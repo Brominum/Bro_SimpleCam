@@ -9,19 +9,29 @@
     ""
 ] call CBA_fnc_addKeybind;
 
-// --- CBA SETTINGS (Addon Options) ---
+// --- CBA SETTINGS ---
 
-// 1. Mouse Sensitivity
+// 1. Whitelist (New)
+[
+    "Bro_SCam_Whitelist", 
+    "EDITBOX", 
+    ["Allowed Users (Whitelist)", "Comma-separated list of profile names allowed to use the camera. Leave EMPTY to allow everyone.\nExample: Bromine, Fluorine, John Army"], 
+    "[Bro] Simple Cinematic Camera", 
+    "", // Default empty
+    true // Global (Server can force this setting)
+] call CBA_Settings_fnc_init;
+
+// 2. Mouse Sensitivity
 [
     "Bro_SCam_Sens", 
     "SLIDER", 
     ["Mouse Sensitivity", "How fast the camera turns."], 
     "[Bro] Simple Cinematic Camera", 
-    [0.01, 1.0, 0.15, 2], // Min, Max, Default, Decimals
-    nil // Client-side setting (not forced by server)
+    [0.01, 1.0, 0.15, 2], 
+    nil
 ] call CBA_Settings_fnc_init;
 
-// 2. Movement Speed Base
+// 3. Movement Speed Base
 [
     "Bro_SCam_Speed", 
     "SLIDER", 
@@ -31,17 +41,17 @@
     nil
 ] call CBA_Settings_fnc_init;
 
-// 3. Position Smoothing (Inertia)
+// 4. Position Smoothing
 [
     "Bro_SCam_SmoothPos", 
     "SLIDER", 
-    ["Position Inertia", "Lower values = Heavier camera, takes longer to stop."], 
+    ["Position Inertia", "Lower values = Heavier camera."], 
     "[Bro] Simple Cinematic Camera", 
     [0.001, 0.5, 0.01, 3], 
     nil
 ] call CBA_Settings_fnc_init;
 
-// 4. Rotation Smoothing
+// 5. Rotation Smoothing
 [
     "Bro_SCam_SmoothRot", 
     "SLIDER", 
@@ -51,7 +61,7 @@
     nil
 ] call CBA_Settings_fnc_init;
 
-// 5. FOV Smoothing
+// 6. FOV Smoothing
 [
     "Bro_SCam_SmoothFOV", 
     "SLIDER", 
@@ -61,7 +71,7 @@
     nil
 ] call CBA_Settings_fnc_init;
 
-// 6. Roll Speed
+// 7. Roll Speed
 [
     "Bro_SCam_RollSpeed", 
     "SLIDER", 

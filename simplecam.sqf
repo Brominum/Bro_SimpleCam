@@ -1,5 +1,5 @@
 /* 
-    Simple Cinematic Camera (Final + CBA Settings)
+    Simple Cinematic Camera (Final + Notifications + HUD + Whitelist)
     Usage: [] execVM "bro_simplecam\simplecam.sqf";
     
     Controls:
@@ -8,18 +8,47 @@
     E / R        - Roll Left / Right
     T            - Reset Roll to Horizon
     G            - Reset to Player
-    F            - Toggle Follow Mode (Locks to target movement)
-    N            - Cycle Vision (Normal / NVG / White Hot / Black Hot)
-    Scroll       - Zoom In / Out (FOV)
-    Hold Shift   - Increase Speed
-    Hold Ctrl    - Decrease Speed
-    L            - Toggle Info HUD
-    Arrows L/R   - Jump to Players
+    F            - Toggle Follow Mode
+    N            - Cycle Vision
+    Scroll       - Zoom
+    Shift/Ctrl   - Speed
+    L            - HUD
+    Arrows L/R   - Jump
     Space        - Exit
 */
 
 if (!hasInterface) exitWith {};
 disableSerialization; 
+
+// --- WHITELIST CHECK ---
+// Get the string, default to empty
+private _wlRaw = missionNamespace getVariable ["Bro_SCam_Whitelist", ""];
+
+// Only check if list is NOT empty
+if (_wlRaw != "") then {
+    // Split by comma
+    private _wlArray = _wlRaw splitString ",";
+    
+    // Trim spaces from names (e.g. " Name " -> "Name")
+    _wlArray = _wlArray apply { 
+        private _arr = toArray _x;
+        // Trim logic handled loosely by ensuring match
+        // Actually, simple strip logic:
+        while {count _arr > 0 && {_arr select 0 == 32}} do { _arr deleteAt 0; };
+        while {count _arr > 0 && {_arr select (count _arr - 1) == 32}} do { _arr deleteAt (count _arr - 1); };
+        toString _arr
+    };
+    
+    // Check if current profileName is in the list (Case Insensitive in SQF)
+    if !(profileName in _wlArray) exitWith {
+        systemChat "ACCESS DENIED: You are not on the Cinematic Camera whitelist.";
+        // Force exit the script scope
+        breakOut "main_scope"; 
+    };
+};
+
+// Define scope for breakOut to work if check failed above
+scopeName "main_scope";
 
 // --- INITIALIZATION ---
 if (!isNil "SCam_Data") exitWith { systemChat "Camera already active."; };
@@ -41,7 +70,7 @@ SCam_Data set ["Cam", _cam];
 // --- UI SETUP ---
 private _display = findDisplay 46;
 
-// 1. Main Info HUD (Bottom Right)
+// 1. Main Info HUD
 private _hud = _display ctrlCreate ["RscStructuredText", -1];
 _hud ctrlSetPosition [safeZoneX + safeZoneW - 0.45, safeZoneY + safeZoneH - 0.55, 0.45, 0.55]; 
 _hud ctrlSetBackgroundColor [0,0,0,0.5]; 
@@ -50,10 +79,10 @@ _hud ctrlCommit 0;
 
 SCam_Data set ["HUD", _hud];
 
-// 2. Notification Box (Bottom Middle - TRANSPARENT)
+// 2. Notification Box
 private _notify = _display ctrlCreate ["RscStructuredText", -1];
 _notify ctrlSetPosition [safeZoneX + (safeZoneW * 0.3), safeZoneY + safeZoneH - 0.15, safeZoneW * 0.4, 0.06];
-_notify ctrlSetBackgroundColor [0,0,0,0]; // Transparent
+_notify ctrlSetBackgroundColor [0,0,0,0]; 
 _notify ctrlShow false; 
 _notify ctrlCommit 0;
 
@@ -64,7 +93,6 @@ SCam_Data set ["NotifyEnd", 0];
 SCam_Data set ["Keys", []];
 SCam_Data set ["MouseD", [0,0]];
 
-// Note: In Follow Mode, "Pos" is Relative Offset. In Free Mode, it is World Pos.
 SCam_Data set ["Pos", _startPos];
 SCam_Data set ["PosDes", _startPos];
 
@@ -83,17 +111,15 @@ SCam_Data set ["VisionMode", 0];
 
 // --- HELPER FUNCTIONS ---
 
-// Function: Show Notification
 SCam_Data set ["fnc_Msg", {
     params ["_text"];
     private _d = SCam_Data;
     private _ctrl = _d get "Notify";
     _ctrl ctrlSetStructuredText parseText format ["<t align='center' size='0.8' font='RobotoCondensedLight'>%1</t>", _text];
     _ctrl ctrlShow true;
-    _d set ["NotifyEnd", diag_tickTime + 1.0]; // Visible for 1 second
+    _d set ["NotifyEnd", diag_tickTime + 1.0]; 
 }];
 
-// Function: Exit
 SCam_Data set ["fnc_Exit", {
     disableSerialization;
     private _data = SCam_Data;
@@ -113,7 +139,6 @@ SCam_Data set ["fnc_Exit", {
     ctrlDelete (_data get "HUD");
     ctrlDelete (_data get "Notify");
     
-    // Reset Vision
     camUseNVG false; 
     false setCamUseTi 0;
 
@@ -153,9 +178,10 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
         [_msg] call (_d get "fnc_Msg");
     };
     
-    // G (Reset to Player)
+    // G (Full Reset)
     if (_key == 34) then {
         _d set ["Target", player];
+        
         private _pPos = getPosASLVisual player;
         private _resetPos = _pPos vectorAdd [0,0,2];
         
@@ -167,7 +193,6 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
             _d set ["PosDes", _resetPos];
         };
         
-        // Reset Params
         _d set ["AngDes", [getDir player, 0]];
         _d set ["RollDes", 0];
         _d set ["Roll", 0]; 
@@ -188,12 +213,10 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
         private _tPos = getPosASLVisual _target;
 
         if (_isFollowing) then {
-            // Switching to FREE
             _d set ["Pos", _tPos vectorAdd _currPos];
             _d set ["PosDes", _tPos vectorAdd _currPosDes];
             ["Follow Mode: OFF"] call (_d get "fnc_Msg");
         } else {
-            // Switching to FOLLOW
             _d set ["Pos", _currPos vectorDiff _tPos];
             _d set ["PosDes", _currPosDes vectorDiff _tPos];
             ["Follow Mode: ON"] call (_d get "fnc_Msg");
@@ -217,7 +240,6 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
             private _newTarget = _list select _idx;
             _d set ["Target", _newTarget];
             
-            // JUMP LOGIC
             private _newTPos = getPosASLVisual _newTarget;
             
             if (_d get "Follow") then {
@@ -232,6 +254,7 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 
             _d set ["AngDes", [getDir _newTarget, 0]];
             _d set ["RollDes", 0];
+            _d set ["Roll", 0];
             
             [format ["Jump to: %1", name _newTarget]] call (_d get "fnc_Msg");
         };
@@ -279,7 +302,7 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
     
     // --- ROTATION ---
     private _fov = _d get "Fov";
-    // USE CBA SETTING FOR SENS
+    // USE CBA SETTING
     private _sens = Bro_SCam_Sens * _fov;
     
     private _angDes = _d get "AngDes";
@@ -289,7 +312,7 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
     
     // --- ROLL ---
     private _rollDes = _d get "RollDes";
-    // USE CBA SETTING FOR ROLL SPEED
+    // USE CBA SETTING
     if (18 in _keys) then { _rollDes = _rollDes - Bro_SCam_RollSpeed; }; // E
     if (19 in _keys) then { _rollDes = _rollDes + Bro_SCam_RollSpeed; }; // R
     if (20 in _keys) then { _rollDes = 0; }; // T
@@ -300,7 +323,7 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
     private _roll = _d get "Roll";
     private _lerp = { params ["_a", "_b", "_t"]; _a + ((_b - _a) * _t) };
     
-    // USE CBA SETTINGS FOR SMOOTHING
+    // USE CBA SETTINGS
     private _yawNew = [_ang select 0, _yawDes, Bro_SCam_SmoothRot] call _lerp;
     private _pitNew = [_ang select 1, _pitDes, Bro_SCam_SmoothRot] call _lerp;
     private _rollNew = [_roll, _rollDes, Bro_SCam_SmoothRot] call _lerp;
@@ -326,7 +349,7 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
     _d set ["SpeedMult", _mult];
 
     // --- MOVEMENT ---
-    // USE CBA SETTING FOR SPEED BASE
+    // USE CBA SETTING
     private _speed = Bro_SCam_Speed * _mult;
     private _moveVec = [0,0,0];
     
@@ -376,7 +399,7 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 
     // --- FOV APPLY ---
     private _fovDes = _d get "FovDes";
-    // USE CBA SETTING FOR SMOOTH FOV
+    // USE CBA SETTING
     private _fovNew = [_fov, _fovDes, Bro_SCam_SmoothFOV] call _lerp;
     _d set ["Fov", _fovNew];
     (_d get "Cam") camSetFov _fovNew;

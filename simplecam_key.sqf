@@ -16,7 +16,7 @@
 [
     "Bro_SCam_Whitelist", 
     "EDITBOX", 
-    ["Allowed Users (Whitelist)", "Comma-separated list of profile names allowed to use the camera. Leave EMPTY to allow everyone.\nExample: Bromine, IS2"], 
+    ["Allowed Users (Whitelist)", "Comma-separated list of profile names allowed to use the camera. Leave EMPTY to allow everyone.\nExample: John, Jane, Bob"], 
     "[Bro] Simple Cinematic Camera", 
     "", 
     true 

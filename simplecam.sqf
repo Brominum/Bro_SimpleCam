@@ -1,5 +1,5 @@
 /* 
-    Simple Cinematic Camera (Final + Full Reset + Light Fonts)
+    Simple Cinematic Camera (Final + CBA Settings)
     Usage: [] execVM "bro_simplecam\simplecam.sqf";
     
     Controls:
@@ -7,7 +7,7 @@
     Q / Z        - Move Up / Down
     E / R        - Roll Left / Right
     T            - Reset Roll to Horizon
-    G            - Full Reset (Pos, Speed, FOV, Roll, Target)
+    G            - Reset to Player
     F            - Toggle Follow Mode (Locks to target movement)
     N            - Cycle Vision (Normal / NVG / White Hot / Black Hot)
     Scroll       - Zoom In / Out (FOV)
@@ -20,14 +20,6 @@
 
 if (!hasInterface) exitWith {};
 disableSerialization; 
-
-// --- CONFIGURATION ---
-#define CAM_SPEED_BASE 0.07    
-#define CAM_SMOOTH_POS 0.01
-#define CAM_SMOOTH_ROT 0.01
-#define CAM_SMOOTH_FOV 0.01
-#define MOUSE_SENS_BASE 0.15
-#define ROLL_SPEED 0.1
 
 // --- INITIALIZATION ---
 if (!isNil "SCam_Data") exitWith { systemChat "Camera already active."; };
@@ -96,7 +88,6 @@ SCam_Data set ["fnc_Msg", {
     params ["_text"];
     private _d = SCam_Data;
     private _ctrl = _d get "Notify";
-    // Font changed to RobotoCondensedLight
     _ctrl ctrlSetStructuredText parseText format ["<t align='center' size='0.8' font='RobotoCondensedLight'>%1</t>", _text];
     _ctrl ctrlShow true;
     _d set ["NotifyEnd", diag_tickTime + 1.0]; // Visible for 1 second
@@ -162,11 +153,9 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
         [_msg] call (_d get "fnc_Msg");
     };
     
-    // G (Full Reset)
+    // G (Reset to Player)
     if (_key == 34) then {
         _d set ["Target", player];
-        
-        // Reset Position
         private _pPos = getPosASLVisual player;
         private _resetPos = _pPos vectorAdd [0,0,2];
         
@@ -178,13 +167,13 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
             _d set ["PosDes", _resetPos];
         };
         
-        // Reset Rotation/Roll/Speed/FOV
+        // Reset Params
         _d set ["AngDes", [getDir player, 0]];
         _d set ["RollDes", 0];
-        _d set ["Roll", 0]; // Snap roll instantly
+        _d set ["Roll", 0]; 
         _d set ["SpeedMult", 1.0];
         _d set ["FovDes", 0.7];
-        _d set ["Fov", 0.7]; // Snap FOV instantly
+        _d set ["Fov", 0.7]; 
         (_d get "Cam") camSetFov 0.7;
         
         ["Camera Reset"] call (_d get "fnc_Msg");
@@ -243,7 +232,6 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 
             _d set ["AngDes", [getDir _newTarget, 0]];
             _d set ["RollDes", 0];
-            _d set ["Roll", 0];
             
             [format ["Jump to: %1", name _newTarget]] call (_d get "fnc_Msg");
         };
@@ -291,7 +279,8 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
     
     // --- ROTATION ---
     private _fov = _d get "Fov";
-    private _sens = MOUSE_SENS_BASE * _fov;
+    // USE CBA SETTING FOR SENS
+    private _sens = Bro_SCam_Sens * _fov;
     
     private _angDes = _d get "AngDes";
     private _yawDes = (_angDes select 0) + ((_mouse select 0) * _sens);
@@ -300,8 +289,9 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
     
     // --- ROLL ---
     private _rollDes = _d get "RollDes";
-    if (18 in _keys) then { _rollDes = _rollDes - ROLL_SPEED; }; // E
-    if (19 in _keys) then { _rollDes = _rollDes + ROLL_SPEED; }; // R
+    // USE CBA SETTING FOR ROLL SPEED
+    if (18 in _keys) then { _rollDes = _rollDes - Bro_SCam_RollSpeed; }; // E
+    if (19 in _keys) then { _rollDes = _rollDes + Bro_SCam_RollSpeed; }; // R
     if (20 in _keys) then { _rollDes = 0; }; // T
     _d set ["RollDes", _rollDes];
 
@@ -310,9 +300,10 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
     private _roll = _d get "Roll";
     private _lerp = { params ["_a", "_b", "_t"]; _a + ((_b - _a) * _t) };
     
-    private _yawNew = [_ang select 0, _yawDes, CAM_SMOOTH_ROT] call _lerp;
-    private _pitNew = [_ang select 1, _pitDes, CAM_SMOOTH_ROT] call _lerp;
-    private _rollNew = [_roll, _rollDes, CAM_SMOOTH_ROT] call _lerp;
+    // USE CBA SETTINGS FOR SMOOTHING
+    private _yawNew = [_ang select 0, _yawDes, Bro_SCam_SmoothRot] call _lerp;
+    private _pitNew = [_ang select 1, _pitDes, Bro_SCam_SmoothRot] call _lerp;
+    private _rollNew = [_roll, _rollDes, Bro_SCam_SmoothRot] call _lerp;
     
     _d set ["Ang", [_yawNew, _pitNew]];
     _d set ["Roll", _rollNew];
@@ -335,7 +326,8 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
     _d set ["SpeedMult", _mult];
 
     // --- MOVEMENT ---
-    private _speed = CAM_SPEED_BASE * _mult;
+    // USE CBA SETTING FOR SPEED BASE
+    private _speed = Bro_SCam_Speed * _mult;
     private _moveVec = [0,0,0];
     
     if (17 in _keys) then { _moveVec = _moveVec vectorAdd _vecDir; };
@@ -367,9 +359,9 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 
     _d set ["PosDes", _posDes];
     
-    // Inertia Application
+    // Inertia Application - USE CBA SETTING
     private _pos = (_d get "Pos");
-    _pos = _pos vectorAdd ((_posDes vectorDiff _pos) vectorMultiply CAM_SMOOTH_POS);
+    _pos = _pos vectorAdd ((_posDes vectorDiff _pos) vectorMultiply Bro_SCam_SmoothPos);
     _d set ["Pos", _pos];
 
     // --- FINAL POSITION RESOLUTION ---
@@ -384,7 +376,8 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 
     // --- FOV APPLY ---
     private _fovDes = _d get "FovDes";
-    private _fovNew = [_fov, _fovDes, CAM_SMOOTH_FOV] call _lerp;
+    // USE CBA SETTING FOR SMOOTH FOV
+    private _fovNew = [_fov, _fovDes, Bro_SCam_SmoothFOV] call _lerp;
     _d set ["Fov", _fovNew];
     (_d get "Cam") camSetFov _fovNew;
 
@@ -402,7 +395,6 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
             default { "NORM" };
         };
 
-        // Font changed to RobotoCondensedLight
         (_d get "HUD") ctrlSetStructuredText parseText format [
             "<t align='left' size='1.2' font='RobotoCondensedLight'>" +
             "SPD: <t color='#00ff00'>%1</t><br/>" +

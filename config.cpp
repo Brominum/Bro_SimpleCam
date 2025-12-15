@@ -1,0 +1,21 @@
+class CfgPatches {	class Bro_SimpleCam {		requiredAddons[] = {"A3_Data_F_Decade_Loadorder","cba_main"};		requiredVersion = 1.60;		author="Bromine";		name = "[Bro] Simple Cinematic Camera";		url = "https://steamcommunity.com/id/Brominum/myworkshopfiles/?appid=107410";	};};
+class Extended_PostInit_EventHandlers {
+	class bro_simplecam {
+		clientInit = "call compile preprocessFileLineNumbers 'bro_simplecam\simplecam_key.sqf'";
+	};
+};
+class CfgFunctions {	class Keys {		class KeyInt {			class bro_camPostInit {				file="\bro_simplecam\simplecam_key.sqf";
+				postInit=1;
+			};
+		};
+	};
+};
+class CfgVehicles {	class Man;
+	class CAManBase: Man {		class ACE_SelfActions {			class bro_simplecam {				displayName="Cinematic Camera";
+				condition="true";
+				statement="[] execVM ""bro_simplecam\simplecam.sqf""";
+				icon="bro_simplecam\icon_ca.paa";
+			};
+		};
+	};
+};

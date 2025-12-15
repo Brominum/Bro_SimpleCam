@@ -51,7 +51,7 @@ if (_wlRaw != "") then {
 scopeName "main_scope";
 
 // --- INITIALIZATION ---
-if (!isNil "SCam_Data") exitWith { systemChat "Camera already active."; };
+if (!isNil "SCam_Data") exitWith {};
 
 SCam_Data = createHashMap;
 SCam_Data set ["Active", true];

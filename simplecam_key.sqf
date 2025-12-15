@@ -1,4 +1,4 @@
-#include "\a3\editor_f\Data\Scripts\dikCodes.h"
+#include "\a3\ui_f\hpp\defineDIKCodes.inc"
 
 // --- KEYBIND ---
 [
@@ -6,19 +6,20 @@
     "bro_simplecamOpen",
     "Open Simple Cinematic Camera",
     {[] execVM "bro_simplecam\simplecam.sqf";},
-    ""
+	{},
+    [DIK_B, [true, true, false]] // Default: Ctrl + Shift + B
 ] call CBA_fnc_addKeybind;
 
 // --- CBA SETTINGS ---
 
-// 1. Whitelist (New)
+// 1. Whitelist
 [
     "Bro_SCam_Whitelist", 
     "EDITBOX", 
-    ["Allowed Users (Whitelist)", "Comma-separated list of profile names allowed to use the camera. Leave EMPTY to allow everyone.\nExample: Bromine, Fluorine, John Army"], 
+    ["Allowed Users (Whitelist)", "Comma-separated list of profile names allowed to use the camera. Leave EMPTY to allow everyone.\nExample: Bromine, IS2"], 
     "[Bro] Simple Cinematic Camera", 
-    "", // Default empty
-    true // Global (Server can force this setting)
+    "", 
+    true 
 ] call CBA_Settings_fnc_init;
 
 // 2. Mouse Sensitivity

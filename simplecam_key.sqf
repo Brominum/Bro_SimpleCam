@@ -1,6 +1,6 @@
 #include "\a3\ui_f\hpp\defineDIKCodes.inc"
 
-// --- CBA SETTINGS (0-10 Scale) ---
+// --- CBA SETTINGS (Clamped Scales) ---
 
 [
 	"Bro_SCam_Whitelist", "EDITBOX", 
@@ -11,49 +11,49 @@
 [
 	"Bro_SCam_Sens", "SLIDER", 
 	["Mouse Sensitivity", "Higher = Faster mouse look."], 
-	"[Bro] Simple Cinematic Camera", [1, 100, 15, 0], nil // Default 15 (was 0.15)
+	"[Bro] Simple Cinematic Camera", [1, 100, 15, 0], nil
 ] call CBA_Settings_fnc_init;
 
 [
 	"Bro_SCam_Speed", "SLIDER", 
 	["Base Movement Speed", "Higher = Faster base speed before multiplier."], 
-	"[Bro] Simple Cinematic Camera", [1, 30, 7, 0], nil // Default 7 (was 0.07)
+	"[Bro] Simple Cinematic Camera", [1, 30, 7, 0], nil
 ] call CBA_Settings_fnc_init;
 
 [
 	"Bro_SCam_SmoothPos", "SLIDER", 
 	["Position Responsiveness", "1 = Heavy/Slow, 10 = Instant."], 
-	"[Bro] Simple Cinematic Camera", [0.1, 10, 1, 1], nil // Default 1 (was 0.01)
+	"[Bro] Simple Cinematic Camera", [0.1, 10, 1, 1], nil
 ] call CBA_Settings_fnc_init;
 
 [
 	"Bro_SCam_SmoothRot", "SLIDER", 
 	["Rotation Responsiveness (Mouse)", "1 = Heavy/Smooth, 10 = Instant."], 
-	"[Bro] Simple Cinematic Camera", [0.1, 10, 1, 1], nil // Default 1 (was 0.01)
+	"[Bro] Simple Cinematic Camera", [0.1, 10, 1, 1], nil
 ] call CBA_Settings_fnc_init;
 
 [
 	"Bro_SCam_SmoothBrg", "SLIDER", 
 	["Orientation Lock Responsiveness", "How fast it tracks the target's angles."], 
-	"[Bro] Simple Cinematic Camera", [0.1, 10, 5, 1], nil // Default 5 (was 0.05)
+	"[Bro] Simple Cinematic Camera", [0.1, 10, 5, 1], nil
 ] call CBA_Settings_fnc_init;
 
 [
 	"Bro_SCam_SmoothFOV", "SLIDER", 
 	["Zoom Responsiveness", "1 = Slow Zoom, 10 = Instant."], 
-	"[Bro] Simple Cinematic Camera", [0.1, 10, 1, 1], nil // Default 1 (was 0.01)
+	"[Bro] Simple Cinematic Camera", [0.1, 10, 1, 1], nil
 ] call CBA_Settings_fnc_init;
 
 [
 	"Bro_SCam_SmoothSpd", "SLIDER", 
 	["Speed Change Responsiveness", "How fast Shift/Ctrl changes speed."], 
-	"[Bro] Simple Cinematic Camera", [0.1, 10, 5, 1], nil // Default 5 (was 0.05)
+	"[Bro] Simple Cinematic Camera", [0.1, 10, 5, 1], nil
 ] call CBA_Settings_fnc_init;
 
 [
 	"Bro_SCam_RollSpeed", "SLIDER", 
 	["Roll Speed", "Higher = Faster rolling."], 
-	"[Bro] Simple Cinematic Camera", [1, 50, 10, 0], nil // Default 10 (was 0.1)
+	"[Bro] Simple Cinematic Camera", [1, 50, 10, 0], nil
 ] call CBA_Settings_fnc_init;
 
 [
@@ -93,6 +93,10 @@ private _modName = "[Bro] Simple Cinematic Camera";
 [_modName, "Bro_SCam_Vision", "Cycle Vision Mode", {}, {}, [DIK_N, [false, false, false]]] call CBA_fnc_addKeybind;
 [_modName, "Bro_SCam_HUD", "Toggle HUD", {}, {}, [DIK_L, [false, false, false]]] call CBA_fnc_addKeybind;
 
-// Jump
-[_modName, "Bro_SCam_Jump_Prev", "Jump to Prev Unit", {}, {}, [DIK_LEFT, [false, false, false]]] call CBA_fnc_addKeybind;
-[_modName, "Bro_SCam_Jump_Next", "Jump to Next Unit", {}, {}, [DIK_RIGHT, [false, false, false]]] call CBA_fnc_addKeybind;
+// Jump (Players Only)
+[_modName, "Bro_SCam_Jump_Prev", "Jump to Prev Player", {}, {}, [DIK_LEFT, [false, false, false]]] call CBA_fnc_addKeybind;
+[_modName, "Bro_SCam_Jump_Next", "Jump to Next Player", {}, {}, [DIK_RIGHT, [false, false, false]]] call CBA_fnc_addKeybind;
+
+// List Navigation (Players + AI)
+[_modName, "Bro_SCam_List_Up", "Jump List Up", {}, {}, [DIK_UP, [false, false, false]]] call CBA_fnc_addKeybind;
+[_modName, "Bro_SCam_List_Down", "Jump List Down", {}, {}, [DIK_DOWN, [false, false, false]]] call CBA_fnc_addKeybind;

@@ -57,8 +57,11 @@ _d set ["K_L_Alt", "Bro_SCam_Lock_Alt" call (_d get "fnc_LoadBind")];
 _d set ["K_L_Ori", "Bro_SCam_Lock_Ori" call (_d get "fnc_LoadBind")];
 _d set ["K_Rst",   "Bro_SCam_Reset" call (_d get "fnc_LoadBind")];
 _d set ["K_Fol",   "Bro_SCam_Follow" call (_d get "fnc_LoadBind")];
+
 _d set ["K_J_Nxt", "Bro_SCam_Jump_Next" call (_d get "fnc_LoadBind")];
 _d set ["K_J_Prv", "Bro_SCam_Jump_Prev" call (_d get "fnc_LoadBind")];
+_d set ["K_L_Up",  "Bro_SCam_List_Up" call (_d get "fnc_LoadBind")];
+_d set ["K_L_Dn",  "Bro_SCam_List_Down" call (_d get "fnc_LoadBind")];
 
 _d set ["K_M_F",   "Bro_SCam_Move_Fwd" call (_d get "fnc_LoadBind")];
 _d set ["K_M_B",   "Bro_SCam_Move_Back" call (_d get "fnc_LoadBind")];
@@ -86,6 +89,72 @@ SCam_Data set ["fnc_CheckKey", {
 	false
 }];
 
+// --- UNIT LIST MANAGEMENT ---
+
+// Returns [ [DisplayName, Unit, isPlayer], ... ] sorted by Player first, then Alphabetical
+SCam_Data set ["fnc_GetSortedUnits", {
+	private _players = allPlayers select { alive _x };
+	private _ai = allUnits select { alive _x && !isPlayer _x && side _x != sideLogic };
+	
+	private _fnc_prep = {
+		params ["_u", "_isP"];
+		private _name = name _u;
+		private _veh = vehicle _u;
+		private _sortStr = _name;
+		
+		if (_veh != _u) then {
+			private _vName = getText (configFile >> "CfgVehicles" >> typeOf _veh >> "displayName");
+			_sortStr = format ["%1 (%2)", _vName, _name];
+		};
+		[_sortStr, _u, _isP]
+	};
+	
+	private _pList = _players apply { [_x, true] call _fnc_prep };
+	private _aList = _ai apply { [_x, false] call _fnc_prep };
+	
+	_pList sort true;
+	_aList sort true;
+	
+	(_pList + _aList)
+}];
+
+// Updates the List UI Box
+SCam_Data set ["fnc_UpdateListUI", {
+	private _d = SCam_Data;
+	if !(_d get "HUD_Vis") exitWith { (_d get "HUD_List") ctrlShow false; };
+	
+	private _target = _d get "Target";
+	private _fullList = call (_d get "fnc_GetSortedUnits");
+	_d set ["CachedList", _fullList]; 
+	
+	private _curIdx = _fullList findIf { (_x select 1) == _target };
+	if (_curIdx == -1) then { _curIdx = 0; };
+	
+	private _count = count _fullList;
+	private _range = 10;
+	private _start = (_curIdx - _range) max 0;
+	private _end = (_curIdx + _range) min (_count - 1);
+	
+	private _text = "";
+	
+	for "_i" from _start to _end do {
+		private _item = _fullList select _i;
+		_item params ["_displayName", "_u", "_isP"];
+		
+		private _color = "#dddddd"; 
+		if (_isP) then { _color = "#00aaff"; }; 
+		if (_i == _curIdx) then { _color = "#ffcc00"; }; 
+		
+		private _prefix = if (_isP) then { "[PL]" } else { "[AI]" };
+		
+		_text = _text + format ["<t color='%1' size='0.8' font='RobotoCondensedBold'>%2 %3</t><br/>", _color, _prefix, _displayName];
+	};
+	
+	private _hudList = _d get "HUD_List";
+	_hudList ctrlSetStructuredText parseText _text;
+	_hudList ctrlShow true;
+}];
+
 // --- CAMERA SETUP ---
 private _startPos = getPosASLVisual player;
 _startPos set [2, (_startPos select 2) + 2]; 
@@ -99,18 +168,27 @@ SCam_Data set ["Cam", _cam];
 
 // --- UI SETUP ---
 private _display = findDisplay 46;
-
 private _hudDefault = missionNamespace getVariable ["Bro_SCam_HUDDefault", true];
 
+// 1. Right Info HUD
 private _hud = _display ctrlCreate ["RscStructuredText", -1];
 _hud ctrlSetPosition [safeZoneX + safeZoneW - 0.45, safeZoneY + safeZoneH - 0.75, 0.45, 0.7]; 
 _hud ctrlSetBackgroundColor [0,0,0,0.5]; 
 _hud ctrlShow _hudDefault; 
 _hud ctrlCommit 0;
-
 SCam_Data set ["HUD", _hud];
 
-// Generate HUD Strings ONCE (Performance)
+// 2. Left Unit List HUD (Positioned above Right HUD)
+private _hudList = _display ctrlCreate ["RscStructuredText", -1];
+_hudList ctrlSetPosition [safeZoneX + safeZoneW - 0.45, safeZoneY + safeZoneH - 1.25, 0.45, 0.5]; 
+_hudList ctrlSetBackgroundColor [0,0,0,0.5];
+_hudList ctrlShow _hudDefault;
+_hudList ctrlCommit 0;
+SCam_Data set ["HUD_List", _hudList];
+SCam_Data set ["LastListUpdate", 0];
+SCam_Data set ["CachedList", []]; 
+
+// Generate HUD Strings ONCE
 private _s_move = format["[%1%2%3%4]", "Bro_SCam_Move_Fwd" call (_d get "fnc_GetKeyName"), "Bro_SCam_Move_Left" call (_d get "fnc_GetKeyName"), "Bro_SCam_Move_Back" call (_d get "fnc_GetKeyName"), "Bro_SCam_Move_Right" call (_d get "fnc_GetKeyName")];
 private _s_ud   = format["[%1/%2]", "Bro_SCam_Move_Up" call (_d get "fnc_GetKeyName"), "Bro_SCam_Move_Down" call (_d get "fnc_GetKeyName")];
 private _s_roll = format["[%1/%2]", "Bro_SCam_Roll_Left" call (_d get "fnc_GetKeyName"), "Bro_SCam_Roll_Right" call (_d get "fnc_GetKeyName")];
@@ -118,6 +196,7 @@ private _s_rstR = format["[%1]", "Bro_SCam_Roll_Reset" call (_d get "fnc_GetKeyN
 private _s_spd  = format["[%1/%2]", "Bro_SCam_Speed_Fast" call (_d get "fnc_GetKeyName"), "Bro_SCam_Speed_Slow" call (_d get "fnc_GetKeyName")];
 private _s_fol  = format["[%1]", "Bro_SCam_Follow" call (_d get "fnc_GetKeyName")];
 private _s_jmp  = format["[%1/%2]", "Bro_SCam_Jump_Prev" call (_d get "fnc_GetKeyName"), "Bro_SCam_Jump_Next" call (_d get "fnc_GetKeyName")];
+private _s_lst  = format["[%1/%2]", "Bro_SCam_List_Up" call (_d get "fnc_GetKeyName"), "Bro_SCam_List_Down" call (_d get "fnc_GetKeyName")];
 private _s_vis  = format["[%1]", "Bro_SCam_Vision" call (_d get "fnc_GetKeyName")];
 private _s_rst  = format["[%1]", "Bro_SCam_Reset" call (_d get "fnc_GetKeyName")];
 private _s_alt  = format["[%1]", "Bro_SCam_Lock_Alt" call (_d get "fnc_GetKeyName")];
@@ -125,7 +204,7 @@ private _s_ori  = format["[%1]", "Bro_SCam_Lock_Ori" call (_d get "fnc_GetKeyNam
 private _s_hud  = format["[%1]", "Bro_SCam_HUD" call (_d get "fnc_GetKeyName")];
 private _s_exit = format["[%1]", "Bro_SCam_Exit" call (_d get "fnc_GetKeyName")];
 
-SCam_Data set ["HUD_Str", [_s_move, _s_ud, _s_roll, _s_rstR, _s_spd, _s_fol, _s_jmp, _s_vis, _s_rst, _s_alt, _s_ori, _s_hud, _s_exit]];
+SCam_Data set ["HUD_Str", [_s_move, _s_ud, _s_roll, _s_rstR, _s_spd, _s_fol, _s_jmp, _s_lst, _s_vis, _s_rst, _s_alt, _s_ori, _s_hud, _s_exit]];
 
 private _notify = _display ctrlCreate ["RscStructuredText", -1];
 _notify ctrlSetPosition [safeZoneX + (safeZoneW * 0.3), safeZoneY + safeZoneH - 0.15, safeZoneW * 0.4, 0.06];
@@ -138,7 +217,7 @@ SCam_Data set ["NotifyEnd", 0];
 
 // --- POPULATE STATE ---
 SCam_Data set ["Keys", []];
-SCam_Data set ["KeyMods", [false, false, false]]; // Shift, Ctrl, Alt
+SCam_Data set ["KeyMods", [false, false, false]];
 SCam_Data set ["MouseD", [0,0]];
 SCam_Data set ["Pos", _startPos];
 SCam_Data set ["PosDes", _startPos];
@@ -187,6 +266,7 @@ SCam_Data set ["fnc_Exit", {
 	camDestroy _cam;
 	
 	ctrlDelete (_data get "HUD");
+	ctrlDelete (_data get "HUD_List");
 	ctrlDelete (_data get "Notify");
 	
 	camUseNVG false; 
@@ -203,24 +283,31 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 	params ["_disp", "_key", "_shift", "_ctrl", "_alt"];
 	private _d = SCam_Data;
 	
-	// Update Modifiers
 	_d set ["KeyMods", [_shift, _ctrl, _alt]];
-	
-	// Update Key List
 	private _keys = _d get "Keys";
 	if !(_key in _keys) then { _keys pushBack _key; };
 
-	// --- TRIGGER ACTIONS (Single Press) ---
+	private _fnc_Trigger = {
+		params ["_bindId"];
+		private _bindData = _d get _bindId;
+		if (_key != (_bindData select 0)) exitWith { false };
+		if !((_d get "KeyMods") isEqualTo (_bindData select 1)) exitWith { false };
+		true
+	};
+
+	// --- TRIGGER ACTIONS ---
 	
-	if (["K_Exit", true] call (_d get "fnc_CheckKey")) exitWith { [] call (_d get "fnc_Exit"); true };
+	if ("K_Exit" call _fnc_Trigger) exitWith { [] call (_d get "fnc_Exit"); true };
 	
-	if (["K_HUD", true] call (_d get "fnc_CheckKey")) then {
+	if ("K_HUD" call _fnc_Trigger) then {
 		private _v = !(_d get "HUD_Vis");
 		_d set ["HUD_Vis", _v];
 		(_d get "HUD") ctrlShow _v;
+		(_d get "HUD_List") ctrlShow _v;
+		if (_v) then { [] call (_d get "fnc_UpdateListUI"); };
 	};
 
-	if (["K_Vis", true] call (_d get "fnc_CheckKey")) then {
+	if ("K_Vis" call _fnc_Trigger) then {
 		private _mode = _d get "VisionMode";
 		_mode = _mode + 1;
 		if (_mode > 3) then { _mode = 0; };
@@ -234,22 +321,28 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 		[_msg] call (_d get "fnc_Msg");
 	};
 	
-	if (["K_L_Alt", true] call (_d get "fnc_CheckKey")) then {
+	if ("K_L_Alt" call _fnc_Trigger) then {
 		private _l = !(_d get "AltLock");
 		_d set ["AltLock", _l];
 		[if (_l) then {"Altitude Lock: ON"} else {"Altitude Lock: OFF"}] call (_d get "fnc_Msg");
 	};
 
-	if (["K_L_Ori", true] call (_d get "fnc_CheckKey")) then {
+	if ("K_L_Ori" call _fnc_Trigger) then {
 		private _b = !(_d get "OrientLock");
 		_d set ["OrientLock", _b];
 		if (_b) then {
 			private _currAng = _d get "AngDes";
 			private _currRoll = _d get "RollDes";
+			
+			// --- ROTATION LOCK: Use vehicle if present ---
 			private _target = _d get "Target";
-			private _tgtDir = getDirVisual _target;
-			private _vDir = vectorDirVisual _target;
-			private _vUp = vectorUpVisual _target;
+			private _refObj = vehicle _target; // Uses vehicle or unit
+			
+			private _tgtDir = getDirVisual _refObj;
+			private _vDir = vectorDirVisual _refObj;
+			private _vUp = vectorUpVisual _refObj;
+			// ---------------------------------------------
+			
 			private _tgtPitch = asin (_vDir select 2);
 			private _vSide = _vDir vectorCrossProduct _vUp;
 			private _tgtBank = (_vSide select 2) atan2 (_vUp select 2);
@@ -267,11 +360,10 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 		};
 	};
 
-	if (["K_Rst", true] call (_d get "fnc_CheckKey")) then {
+	if ("K_Rst" call _fnc_Trigger) then {
 		_d set ["Target", player];
 		private _pPos = getPosASLVisual player;
 		private _resetPos = _pPos vectorAdd [0,0,2];
-		
 		if (_d get "Follow") then {
 			_d set ["Pos", [0,0,2]];
 			_d set ["PosDes", [0,0,2]];
@@ -291,9 +383,10 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 		_d set ["AltLock", false];
 		_d set ["OrientLock", false];
 		["Camera Reset"] call (_d get "fnc_Msg");
+		[] call (_d get "fnc_UpdateListUI");
 	};
 
-	if (["K_Fol", true] call (_d get "fnc_CheckKey")) then {
+	if ("K_Fol" call _fnc_Trigger) then {
 		private _isFollowing = _d get "Follow";
 		private _target = _d get "Target";
 		private _currPos = _d get "Pos";
@@ -312,15 +405,15 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 		_d set ["Follow", !_isFollowing];
 	};
 
-	if (["K_J_Prv", true] call (_d get "fnc_CheckKey") || ["K_J_Nxt", true] call (_d get "fnc_CheckKey")) then {
+	if (("K_J_Prv" call _fnc_Trigger) || ("K_J_Nxt" call _fnc_Trigger)) then {
 		private _list = allPlayers select { alive _x };
+		_list sort true; 
 		if (count _list > 0) then {
 			private _curr = _d get "Target";
 			private _idx = _list find _curr;
 			if (_idx == -1) then { _idx = 0; };
 			
-			// If Next key pressed (Note: Logic check simplified)
-			if (["K_J_Nxt", true] call (_d get "fnc_CheckKey")) then { _idx = _idx + 1; } else { _idx = _idx - 1; };
+			if ("K_J_Nxt" call _fnc_Trigger) then { _idx = _idx + 1; } else { _idx = _idx - 1; };
 			if (_idx >= count _list) then { _idx = 0; };
 			if (_idx < 0) then { _idx = (count _list) - 1; };
 			
@@ -340,9 +433,43 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 			_d set ["RollDes", 0];
 			_d set ["Roll", 0];
 			
-			[format ["Jump to: %1", name _newTarget]] call (_d get "fnc_Msg");
+			[format ["Jump to Player: %1", name _newTarget]] call (_d get "fnc_Msg");
+			[] call (_d get "fnc_UpdateListUI");
 		};
 	};
+
+	if (("K_L_Up" call _fnc_Trigger) || ("K_L_Dn" call _fnc_Trigger)) then {
+		private _fullList = call (_d get "fnc_GetSortedUnits");
+		if (count _fullList > 0) then {
+			private _curr = _d get "Target";
+			private _idx = _fullList findIf { (_x select 1) == _curr };
+			if (_idx == -1) then { _idx = 0; };
+
+			if ("K_L_Dn" call _fnc_Trigger) then { _idx = _idx + 1; } else { _idx = _idx - 1; };
+			if (_idx >= count _fullList) then { _idx = 0; };
+			if (_idx < 0) then { _idx = (count _fullList) - 1; };
+			
+			private _newTarget = (_fullList select _idx) select 1;
+			_d set ["Target", _newTarget];
+
+			private _newTPos = getPosASLVisual _newTarget;
+			if (_d get "Follow") then {
+				_d set ["Pos", [0,0,2]];
+				_d set ["PosDes", [0,0,2]];
+			} else {
+				_d set ["Pos", _newTPos vectorAdd [0,0,2]];
+				_d set ["PosDes", _newTPos vectorAdd [0,0,2]];
+			};
+			_d set ["AngDes", [getDir _newTarget, 0]];
+			_d set ["Ang", [getDir _newTarget, 0]]; 
+			_d set ["RollDes", 0];
+			_d set ["Roll", 0];
+
+			[format ["Jump to: %1", name _newTarget]] call (_d get "fnc_Msg");
+			[] call (_d get "fnc_UpdateListUI");
+		};
+	};
+
 	false
 }]);
 
@@ -377,12 +504,9 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	if (isNil "SCam_Data") exitWith {};
 	private _d = SCam_Data;
 	
-	// --- INPUTS ---
 	private _mouse = _d get "MouseD";
 	_d set ["MouseD", [0,0]]; 
 	
-	// --- ROTATION ---
-	// SCALING: Divide by 100
 	private _cfgSens = Bro_SCam_Sens / 100;
 	private _cfgRollSpeed = Bro_SCam_RollSpeed / 100;
 
@@ -403,10 +527,15 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 		
 		_d set ["RotOffset", _rotOffset];
 		
+		// --- ROTATION LOCK UPDATE ---
 		private _target = _d get "Target";
-		private _tgtDir = getDirVisual _target; 
-		private _vDir = vectorDirVisual _target;
-		private _vUp = vectorUpVisual _target;
+		private _refObj = vehicle _target; // Use vehicle or unit
+		
+		private _tgtDir = getDirVisual _refObj; 
+		private _vDir = vectorDirVisual _refObj;
+		private _vUp = vectorUpVisual _refObj;
+		// ----------------------------
+
 		private _tgtPitch = asin (_vDir select 2);
 		private _vSide = _vDir vectorCrossProduct _vUp;
 		private _tgtBank = (_vSide select 2) atan2 (_vUp select 2);
@@ -430,7 +559,6 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	};
 
 	// --- SMOOTHING ---
-	// SCALING: Divide by 100
 	private _cfgSmoothRot = Bro_SCam_SmoothRot / 100;
 	private _cfgSmoothBrg = Bro_SCam_SmoothBrg / 100;
 	private _cfgSmoothPos = Bro_SCam_SmoothPos / 100;
@@ -474,7 +602,6 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	_d set ["SpeedMult", _newSpd];
 
 	// --- MOVEMENT ---
-	// SCALING: Divide by 100
 	private _speed = (Bro_SCam_Speed / 100) * _newSpd;
 	private _moveVec = [0,0,0];
 	
@@ -517,8 +644,14 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	private _fovNew = [_fov, _fovDes, _cfgSmoothFOV] call _lerp;
 	_d set ["Fov", _fovNew];
 	(_d get "Cam") camSetFov _fovNew;
+	
+	// --- PERIODIC UI UPDATE (Slow) ---
+	if (diag_tickTime > (_d get "LastListUpdate") + 2.0) then {
+		_d set ["LastListUpdate", diag_tickTime];
+		if (_d get "HUD_Vis") then { [] call (_d get "fnc_UpdateListUI"); };
+	};
 
-	// --- HUD UPDATE ---
+	// --- HUD UPDATE (Fast) ---
 	if (_d get "HUD_Vis") then {
 		private _followTxt = if (_d get "Follow") then { "<t color='#ff0000'>[FOLLOW]</t>" } else { "" };
 		private _lockTxt = if (_lock) then { "<t color='#ff0000'>[LOCK]</t>" } else { "<t color='#888888'>OFF</t>" };
@@ -528,8 +661,7 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 		private _visMode = _d get "VisionMode";
 		private _visStr = switch (_visMode) do { case 0: {"NORM"}; case 1: {"NVG"}; case 2: {"WHOT"}; case 3: {"BHOT"}; default {"NORM"}; };
 		
-		// Unpack cached key strings
-		(_d get "HUD_Str") params ["_s_move", "_s_ud", "_s_roll", "_s_rstR", "_s_spd", "_s_fol", "_s_jmp", "_s_vis", "_s_rst", "_s_alt", "_s_ori", "_s_hud", "_s_exit"];
+		(_d get "HUD_Str") params ["_s_move", "_s_ud", "_s_roll", "_s_rstR", "_s_spd", "_s_fol", "_s_jmp", "_s_lst", "_s_vis", "_s_rst", "_s_alt", "_s_ori", "_s_hud", "_s_exit"];
 
 		(_d get "HUD") ctrlSetStructuredText parseText format [
 			"<t align='left' size='1.2' font='RobotoCondensedLight'>" +
@@ -547,14 +679,14 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 			"%10 Move <t color='#888888'>|</t> %11 Up/Down<br/>" +
 			"%12 Roll <t color='#888888'>|</t> %13 Reset Roll<br/>" +
 			"[Scroll] Zoom <t color='#888888'>|</t> %14 Speed<br/>" +
-			"%15 Follow <t color='#888888'>|</t> %16 Jump<br/>" +
-			"%17 Vision <t color='#888888'>|</t> %18 Reset<br/>" +
-			"%19 Alt Lock <t color='#888888'>|</t> %20 Orient Lock<br/>" +
-			"%21 HUD <t color='#888888'>|</t> %22 Exit" +
+			"%15 Follow <t color='#888888'>|</t> %16 Players<br/>" +
+			"%17 List Select <t color='#888888'>|</t> %18 Vision<br/>" +
+			"%19 Reset <t color='#888888'>|</t> %20 Alt Lock<br/>" +
+			"%21 Ori Lock <t color='#888888'>|</t> %22 HUD <t color='#888888'>|</t> %23 Exit" +
 			"</t></t>",
 			round(_newSpd * 100) / 100, round(_fovNew * 100) / 100, round(_rollNew * 10) / 10,
 			mapGridPosition _finalCamPos, _followTxt, _tgtName, _visStr, _lockTxt, _oriTxt,
-			_s_move, _s_ud, _s_roll, _s_rstR, _s_spd, _s_fol, _s_jmp, _s_vis, _s_rst, _s_alt, _s_ori, _s_hud, _s_exit
+			_s_move, _s_ud, _s_roll, _s_rstR, _s_spd, _s_fol, _s_jmp, _s_lst, _s_vis, _s_rst, _s_alt, _s_ori, _s_hud, _s_exit
 		];
 	};
 	
@@ -569,3 +701,4 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 
 SCam_Data set ["EH_List", _ehIds];
 ["Cinematic Camera ON"] call (SCam_Data get "fnc_Msg");
+[] call (SCam_Data get "fnc_UpdateListUI");

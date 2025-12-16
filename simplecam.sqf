@@ -1,5 +1,5 @@
 /* 
-	Simple Cinematic Camera (Final + Orientation Lock)
+	Simple Cinematic Camera
 	Usage: [] execVM "bro_simplecam\simplecam.sqf";
 	
 	Controls:
@@ -43,15 +43,6 @@ if (_wlRaw != "") then {
 
 scopeName "main_scope";
 
-// --- CONFIGURATION ---
-#define CAM_SPEED_BASE 0.07    
-#define CAM_SMOOTH_POS 0.01
-#define CAM_SMOOTH_ROT 0.01
-#define CAM_SMOOTH_FOV 0.01
-#define CAM_SMOOTH_SPD 0.05
-#define MOUSE_SENS_BASE 0.15
-#define ROLL_SPEED 0.1
-
 // --- INITIALIZATION ---
 if (!isNil "SCam_Data") exitWith {}; // Silent exit if active
 
@@ -73,10 +64,12 @@ SCam_Data set ["Cam", _cam];
 private _display = findDisplay 46;
 
 // 1. Main Info HUD
+private _hudDefault = missionNamespace getVariable ["Bro_SCam_HUDDefault", true]; // Get Setting
+
 private _hud = _display ctrlCreate ["RscStructuredText", -1];
 _hud ctrlSetPosition [safeZoneX + safeZoneW - 0.45, safeZoneY + safeZoneH - 0.75, 0.45, 0.7]; 
 _hud ctrlSetBackgroundColor [0,0,0,0.5]; 
-_hud ctrlShow true; 
+_hud ctrlShow _hudDefault; // Apply Setting
 _hud ctrlCommit 0;
 
 SCam_Data set ["HUD", _hud];
@@ -108,7 +101,7 @@ SCam_Data set ["FovDes", 0.7];
 SCam_Data set ["SpeedMult", 1.0];
 SCam_Data set ["SpeedMultDes", 1.0];
 SCam_Data set ["Target", player];
-SCam_Data set ["HUD_Vis", true]; 
+SCam_Data set ["HUD_Vis", _hudDefault];
 SCam_Data set ["EH_List", []]; 
 SCam_Data set ["Follow", false];
 SCam_Data set ["VisionMode", 0];

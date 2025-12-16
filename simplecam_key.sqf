@@ -16,7 +16,7 @@
 [
 	"Bro_SCam_Whitelist", 
 	"EDITBOX", 
-	["Allowed Users (Whitelist)", "Comma-separated list of profile names allowed to use the camera. Leave EMPTY to allow everyone.\nExample: Bromine, IS2"], 
+	["Allowed Users (Whitelist)", "Comma-separated list of profile names allowed to use the camera. Leave EMPTY to allow everyone.\nExample: John,PFC Bob,1SGT Joe"], 
 	"[Bro] Simple Cinematic Camera", 
 	"", 
 	true 
@@ -99,5 +99,14 @@
 	["Roll Speed", "How fast E and R roll the camera."], 
 	"[Bro] Simple Cinematic Camera", 
 	[0.01, 2.0, 0.1, 2], 
+	nil
+] call CBA_Settings_fnc_init;
+// 10. HUD Default On
+[
+	"Bro_SCam_HUDDefault", 
+	"CHECKBOX", 
+	["HUD Starts On", "If checked, the HUD will be visible immediately when opening the camera."], 
+	"[Bro] Simple Cinematic Camera", 
+	true, 
 	nil
 ] call CBA_Settings_fnc_init;

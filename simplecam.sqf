@@ -1,5 +1,5 @@
 /* 
-	Simple Cinematic Camera (Rebindable edition)
+	Simple Cinematic Camera
 	Usage: [] execVM "bro_simplecam\simplecam.sqf";
 */
 
@@ -36,11 +36,8 @@ SCam_Data set ["Active", true];
 // --- HELPER FUNCTIONS FOR KEYS ---
 SCam_Data set ["fnc_LoadBind", {
 	params ["_actionName"];
-	// Returns [DIK_CODE, [Shift, Ctrl, Alt]]
 	private _bind = [MOD_NAME, _actionName] call CBA_fnc_getKeybind;
 	if (isNil "_bind") exitWith { [0, [false,false,false]] };
-	
-	// FIX: Select index 5, which contains [DIK, [Modifiers]]
 	_bind select 5 
 }];
 
@@ -48,13 +45,10 @@ SCam_Data set ["fnc_GetKeyName", {
 	params ["_actionName"];
 	private _bind = [MOD_NAME, _actionName] call CBA_fnc_getKeybind;
 	if (isNil "_bind") exitWith { "UNBOUND" };
-	
-	// FIX: Select index 5 and pass it to localizeKey
 	(_bind select 5) call CBA_fnc_localizeKey;
 }];
 
 // --- LOAD KEYBINDS ---
-// We cache the codes to avoid searching map every frame
 private _d = SCam_Data;
 _d set ["K_Exit",  "Bro_SCam_Exit" call (_d get "fnc_LoadBind")];
 _d set ["K_HUD",   "Bro_SCam_HUD" call (_d get "fnc_LoadBind")];
@@ -83,22 +77,12 @@ _d set ["K_S_Slw", "Bro_SCam_Speed_Slow" call (_d get "fnc_LoadBind")];
 // --- CHECK KEY INPUT FUNCTION ---
 SCam_Data set ["fnc_CheckKey", {
 	params ["_keyId", "_exactMod"]; 
-	// _keyId: String key for SCam_Data (e.g. "K_M_F")
-	// _exactMod: Boolean. If false, we ignore modifiers (good for movement). If true, we require them (good for toggles).
-	
 	private _bindData = SCam_Data get _keyId;
 	_bindData params ["_dik", "_reqMods"];
-	
-	// Check if physical key is held
 	if !(_dik in (SCam_Data get "Keys")) exitWith { false };
-	
-	// If we don't care about modifiers (e.g. W for forward, regardless if Shift is held)
 	if (!_exactMod) exitWith { true };
-	
-	// Check modifiers
-	private _currMods = SCam_Data get "KeyMods"; // [S, C, A]
+	private _currMods = SCam_Data get "KeyMods"; 
 	if (_currMods isEqualTo _reqMods) exitWith { true };
-	
 	false
 }];
 
@@ -398,8 +382,12 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	_d set ["MouseD", [0,0]]; 
 	
 	// --- ROTATION ---
+	// SCALING: Divide by 100
+	private _cfgSens = Bro_SCam_Sens / 100;
+	private _cfgRollSpeed = Bro_SCam_RollSpeed / 100;
+
 	private _fov = _d get "Fov";
-	private _sens = Bro_SCam_Sens * _fov;
+	private _sens = _cfgSens * _fov;
 	private _angDes = _d get "AngDes";
 	private _angCurr = _d get "Ang";
 	private _rollDes = _d get "RollDes";
@@ -409,8 +397,8 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 		_rotOffset set [0, (_rotOffset select 0) + ((_mouse select 0) * _sens)]; 
 		_rotOffset set [1, ((_rotOffset select 1) - ((_mouse select 1) * _sens)) max -89 min 89]; 
 		
-		if (["K_R_L", false] call (_d get "fnc_CheckKey")) then { _rotOffset set [2, (_rotOffset select 2) - Bro_SCam_RollSpeed]; }; 
-		if (["K_R_R", false] call (_d get "fnc_CheckKey")) then { _rotOffset set [2, (_rotOffset select 2) + Bro_SCam_RollSpeed]; }; 
+		if (["K_R_L", false] call (_d get "fnc_CheckKey")) then { _rotOffset set [2, (_rotOffset select 2) - _cfgRollSpeed]; }; 
+		if (["K_R_R", false] call (_d get "fnc_CheckKey")) then { _rotOffset set [2, (_rotOffset select 2) + _cfgRollSpeed]; }; 
 		if (["K_R_Rst", false] call (_d get "fnc_CheckKey")) then { _rotOffset set [2, 0]; }; 
 		
 		_d set ["RotOffset", _rotOffset];
@@ -435,22 +423,29 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 		private _pitDes = ((_angDes select 1) - ((_mouse select 1) * _sens)) max -89 min 89;
 		_d set ["AngDes", [_yawDes, _pitDes]];
 		
-		if (["K_R_L", false] call (_d get "fnc_CheckKey")) then { _rollDes = _rollDes - Bro_SCam_RollSpeed; }; 
-		if (["K_R_R", false] call (_d get "fnc_CheckKey")) then { _rollDes = _rollDes + Bro_SCam_RollSpeed; }; 
+		if (["K_R_L", false] call (_d get "fnc_CheckKey")) then { _rollDes = _rollDes - _cfgRollSpeed; }; 
+		if (["K_R_R", false] call (_d get "fnc_CheckKey")) then { _rollDes = _rollDes + _cfgRollSpeed; }; 
 		if (["K_R_Rst", false] call (_d get "fnc_CheckKey")) then { _rollDes = 0; }; 
 		_d set ["RollDes", _rollDes];
 	};
 
 	// --- SMOOTHING ---
+	// SCALING: Divide by 100
+	private _cfgSmoothRot = Bro_SCam_SmoothRot / 100;
+	private _cfgSmoothBrg = Bro_SCam_SmoothBrg / 100;
+	private _cfgSmoothPos = Bro_SCam_SmoothPos / 100;
+	private _cfgSmoothFOV = Bro_SCam_SmoothFOV / 100;
+	private _cfgSmoothSpd = Bro_SCam_SmoothSpd / 100;
+
 	private _ang = _d get "Ang";
 	private _roll = _d get "Roll";
 	private _lerp = { params ["_a", "_b", "_t"]; _a + ((_b - _a) * _t) };
 	
-	private _rotSmooth = if (_d get "OrientLock") then { Bro_SCam_SmoothBrg } else { Bro_SCam_SmoothRot };
+	private _rotSmooth = if (_d get "OrientLock") then { _cfgSmoothBrg } else { _cfgSmoothRot };
 	private _yawNew = [_ang select 0, (_d get "AngDes") select 0, _rotSmooth] call _lerp;
 	private _pitNew = [_ang select 1, (_d get "AngDes") select 1, _rotSmooth] call _lerp;
 	
-	private _rollSmooth = if (_d get "OrientLock") then { _rotSmooth } else { Bro_SCam_SmoothRot };
+	private _rollSmooth = if (_d get "OrientLock") then { _rotSmooth } else { _cfgSmoothRot };
 	private _rollNew = [_roll, _rollDes, _rollSmooth] call _lerp;
 	
 	_d set ["Ang", [_yawNew, _pitNew]];
@@ -475,11 +470,12 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	_d set ["SpeedMultDes", _spdDes];
 
 	private _currSpd = _d get "SpeedMult";
-	private _newSpd = [_currSpd, _spdDes, Bro_SCam_SmoothSpd] call _lerp;
+	private _newSpd = [_currSpd, _spdDes, _cfgSmoothSpd] call _lerp;
 	_d set ["SpeedMult", _newSpd];
 
 	// --- MOVEMENT ---
-	private _speed = Bro_SCam_Speed * _newSpd;
+	// SCALING: Divide by 100
+	private _speed = (Bro_SCam_Speed / 100) * _newSpd;
 	private _moveVec = [0,0,0];
 	
 	private _lock = _d get "AltLock";
@@ -511,14 +507,14 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	_d set ["PosDes", _posDes];
 	
 	private _pos = (_d get "Pos");
-	_pos = _pos vectorAdd ((_posDes vectorDiff _pos) vectorMultiply Bro_SCam_SmoothPos);
+	_pos = _pos vectorAdd ((_posDes vectorDiff _pos) vectorMultiply _cfgSmoothPos);
 	_d set ["Pos", _pos];
 
 	private _finalCamPos = if (_d get "Follow") then { getPosASLVisual (_d get "Target") vectorAdd _pos } else { _pos };
 
 	// --- FOV ---
 	private _fovDes = _d get "FovDes";
-	private _fovNew = [_fov, _fovDes, Bro_SCam_SmoothFOV] call _lerp;
+	private _fovNew = [_fov, _fovDes, _cfgSmoothFOV] call _lerp;
 	_d set ["Fov", _fovNew];
 	(_d get "Cam") camSetFov _fovNew;
 

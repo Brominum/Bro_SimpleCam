@@ -1,72 +1,68 @@
 #include "\a3\ui_f\hpp\defineDIKCodes.inc"
 
-// --- CBA SETTINGS (Sliders/Options) ---
-// (Kept your existing settings, added HUD Default at the end)
+// --- CBA SETTINGS (0-10 Scale) ---
 
 [
 	"Bro_SCam_Whitelist", "EDITBOX", 
-	["Allowed Users (Whitelist)", "Comma-separated list: SGT John,Billy,1LT Hoang"], 
+	["Allowed Users (Whitelist)", "Comma-separated list like: PV1 John,Billy,1LT Bob"], 
 	"[Bro] Simple Cinematic Camera", "", true 
 ] call CBA_Settings_fnc_init;
 
 [
 	"Bro_SCam_Sens", "SLIDER", 
-	["Mouse Sensitivity", "Lower = Smoother / Slower"], 
-	"[Bro] Simple Cinematic Camera", [0.01, 1.0, 0.15, 2], nil
+	["Mouse Sensitivity", "Higher = Faster mouse look."], 
+	"[Bro] Simple Cinematic Camera", [1, 100, 15, 0], nil // Default 15 (was 0.15)
 ] call CBA_Settings_fnc_init;
 
 [
 	"Bro_SCam_Speed", "SLIDER", 
-	["Base Movement Speed", "Lower = Smoother / Slower"], 
-	"[Bro] Simple Cinematic Camera", [0.01, 2.0, 0.07, 2], nil
+	["Base Movement Speed", "Higher = Faster base speed before multiplier."], 
+	"[Bro] Simple Cinematic Camera", [1, 30, 7, 0], nil // Default 7 (was 0.07)
 ] call CBA_Settings_fnc_init;
 
 [
 	"Bro_SCam_SmoothPos", "SLIDER", 
-	["Position Inertia", "Lower = Smoother / Slower"], 
-	"[Bro] Simple Cinematic Camera", [0.001, 0.5, 0.01, 3], nil
+	["Position Responsiveness", "1 = Heavy/Slow, 10 = Instant."], 
+	"[Bro] Simple Cinematic Camera", [0.1, 10, 1, 1], nil // Default 1 (was 0.01)
 ] call CBA_Settings_fnc_init;
 
 [
 	"Bro_SCam_SmoothRot", "SLIDER", 
-	["Rotation Smoothness", "Lower = Smoother / Slower"], 
-	"[Bro] Simple Cinematic Camera", [0.001, 0.5, 0.01, 3], nil
+	["Rotation Responsiveness (Mouse)", "1 = Heavy/Smooth, 10 = Instant."], 
+	"[Bro] Simple Cinematic Camera", [0.1, 10, 1, 1], nil // Default 1 (was 0.01)
 ] call CBA_Settings_fnc_init;
 
 [
 	"Bro_SCam_SmoothBrg", "SLIDER", 
-	["Orientation Lock Smoothness", "Lower = Smoother / Slower"], 
-	"[Bro] Simple Cinematic Camera", [0.001, 0.5, 0.05, 3], nil
+	["Orientation Lock Responsiveness", "How fast it tracks the target's angles."], 
+	"[Bro] Simple Cinematic Camera", [0.1, 10, 5, 1], nil // Default 5 (was 0.05)
 ] call CBA_Settings_fnc_init;
 
 [
 	"Bro_SCam_SmoothFOV", "SLIDER", 
-	["Zoom Smoothness", "Lower = Smoother / Slower"], 
-	"[Bro] Simple Cinematic Camera", [0.001, 0.5, 0.01, 3], nil
+	["Zoom Responsiveness", "1 = Slow Zoom, 10 = Instant."], 
+	"[Bro] Simple Cinematic Camera", [0.1, 10, 1, 1], nil // Default 1 (was 0.01)
 ] call CBA_Settings_fnc_init;
 
 [
 	"Bro_SCam_SmoothSpd", "SLIDER", 
-	["Speed Smoothness", "Lower = Smoother / Slower"], 
-	"[Bro] Simple Cinematic Camera", [0.001, 0.5, 0.02, 3], nil
+	["Speed Change Responsiveness", "How fast Shift/Ctrl changes speed."], 
+	"[Bro] Simple Cinematic Camera", [0.1, 10, 5, 1], nil // Default 5 (was 0.05)
 ] call CBA_Settings_fnc_init;
 
 [
 	"Bro_SCam_RollSpeed", "SLIDER", 
-	["Roll Speed", "Lower = Smoother / Slower"], 
-	"[Bro] Simple Cinematic Camera", [0.01, 2.0, 0.1, 2], nil
+	["Roll Speed", "Higher = Faster rolling."], 
+	"[Bro] Simple Cinematic Camera", [1, 50, 10, 0], nil // Default 10 (was 0.1)
 ] call CBA_Settings_fnc_init;
 
 [
 	"Bro_SCam_HUDDefault", "CHECKBOX", 
-	["HUD Default On", "If checked, HUD is visible when camera opened each time."], 
+	["HUD Default On", "If checked, HUD is visible on start."], 
 	"[Bro] Simple Cinematic Camera", true, nil
 ] call CBA_Settings_fnc_init;
 
 // --- KEYBINDINGS ---
-// We register these so the user can change them in Options -> Controls -> Configure Addons
-// We pass {} as the code because simplecam.sqf handles the input loop manually.
-
 private _modName = "[Bro] Simple Cinematic Camera";
 
 [_modName, "Bro_SCam_Open", "Open Camera", { [] execVM "bro_simplecam\simplecam.sqf"; }, {}, [DIK_B, [true, true, false]]] call CBA_fnc_addKeybind;
@@ -90,7 +86,7 @@ private _modName = "[Bro] Simple Cinematic Camera";
 [_modName, "Bro_SCam_Speed_Slow", "Speed Decrease", {}, {}, [DIK_LCONTROL, [false, false, false]]] call CBA_fnc_addKeybind;
 
 // Toggles / Actions
-[_modName, "Bro_SCam_Reset", "Reset camera and modes (except follow)", {}, {}, [DIK_G, [false, false, false]]] call CBA_fnc_addKeybind;
+[_modName, "Bro_SCam_Reset", "Reset to Player", {}, {}, [DIK_G, [false, false, false]]] call CBA_fnc_addKeybind;
 [_modName, "Bro_SCam_Follow", "Toggle Follow Mode", {}, {}, [DIK_F, [false, false, false]]] call CBA_fnc_addKeybind;
 [_modName, "Bro_SCam_Lock_Alt", "Toggle Altitude Lock", {}, {}, [DIK_V, [false, false, false]]] call CBA_fnc_addKeybind;
 [_modName, "Bro_SCam_Lock_Ori", "Toggle Orientation Lock", {}, {}, [DIK_B, [false, false, false]]] call CBA_fnc_addKeybind;

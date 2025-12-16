@@ -90,8 +90,6 @@ SCam_Data set ["fnc_CheckKey", {
 }];
 
 // --- UNIT LIST MANAGEMENT ---
-
-// Returns [ [DisplayName, Unit, isPlayer], ... ] sorted by Player first, then Alphabetical
 SCam_Data set ["fnc_GetSortedUnits", {
 	private _players = allPlayers select { alive _x };
 	private _ai = allUnits select { alive _x && !isPlayer _x && side _x != sideLogic };
@@ -118,7 +116,6 @@ SCam_Data set ["fnc_GetSortedUnits", {
 	(_pList + _aList)
 }];
 
-// Updates the List UI Box
 SCam_Data set ["fnc_UpdateListUI", {
 	private _d = SCam_Data;
 	if !(_d get "HUD_Vis") exitWith { (_d get "HUD_List") ctrlShow false; };
@@ -178,7 +175,7 @@ _hud ctrlShow _hudDefault;
 _hud ctrlCommit 0;
 SCam_Data set ["HUD", _hud];
 
-// 2. Left Unit List HUD (Positioned above Right HUD)
+// 2. Left Unit List HUD
 private _hudList = _display ctrlCreate ["RscStructuredText", -1];
 _hudList ctrlSetPosition [safeZoneX + safeZoneW - 0.45, safeZoneY + safeZoneH - 1.25, 0.45, 0.5]; 
 _hudList ctrlSetBackgroundColor [0,0,0,0.5];
@@ -244,7 +241,7 @@ SCam_Data set ["fnc_Msg", {
 	params ["_text"];
 	private _d = SCam_Data;
 	private _ctrl = _d get "Notify";
-	_ctrl ctrlSetStructuredText parseText format ["<t align='center' size='0.8' font='RobotoCondensedLight'>%1</t>", _text];
+	_ctrl ctrlSetStructuredText parseText format ["<t align='center' size='0.8' font='RobotoCondensed'>%1</t>", _text];
 	_ctrl ctrlShow true;
 	_d set ["NotifyEnd", diag_tickTime + 1.0]; 
 }];
@@ -334,22 +331,24 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 			private _currAng = _d get "AngDes";
 			private _currRoll = _d get "RollDes";
 			
-			// --- ROTATION LOCK: Use vehicle if present ---
+			// --- STANDARD ROTATION LOCK (Reverted) ---
+			// Locks viewing direction to target direction, but keeps world position.
+			// Use vehicle for reference if in one
 			private _target = _d get "Target";
-			private _refObj = vehicle _target; // Uses vehicle or unit
+			private _refObj = vehicle _target; 
 			
 			private _tgtDir = getDirVisual _refObj;
 			private _vDir = vectorDirVisual _refObj;
 			private _vUp = vectorUpVisual _refObj;
-			// ---------------------------------------------
-			
 			private _tgtPitch = asin (_vDir select 2);
+			
 			private _vSide = _vDir vectorCrossProduct _vUp;
 			private _tgtBank = (_vSide select 2) atan2 (_vUp select 2);
 			
 			private _diffYaw = (_currAng select 0) - _tgtDir;
 			if (_diffYaw > 180) then { _diffYaw = _diffYaw - 360; };
 			if (_diffYaw < -180) then { _diffYaw = _diffYaw + 360; };
+			
 			private _diffPitch = (_currAng select 1) - _tgtPitch;
 			private _diffRoll = _currRoll - _tgtBank;
 			
@@ -361,9 +360,11 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 	};
 
 	if ("K_Rst" call _fnc_Trigger) then {
-		_d set ["Target", player];
-		private _pPos = getPosASLVisual player;
+		// Reset to CURRENT TARGET (Fix)
+		private _target = _d get "Target";
+		private _pPos = getPosASLVisual _target;
 		private _resetPos = _pPos vectorAdd [0,0,2];
+		
 		if (_d get "Follow") then {
 			_d set ["Pos", [0,0,2]];
 			_d set ["PosDes", [0,0,2]];
@@ -371,8 +372,8 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 			_d set ["Pos", _resetPos];
 			_d set ["PosDes", _resetPos];
 		};
-		_d set ["AngDes", [getDir player, 0]];
-		_d set ["Ang", [getDir player, 0]]; 
+		_d set ["AngDes", [getDir _target, 0]];
+		_d set ["Ang", [getDir _target, 0]]; 
 		_d set ["RollDes", 0];
 		_d set ["Roll", 0]; 
 		_d set ["SpeedMultDes", 1.0];
@@ -517,6 +518,7 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	private _rollDes = _d get "RollDes";
 
 	if (_d get "OrientLock") then {
+		// --- STANDARD ROTATION LOCK ---
 		private _rotOffset = _d get "RotOffset";
 		_rotOffset set [0, (_rotOffset select 0) + ((_mouse select 0) * _sens)]; 
 		_rotOffset set [1, ((_rotOffset select 1) - ((_mouse select 1) * _sens)) max -89 min 89]; 
@@ -527,16 +529,14 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 		
 		_d set ["RotOffset", _rotOffset];
 		
-		// --- ROTATION LOCK UPDATE ---
 		private _target = _d get "Target";
-		private _refObj = vehicle _target; // Use vehicle or unit
+		private _refObj = vehicle _target; // Uses vehicle or unit
 		
 		private _tgtDir = getDirVisual _refObj; 
 		private _vDir = vectorDirVisual _refObj;
 		private _vUp = vectorUpVisual _refObj;
-		// ----------------------------
-
 		private _tgtPitch = asin (_vDir select 2);
+		
 		private _vSide = _vDir vectorCrossProduct _vUp;
 		private _tgtBank = (_vSide select 2) atan2 (_vUp select 2);
 		
@@ -548,6 +548,7 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 		_d set ["RollDes", _rollDes];
 		
 	} else {
+		// --- FREE LOOK ---
 		private _yawDes = (_angDes select 0) + ((_mouse select 0) * _sens);
 		private _pitDes = ((_angDes select 1) - ((_mouse select 1) * _sens)) max -89 min 89;
 		_d set ["AngDes", [_yawDes, _pitDes]];
@@ -558,7 +559,7 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 		_d set ["RollDes", _rollDes];
 	};
 
-	// --- SMOOTHING ---
+// --- SMOOTHING ---
 	private _cfgSmoothRot = Bro_SCam_SmoothRot / 100;
 	private _cfgSmoothBrg = Bro_SCam_SmoothBrg / 100;
 	private _cfgSmoothPos = Bro_SCam_SmoothPos / 100;
@@ -567,14 +568,30 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 
 	private _ang = _d get "Ang";
 	private _roll = _d get "Roll";
+	
+	// Standard Linear Interpolation
 	private _lerp = { params ["_a", "_b", "_t"]; _a + ((_b - _a) * _t) };
 	
+	// Angular Interpolation (Shortest Path Logic)
+	private _lerpAngle = {
+		params ["_cur", "_des", "_t"];
+		private _diff = _des - _cur;
+		// Normalize difference to -180 to 180 range
+		while {_diff > 180} do { _diff = _diff - 360; };
+		while {_diff < -180} do { _diff = _diff + 360; };
+		_cur + (_diff * _t)
+	};
+	
 	private _rotSmooth = if (_d get "OrientLock") then { _cfgSmoothBrg } else { _cfgSmoothRot };
-	private _yawNew = [_ang select 0, (_d get "AngDes") select 0, _rotSmooth] call _lerp;
-	private _pitNew = [_ang select 1, (_d get "AngDes") select 1, _rotSmooth] call _lerp;
+	
+	// Use lerpAngle for Yaw to fix the 360 spin
+	private _yawNew = [_ang select 0, (_d get "AngDes") select 0, _rotSmooth] call _lerpAngle;
+	private _pitNew = [_ang select 1, (_d get "AngDes") select 1, _rotSmooth] call _lerp; // Pitch doesn't wrap
 	
 	private _rollSmooth = if (_d get "OrientLock") then { _rotSmooth } else { _cfgSmoothRot };
-	private _rollNew = [_roll, _rollDes, _rollSmooth] call _lerp;
+	
+	// Use lerpAngle for Roll to handle 360 rolls smoothly
+	private _rollNew = [_roll, _rollDes, _rollSmooth] call _lerpAngle;
 	
 	_d set ["Ang", [_yawNew, _pitNew]];
 	_d set ["Roll", _rollNew];
@@ -621,7 +638,7 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 
 	private _posDes = (_d get "PosDes") vectorAdd _moveVec;
 	
-	// Ground check
+	// --- GROUND CHECK (Reverted to Standard) ---
 	private _targetBase = if (_d get "Follow") then { getPosASLVisual (_d get "Target") } else { [0,0,0] };
 	private _absPosDes = _targetBase vectorAdd _posDes;
 	private _terrZ = getTerrainHeightASL _absPosDes;
@@ -637,7 +654,15 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	_pos = _pos vectorAdd ((_posDes vectorDiff _pos) vectorMultiply _cfgSmoothPos);
 	_d set ["Pos", _pos];
 
-	private _finalCamPos = if (_d get "Follow") then { getPosASLVisual (_d get "Target") vectorAdd _pos } else { _pos };
+	// --- FINAL POSITION ---
+	private _finalCamPos = [0,0,0];
+	
+	if (_d get "Follow") then {
+		private _tPos = getPosASLVisual (_d get "Target");
+		_finalCamPos = _tPos vectorAdd _pos;
+	} else {
+		_finalCamPos = _pos;
+	};
 
 	// --- FOV ---
 	private _fovDes = _d get "FovDes";

@@ -92,7 +92,13 @@ SCam_Data set ["fnc_CheckKey", {
 // --- UNIT LIST MANAGEMENT ---
 SCam_Data set ["fnc_GetSortedUnits", {
 	private _players = allPlayers select { alive _x };
-	private _ai = allUnits select { alive _x && !isPlayer _x && side _x != sideLogic };
+	
+	private _hideAI = missionNamespace getVariable ["Bro_SCam_HideAI", false];
+	private _ai = [];
+	
+	if (!_hideAI) then {
+		_ai = allUnits select { alive _x && !isPlayer _x && side _x != sideLogic };
+	};
 	
 	private _fnc_prep = {
 		params ["_u", "_isP"];
@@ -152,13 +158,36 @@ SCam_Data set ["fnc_UpdateListUI", {
 	_hudList ctrlShow true;
 }];
 
-// --- CAMERA SETUP ---
+// --- CAMERA SETUP & STATE RESTORATION ---
+private _useSavedState = missionNamespace getVariable ["Bro_SCam_SavePos", false];
+private _lastState = missionNamespace getVariable "Bro_SCam_LastState";
+
 private _startPos = getPosASLVisual player;
-_startPos set [2, (_startPos select 2) + 2]; 
+private _startAng = [getDir player, 0];
+private _startRoll = 0;
+private _startFov = 0.7;
+private _startTarget = player; // Default to player
+
+if (_useSavedState && !isNil "_lastState") then {
+	_startPos = _lastState select 0;
+	_startAng = _lastState select 1;
+	_startRoll = _lastState select 2;
+	_startFov = _lastState select 3;
+	
+	// Load saved target if available, not null, and alive
+	if (count _lastState > 4) then {
+		private _t = _lastState select 4;
+		if (!isNull _t && {alive _t}) then {
+			_startTarget = _t;
+		};
+	};
+} else {
+	_startPos set [2, (_startPos select 2) + 2]; 
+};
 
 private _cam = "camera" camCreate _startPos;
 _cam cameraEffect ["Internal", "Back"];
-_cam camSetFov 0.7;
+_cam camSetFov _startFov;
 showCinemaBorder false;
 
 SCam_Data set ["Cam", _cam];
@@ -218,19 +247,19 @@ SCam_Data set ["KeyMods", [false, false, false]];
 SCam_Data set ["MouseD", [0,0]];
 SCam_Data set ["Pos", _startPos];
 SCam_Data set ["PosDes", _startPos];
-SCam_Data set ["Ang", [getDir player, 0]];
-SCam_Data set ["AngDes", [getDir player, 0]];
+SCam_Data set ["Ang", _startAng];
+SCam_Data set ["AngDes", _startAng];
 SCam_Data set ["RotOffset", [0, 0, 0]];
-SCam_Data set ["Roll", 0];
-SCam_Data set ["RollDes", 0];
-SCam_Data set ["Fov", 0.7];
-SCam_Data set ["FovDes", 0.7];
+SCam_Data set ["Roll", _startRoll];
+SCam_Data set ["RollDes", _startRoll];
+SCam_Data set ["Fov", _startFov];
+SCam_Data set ["FovDes", _startFov];
 SCam_Data set ["SpeedMult", 1.0];
 SCam_Data set ["SpeedMultDes", 1.0];
-SCam_Data set ["Target", player];
+SCam_Data set ["Target", _startTarget]; // Apply the resolved target here
 SCam_Data set ["HUD_Vis", _hudDefault]; 
 SCam_Data set ["EH_List", []]; 
-SCam_Data set ["Follow", false];
+SCam_Data set ["Follow", false]; // Always start false so camera stays at saved position
 SCam_Data set ["VisionMode", 0];
 SCam_Data set ["AltLock", false]; 
 SCam_Data set ["OrientLock", false];
@@ -250,6 +279,27 @@ SCam_Data set ["fnc_Exit", {
 	disableSerialization;
 	private _data = SCam_Data;
 	private _display = findDisplay 46;
+	
+	// Save State logic
+	if (missionNamespace getVariable ["Bro_SCam_SavePos", false]) then {
+		
+		// Convert relative position to absolute if Following
+		private _savePos = _data get "Pos";
+		if (_data get "Follow") then {
+			private _target = _data get "Target";
+			if (!isNull _target) then {
+				_savePos = (getPosASLVisual _target) vectorAdd _savePos;
+			};
+		};
+
+		missionNamespace setVariable ["Bro_SCam_LastState", [
+			_savePos,              // 0
+			_data get "Ang",       // 1
+			_data get "Roll",      // 2
+			_data get "Fov",       // 3
+			_data get "Target"     // 4 - NEW: Save the target unit
+		]];
+	};
 	
 	private _ehList = _data get "EH_List";
 	_display displayRemoveEventHandler ["KeyDown", _ehList select 0];

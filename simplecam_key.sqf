@@ -4,8 +4,26 @@
 
 [
 	"Bro_SCam_Whitelist", "EDITBOX", 
-	["Allowed Users (Whitelist)", "Comma-separated list of usernames: PV1 John,Billy,1LT Bob"], 
+	["Allowed Users (Whitelist)", "Comma-separated usernames, e.g.: PV1 John,Billy,1LT Bob"], 
 	"[Bro] Simple Cinematic Camera", "", true 
+] call CBA_Settings_fnc_init;
+
+[
+	"Bro_SCam_SavePos", "CHECKBOX", 
+	["Save Last Camera Position", "If checked, reopening the camera resumes from where you left it. Uncheck to always reset to player."], 
+	"[Bro] Simple Cinematic Camera", true, nil
+] call CBA_Settings_fnc_init;
+
+[
+	"Bro_SCam_HUDDefault", "CHECKBOX", 
+	["HUD Default On", "If checked, HUD is visible on start."], 
+	"[Bro] Simple Cinematic Camera", true, nil
+] call CBA_Settings_fnc_init;
+
+[
+	"Bro_SCam_HideAI", "CHECKBOX", 
+	["Hide AI Units", "If checked, AI units are removed from the jump list, showing only players."], 
+	"[Bro] Simple Cinematic Camera", false, nil
 ] call CBA_Settings_fnc_init;
 
 [
@@ -54,12 +72,6 @@
 	"Bro_SCam_RollSpeed", "SLIDER", 
 	["Roll Speed", "Higher = Faster rolling."], 
 	"[Bro] Simple Cinematic Camera", [1, 50, 10, 0], nil
-] call CBA_Settings_fnc_init;
-
-[
-	"Bro_SCam_HUDDefault", "CHECKBOX", 
-	["HUD Default On", "If checked, HUD is visible on start."], 
-	"[Bro] Simple Cinematic Camera", true, nil
 ] call CBA_Settings_fnc_init;
 
 // --- KEYBINDINGS ---

@@ -4,7 +4,7 @@
 
 [
 	"Bro_SCam_Whitelist", "EDITBOX", 
-	["Allowed Users (Whitelist)", "Comma-separated list like: PV1 John,Billy,1LT Bob"], 
+	["Allowed Users (Whitelist)", "Comma-separated list of usernames: PV1 John,Billy,1LT Bob"], 
 	"[Bro] Simple Cinematic Camera", "", true 
 ] call CBA_Settings_fnc_init;
 

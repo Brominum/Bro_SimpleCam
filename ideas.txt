@@ -1,3 +1,3 @@
 1. Waypoints system? Wpts 1-10 on number bar that you hit to jump to a predetermined position and rotation
-	a. Lerp between waypoints
+	a. Lerp between waypoints?
 2. COMPLETED- Maybe keybinds for camera's individual controls? Do after everything is like actually working perfect

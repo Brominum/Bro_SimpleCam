@@ -97,6 +97,10 @@ private _modName = "[Bro] Simple Cinematic Camera";
 [_modName, "Bro_SCam_Speed_Fast", "Speed Increase", {}, {}, [DIK_LSHIFT, [false, false, false]]] call CBA_fnc_addKeybind;
 [_modName, "Bro_SCam_Speed_Slow", "Speed Decrease", {}, {}, [DIK_LCONTROL, [false, false, false]]] call CBA_fnc_addKeybind;
 
+// Timescale (SP Only)
+[_modName, "Bro_SCam_Time_Inc", "Timescale Increase (+)", {}, {}, [DIK_EQUALS, [false, false, false]]] call CBA_fnc_addKeybind;
+[_modName, "Bro_SCam_Time_Dec", "Timescale Decrease (-)", {}, {}, [DIK_MINUS, [false, false, false]]] call CBA_fnc_addKeybind;
+
 // Toggles / Actions
 [_modName, "Bro_SCam_Reset", "Reset to Player", {}, {}, [DIK_G, [false, false, false]]] call CBA_fnc_addKeybind;
 [_modName, "Bro_SCam_Follow", "Toggle Follow Mode", {}, {}, [DIK_F, [false, false, false]]] call CBA_fnc_addKeybind;

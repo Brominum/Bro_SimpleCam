@@ -77,6 +77,9 @@ _d set ["K_R_Rst", "Bro_SCam_Roll_Reset" call (_d get "fnc_LoadBind")];
 _d set ["K_S_Fst", "Bro_SCam_Speed_Fast" call (_d get "fnc_LoadBind")];
 _d set ["K_S_Slw", "Bro_SCam_Speed_Slow" call (_d get "fnc_LoadBind")];
 
+_d set ["K_T_Inc", "Bro_SCam_Time_Inc" call (_d get "fnc_LoadBind")];
+_d set ["K_T_Dec", "Bro_SCam_Time_Dec" call (_d get "fnc_LoadBind")];
+
 // --- CHECK KEY INPUT FUNCTION ---
 SCam_Data set ["fnc_CheckKey", {
 	params ["_keyId", "_exactMod"]; 
@@ -198,7 +201,8 @@ private _hudDefault = missionNamespace getVariable ["Bro_SCam_HUDDefault", true]
 
 // 1. Right Info HUD
 private _hud = _display ctrlCreate ["RscStructuredText", -1];
-_hud ctrlSetPosition [safeZoneX + safeZoneW - 0.45, safeZoneY + safeZoneH - 0.75, 0.45, 0.7]; 
+// Position Adjusted: Moved up (-0.85) and made taller (0.8) to fit all text
+_hud ctrlSetPosition [safeZoneX + safeZoneW - 0.45, safeZoneY + safeZoneH - 0.85, 0.45, 0.8]; 
 _hud ctrlSetBackgroundColor [0,0,0,0.5]; 
 _hud ctrlShow _hudDefault; 
 _hud ctrlCommit 0;
@@ -206,7 +210,7 @@ SCam_Data set ["HUD", _hud];
 
 // 2. Left Unit List HUD
 private _hudList = _display ctrlCreate ["RscStructuredText", -1];
-_hudList ctrlSetPosition [safeZoneX + safeZoneW - 0.45, safeZoneY + safeZoneH - 1.25, 0.45, 0.5]; 
+_hudList ctrlSetPosition [safeZoneX + safeZoneW - 0.45, safeZoneY + safeZoneH - 1.35, 0.45, 0.5]; // Adjusted Y slightly to not overlap new top HUD
 _hudList ctrlSetBackgroundColor [0,0,0,0.5];
 _hudList ctrlShow _hudDefault;
 _hudList ctrlCommit 0;
@@ -229,8 +233,9 @@ private _s_alt  = format["[%1]", "Bro_SCam_Lock_Alt" call (_d get "fnc_GetKeyNam
 private _s_ori  = format["[%1]", "Bro_SCam_Lock_Ori" call (_d get "fnc_GetKeyName")];
 private _s_hud  = format["[%1]", "Bro_SCam_HUD" call (_d get "fnc_GetKeyName")];
 private _s_exit = format["[%1]", "Bro_SCam_Exit" call (_d get "fnc_GetKeyName")];
+private _s_time = format["[%1/%2]", "Bro_SCam_Time_Inc" call (_d get "fnc_GetKeyName"), "Bro_SCam_Time_Dec" call (_d get "fnc_GetKeyName")];
 
-SCam_Data set ["HUD_Str", [_s_move, _s_ud, _s_roll, _s_rstR, _s_spd, _s_fol, _s_jmp, _s_lst, _s_vis, _s_rst, _s_alt, _s_ori, _s_hud, _s_exit]];
+SCam_Data set ["HUD_Str", [_s_move, _s_ud, _s_roll, _s_rstR, _s_spd, _s_fol, _s_jmp, _s_lst, _s_vis, _s_rst, _s_alt, _s_ori, _s_hud, _s_exit, _s_time]];
 
 private _notify = _display ctrlCreate ["RscStructuredText", -1];
 _notify ctrlSetPosition [safeZoneX + (safeZoneW * 0.3), safeZoneY + safeZoneH - 0.15, safeZoneW * 0.4, 0.06];
@@ -366,6 +371,47 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 			case 3: { camUseNVG false; true setCamUseTi 1; "Vision: Black Hot"; };
 		};
 		[_msg] call (_d get "fnc_Msg");
+	};
+	
+	// Timescale Logic (SP Only)
+	if (!isMultiplayer) then {
+		if ("K_T_Inc" call _fnc_Trigger) then {
+			private _now = accTime;
+			private _next = _now;
+			
+			if (_now >= 1.0) then {
+				_next = _now + 0.1;
+			} else {
+				_next = _now + 0.02;
+			};
+			
+			// Round to 2 decimals to prevent floating point drift (e.g. 0.9800001)
+			_next = (round (_next * 100)) / 100;
+			
+			if (_next > 4.0) then { _next = 4.0; };
+			
+			setAccTime _next;
+			[format ["Timescale: %1", _next]] call (_d get "fnc_Msg");
+		};
+		
+		if ("K_T_Dec" call _fnc_Trigger) then {
+			private _now = accTime;
+			private _next = _now;
+			
+			// Check threshold slightly above 1 to handle floating point fuzziness
+			if (_now > 1.001) then {
+				_next = _now - 0.1;
+			} else {
+				_next = _now - 0.02;
+			};
+			
+			_next = (round (_next * 100)) / 100;
+			
+			if (_next < 0) then { _next = 0; };
+			
+			setAccTime _next;
+			[format ["Timescale: %1", _next]] call (_d get "fnc_Msg");
+		};
 	};
 	
 	if ("K_L_Alt" call _fnc_Trigger) then {
@@ -736,7 +782,7 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 		private _visMode = _d get "VisionMode";
 		private _visStr = switch (_visMode) do { case 0: {"NORM"}; case 1: {"NVG"}; case 2: {"WHOT"}; case 3: {"BHOT"}; default {"NORM"}; };
 		
-		(_d get "HUD_Str") params ["_s_move", "_s_ud", "_s_roll", "_s_rstR", "_s_spd", "_s_fol", "_s_jmp", "_s_lst", "_s_vis", "_s_rst", "_s_alt", "_s_ori", "_s_hud", "_s_exit"];
+		(_d get "HUD_Str") params ["_s_move", "_s_ud", "_s_roll", "_s_rstR", "_s_spd", "_s_fol", "_s_jmp", "_s_lst", "_s_vis", "_s_rst", "_s_alt", "_s_ori", "_s_hud", "_s_exit", "_s_time"];
 
 		(_d get "HUD") ctrlSetStructuredText parseText format [
 			"<t align='left' size='1.2' font='RobotoCondensedLight'>" +
@@ -748,6 +794,7 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 			"POS: <t color='#ffff00'>%4</t> %5<br/>" +
 			"TGT: <t color='#ffa500'>%6</t><br/>" +
 			"VIS: <t color='#ffa500'>%7</t><br/>" +
+			"TIME: <t color='#00ff00'>%24</t><br/>" +
 			"<t size='0.8'>------------------------------</t><br/>" +
 			"<t size='0.8' color='#dddddd'>CONTROLS</t><br/>" +
 			"<t size='0.8'>" +
@@ -757,11 +804,13 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 			"%15 Follow <t color='#888888'>|</t> %16 Players<br/>" +
 			"%17 List Select <t color='#888888'>|</t> %18 Vision<br/>" +
 			"%19 Reset <t color='#888888'>|</t> %20 Alt Lock<br/>" +
-			"%21 Ori Lock <t color='#888888'>|</t> %22 HUD <t color='#888888'>|</t> %23 Exit" +
+			"%21 Ori Lock <t color='#888888'>|</t> %22 HUD <t color='#888888'>|</t> %23 Exit<br/>" +
+			"%25 Timescale" +
 			"</t></t>",
 			round(_newSpd * 100) / 100, round(_fovNew * 100) / 100, round(_rollNew * 10) / 10,
 			mapGridPosition _finalCamPos, _followTxt, _tgtName, _visStr, _lockTxt, _oriTxt,
-			_s_move, _s_ud, _s_roll, _s_rstR, _s_spd, _s_fol, _s_jmp, _s_lst, _s_vis, _s_rst, _s_alt, _s_ori, _s_hud, _s_exit
+			_s_move, _s_ud, _s_roll, _s_rstR, _s_spd, _s_fol, _s_jmp, _s_lst, _s_vis, _s_rst, _s_alt, _s_ori, _s_hud, _s_exit,
+			accTime, _s_time
 		];
 	};
 	

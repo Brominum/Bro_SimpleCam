@@ -1,6 +1,7 @@
 /* 
 	Simple Cinematic Camera
 	Usage: [] execVM "bro_simplecam\simplecam.sqf";
+	Updated with TFAR & ACRE Audio Integration
 */
 
 if (!hasInterface) exitWith {};
@@ -161,6 +162,31 @@ SCam_Data set ["fnc_UpdateListUI", {
 	_hudList ctrlShow true;
 }];
 
+// --- AUDIO INTEGRATION FUNCTION ---
+SCam_Data set ["fnc_SetAudioSpectator", {
+	params ["_state"];
+	
+	// TFAR Integration (Support for both 0.9.x and 1.0+)
+	if (isClass (configFile >> "CfgPatches" >> "task_force_radio") || isClass (configFile >> "CfgPatches" >> "TFAR_Core")) then {
+		// New TFAR (1.0+)
+		if (!isNil "tfar_fnc_forceSpectator") then {
+			[player, _state] call tfar_fnc_forceSpectator;
+		} else {
+			// Old TFAR (0.9.12)
+			if (!isNil "tf_radio_fnc_forceSpectator") then {
+				[player, _state] call tf_radio_fnc_forceSpectator;
+			};
+		};
+	};
+	
+	// ACRE2 Integration
+	if (isClass (configFile >> "CfgPatches" >> "acre_main")) then {
+		if (!isNil "acre_api_fnc_setSpectator") then {
+			[_state] call acre_api_fnc_setSpectator;
+		};
+	};
+}];
+
 // --- CAMERA SETUP & STATE RESTORATION ---
 private _useSavedState = missionNamespace getVariable ["Bro_SCam_SavePos", false];
 private _lastState = missionNamespace getVariable "Bro_SCam_LastState";
@@ -194,6 +220,9 @@ _cam camSetFov _startFov;
 showCinemaBorder false;
 
 SCam_Data set ["Cam", _cam];
+
+// --- ENABLE AUDIO SPECTATOR ---
+[true] call (SCam_Data get "fnc_SetAudioSpectator");
 
 // --- UI SETUP ---
 private _display = findDisplay 46;
@@ -323,6 +352,9 @@ SCam_Data set ["fnc_Exit", {
 	
 	camUseNVG false; 
 	false setCamUseTi 0;
+
+	// --- DISABLE AUDIO SPECTATOR (Return to player) ---
+	[false] call (_data get "fnc_SetAudioSpectator");
 
 	SCam_Data = nil;
 }];

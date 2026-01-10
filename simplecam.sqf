@@ -618,7 +618,7 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	// Cache fnc_CheckKey
 	private _checkKey = _d get "fnc_CheckKey";
 	
-	// --- ROTATION LOGIC ---
+// --- ROTATION LOGIC ---
 	if (_d get "LookAtLock") then {
 		private _target = _d get "Target";
 		if (isNull _target || {!alive _target}) then {
@@ -626,7 +626,15 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 			["Look At: DISABLED (Target Lost)"] call (_d get "fnc_Msg");
 		} else {
 			private _tPosReal = getPosASLVisual _target;
+			
+			// Calculate actual camera position (Based on feet/pivot to match movement logic)
 			private _camPosAbs = if (_d get "Follow") then { _tPosReal vectorAdd (_d get "Pos") } else { _d get "Pos" };
+			
+			// Offset target point to chest height (1.5m) if on foot
+			if (vehicle _target == _target) then {
+				_tPosReal = _tPosReal vectorAdd [0, 0, 1];
+			};
+
 			private _lookVec = _tPosReal vectorDiff _camPosAbs;
 			private _yawTgt = (_lookVec select 0) atan2 (_lookVec select 1);
 			private _dist = vectorMagnitude _lookVec;

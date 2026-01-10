@@ -106,6 +106,7 @@ private _modName = "[Bro] Simple Cinematic Camera";
 [_modName, "Bro_SCam_Follow", "Toggle Follow Mode", {}, {}, [DIK_F, [false, false, false]]] call CBA_fnc_addKeybind;
 [_modName, "Bro_SCam_Lock_Alt", "Toggle Altitude Lock", {}, {}, [DIK_V, [false, false, false]]] call CBA_fnc_addKeybind;
 [_modName, "Bro_SCam_Lock_Ori", "Toggle Orientation Lock", {}, {}, [DIK_B, [false, false, false]]] call CBA_fnc_addKeybind;
+[_modName, "Bro_SCam_Look_At", "Toggle Look At Target", {}, {}, [DIK_F, [false, false, true]]] call CBA_fnc_addKeybind;
 [_modName, "Bro_SCam_Vision", "Cycle Vision Mode", {}, {}, [DIK_N, [false, false, false]]] call CBA_fnc_addKeybind;
 [_modName, "Bro_SCam_HUD", "Toggle HUD", {}, {}, [DIK_L, [false, false, false]]] call CBA_fnc_addKeybind;
 

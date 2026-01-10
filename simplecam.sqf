@@ -54,6 +54,7 @@ _d set ["K_HUD",   "Bro_SCam_HUD" call (_d get "fnc_LoadBind")];
 _d set ["K_Vis",   "Bro_SCam_Vision" call (_d get "fnc_LoadBind")];
 _d set ["K_L_Alt", "Bro_SCam_Lock_Alt" call (_d get "fnc_LoadBind")];
 _d set ["K_L_Ori", "Bro_SCam_Lock_Ori" call (_d get "fnc_LoadBind")];
+_d set ["K_L_At",  "Bro_SCam_Look_At" call (_d get "fnc_LoadBind")];
 _d set ["K_Rst",   "Bro_SCam_Reset" call (_d get "fnc_LoadBind")];
 _d set ["K_Fol",   "Bro_SCam_Follow" call (_d get "fnc_LoadBind")];
 _d set ["K_J_Nxt", "Bro_SCam_Jump_Next" call (_d get "fnc_LoadBind")];
@@ -231,10 +232,11 @@ private _s_vis  = format["[%1]", "Bro_SCam_Vision" call (_d get "fnc_GetKeyName"
 private _s_rst  = format["[%1]", "Bro_SCam_Reset" call (_d get "fnc_GetKeyName")];
 private _s_alt  = format["[%1]", "Bro_SCam_Lock_Alt" call (_d get "fnc_GetKeyName")];
 private _s_ori  = format["[%1]", "Bro_SCam_Lock_Ori" call (_d get "fnc_GetKeyName")];
+private _s_lat  = format["[%1]", "Bro_SCam_Look_At" call (_d get "fnc_GetKeyName")];
 private _s_hud  = format["[%1]", "Bro_SCam_HUD" call (_d get "fnc_GetKeyName")];
 private _s_exit = format["[%1]", "Bro_SCam_Exit" call (_d get "fnc_GetKeyName")];
 private _s_time = format["[%1/%2]", "Bro_SCam_Time_Inc" call (_d get "fnc_GetKeyName"), "Bro_SCam_Time_Dec" call (_d get "fnc_GetKeyName")];
-SCam_Data set ["HUD_Str", [_s_move, _s_ud, _s_roll, _s_rstR, _s_spd, _s_fol, _s_jmp, _s_lst, _s_vis, _s_rst, _s_alt, _s_ori, _s_hud, _s_exit, _s_time]];
+SCam_Data set ["HUD_Str", [_s_move, _s_ud, _s_roll, _s_rstR, _s_spd, _s_fol, _s_jmp, _s_lst, _s_vis, _s_rst, _s_alt, _s_ori, _s_lat, _s_hud, _s_exit, _s_time]];
 private _notify = _display ctrlCreate ["RscStructuredText", -1];
 _notify ctrlSetPosition [safeZoneX + (safeZoneW * 0.3), safeZoneY + safeZoneH - 0.15, safeZoneW * 0.4, 0.06];
 _notify ctrlSetBackgroundColor [0,0,0,0];
@@ -264,6 +266,7 @@ SCam_Data set ["Follow", false];
 SCam_Data set ["VisionMode", 0];
 SCam_Data set ["AltLock", false];
 SCam_Data set ["OrientLock", false];
+SCam_Data set ["LookAtLock", false];
 SCam_Data set ["LastHUDUpdate", 0];
 // --- HELPER FUNCTIONS ---
 SCam_Data set ["fnc_Msg", {
@@ -397,10 +400,17 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 		_d set ["AltLock", _l];
 		[if (_l) then {"Altitude Lock: ON"} else {"Altitude Lock: OFF"}] call (_d get "fnc_Msg");
 	};
+	if ("K_L_At" call _fnc_Trigger) then {
+		private _l = !(_d get "LookAtLock");
+		_d set ["LookAtLock", _l];
+		if (_l) then { _d set ["OrientLock", false]; };
+		[if (_l) then {"Look At Target: ON"} else {"Look At Target: OFF"}] call (_d get "fnc_Msg");
+	};
 	if ("K_L_Ori" call _fnc_Trigger) then {
 		private _b = !(_d get "OrientLock");
 		_d set ["OrientLock", _b];
 		if (_b) then {
+			_d set ["LookAtLock", false];
 			private _currAng = _d get "AngDes";
 			private _currRoll = _d get "RollDes";
 			private _target = _d get "Target";
@@ -455,6 +465,7 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 		(_d get "Cam") camSetFov 0.7;
 		_d set ["AltLock", false];
 		_d set ["OrientLock", false];
+		_d set ["LookAtLock", false];
 		["Camera Reset"] call (_d get "fnc_Msg");
 		[] call (_d get "fnc_UpdateListUI");
 	};
@@ -586,49 +597,74 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	private _rollDes = _d get "RollDes";
 	// Cache fnc_CheckKey
 	private _checkKey = _d get "fnc_CheckKey";
-	if (_d get "OrientLock") then {
+	
+	// --- ROTATION LOGIC ---
+	if (_d get "LookAtLock") then {
 		private _target = _d get "Target";
-		// Validate target before using
 		if (isNull _target || {!alive _target}) then {
-			_d set ["OrientLock", false];
-			["Orientation Lock: DISABLED (Target Lost)"] call (_d get "fnc_Msg");
+			_d set ["LookAtLock", false];
+			["Look At: DISABLED (Target Lost)"] call (_d get "fnc_Msg");
 		} else {
-			private _rotOffset = _d get "RotOffset";
-			_rotOffset set [0, (_rotOffset select 0) + ((_mouse select 0) * _sens)];
-			_rotOffset set [1, ((_rotOffset select 1) - ((_mouse select 1) * _sens)) max -89 min 89];
-			if (["K_R_L", false] call _checkKey) then { _rotOffset set [2, (_rotOffset select 2) - _cfgRollSpeed]; };
-			if (["K_R_R", false] call _checkKey) then { _rotOffset set [2, (_rotOffset select 2) + _cfgRollSpeed]; };
-			if (["K_R_Rst", false] call _checkKey) then { _rotOffset set [2, 0]; };
-			_d set ["RotOffset", _rotOffset];
-			private _refObj = vehicle _target;
-			// Validate vehicle
-			if (!isNull _refObj && {alive _refObj}) then {
-				private _tgtDir = getDirVisual _refObj;
-				private _vDir = vectorDirVisual _refObj;
-				private _vUp = vectorUpVisual _refObj;
-				private _tgtPitch = asin (_vDir select 2);
-				private _vSide = _vDir vectorCrossProduct _vUp;
-				private _tgtBank = (_vSide select 2) atan2 (_vUp select 2);
-				private _yawDes = _tgtDir + (_rotOffset select 0);
-				private _pitDes = _tgtPitch + (_rotOffset select 1);
-				_rollDes = _tgtBank + (_rotOffset select 2);
-				_d set ["AngDes", [_yawDes, _pitDes]];
-				_d set ["RollDes", _rollDes];
-			} else {
-				_d set ["OrientLock", false];
-				["Orientation Lock: DISABLED (Vehicle Lost)"] call (_d get "fnc_Msg");
-			};
+			private _tPosReal = getPosASLVisual _target;
+			private _camPosAbs = if (_d get "Follow") then { _tPosReal vectorAdd (_d get "Pos") } else { _d get "Pos" };
+			private _lookVec = _tPosReal vectorDiff _camPosAbs;
+			private _yawTgt = (_lookVec select 0) atan2 (_lookVec select 1);
+			private _dist = vectorMagnitude _lookVec;
+			private _pitTgt = if (_dist > 0) then { asin ((_lookVec select 2) / _dist) } else { 0 };
+			_d set ["AngDes", [_yawTgt, _pitTgt]];
+			
+			// Allow Roll Control
+			if (["K_R_L", false] call _checkKey) then { _rollDes = _rollDes - _cfgRollSpeed; };
+			if (["K_R_R", false] call _checkKey) then { _rollDes = _rollDes + _cfgRollSpeed; };
+			if (["K_R_Rst", false] call _checkKey) then { _rollDes = 0; };
+			_d set ["RollDes", _rollDes];
 		};
 	} else {
-		// Free look
-		private _yawDes = (_angDes select 0) + ((_mouse select 0) * _sens);
-		private _pitDes = ((_angDes select 1) - ((_mouse select 1) * _sens)) max -89 min 89;
-		_d set ["AngDes", [_yawDes, _pitDes]];
-		if (["K_R_L", false] call _checkKey) then { _rollDes = _rollDes - _cfgRollSpeed; };
-		if (["K_R_R", false] call _checkKey) then { _rollDes = _rollDes + _cfgRollSpeed; };
-		if (["K_R_Rst", false] call _checkKey) then { _rollDes = 0; };
-		_d set ["RollDes", _rollDes];
+		if (_d get "OrientLock") then {
+			private _target = _d get "Target";
+			// Validate target before using
+			if (isNull _target || {!alive _target}) then {
+				_d set ["OrientLock", false];
+				["Orientation Lock: DISABLED (Target Lost)"] call (_d get "fnc_Msg");
+			} else {
+				private _rotOffset = _d get "RotOffset";
+				_rotOffset set [0, (_rotOffset select 0) + ((_mouse select 0) * _sens)];
+				_rotOffset set [1, ((_rotOffset select 1) - ((_mouse select 1) * _sens)) max -89 min 89];
+				if (["K_R_L", false] call _checkKey) then { _rotOffset set [2, (_rotOffset select 2) - _cfgRollSpeed]; };
+				if (["K_R_R", false] call _checkKey) then { _rotOffset set [2, (_rotOffset select 2) + _cfgRollSpeed]; };
+				if (["K_R_Rst", false] call _checkKey) then { _rotOffset set [2, 0]; };
+				_d set ["RotOffset", _rotOffset];
+				private _refObj = vehicle _target;
+				// Validate vehicle
+				if (!isNull _refObj && {alive _refObj}) then {
+					private _tgtDir = getDirVisual _refObj;
+					private _vDir = vectorDirVisual _refObj;
+					private _vUp = vectorUpVisual _refObj;
+					private _tgtPitch = asin (_vDir select 2);
+					private _vSide = _vDir vectorCrossProduct _vUp;
+					private _tgtBank = (_vSide select 2) atan2 (_vUp select 2);
+					private _yawDes = _tgtDir + (_rotOffset select 0);
+					private _pitDes = _tgtPitch + (_rotOffset select 1);
+					_rollDes = _tgtBank + (_rotOffset select 2);
+					_d set ["AngDes", [_yawDes, _pitDes]];
+					_d set ["RollDes", _rollDes];
+				} else {
+					_d set ["OrientLock", false];
+					["Orientation Lock: DISABLED (Vehicle Lost)"] call (_d get "fnc_Msg");
+				};
+			};
+		} else {
+			// Free look
+			private _yawDes = (_angDes select 0) + ((_mouse select 0) * _sens);
+			private _pitDes = ((_angDes select 1) - ((_mouse select 1) * _sens)) max -89 min 89;
+			_d set ["AngDes", [_yawDes, _pitDes]];
+			if (["K_R_L", false] call _checkKey) then { _rollDes = _rollDes - _cfgRollSpeed; };
+			if (["K_R_R", false] call _checkKey) then { _rollDes = _rollDes + _cfgRollSpeed; };
+			if (["K_R_Rst", false] call _checkKey) then { _rollDes = 0; };
+			_d set ["RollDes", _rollDes];
+		};
 	};
+	
 	// --- SMOOTHING ---
 	private _ang = _d get "Ang";
 	private _roll = _d get "Roll";
@@ -642,7 +678,8 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 		_diff = _diff - (360 * floor((_diff + 180) / 360));
 		_cur + (_diff * _t)
 	};
-	private _rotSmooth = if (_d get "OrientLock") then { _cfgSmoothBrg } else { _cfgSmoothRot };
+	// If LookAt is active, we use a faster smooth for bearing to keep up with movement
+	private _rotSmooth = if (_d get "OrientLock" || _d get "LookAtLock") then { _cfgSmoothBrg } else { _cfgSmoothRot };
 	private _yawNew = [_ang select 0, (_d get "AngDes") select 0, _rotSmooth] call _lerpAngle;
 	private _pitNew = [_ang select 1, (_d get "AngDes") select 1, _rotSmooth] call _lerp;
 	private _rollSmooth = if (_d get "OrientLock") then { _rotSmooth } else { _cfgSmoothRot };
@@ -730,6 +767,7 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 		private _followTxt = if (_d get "Follow") then { "<t color='#ff0000'>[FOLLOW]</t>" } else { "" };
 		private _lockTxt = if (_lock) then { "<t color='#ff0000'>[LOCK]</t>" } else { "<t color='#888888'>OFF</t>" };
 		private _oriTxt = if (_d get "OrientLock") then { "<t color='#ff0000'>[LOCK]</t>" } else { "<t color='#888888'>OFF</t>" };
+		private _latTxt = if (_d get "LookAtLock") then { "<t color='#ff0000'>[LOCK]</t>" } else { "<t color='#888888'>OFF</t>" };
 		private _tgtName = "NONE";
 		if (!isNull _target && {alive _target}) then {
 			_tgtName = name _target;
@@ -742,7 +780,7 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 			case 3: {"BHOT"};
 			default {"NORM"};
 		};
-		(_d get "HUD_Str") params ["_s_move", "_s_ud", "_s_roll", "_s_rstR", "_s_spd", "_s_fol", "_s_jmp", "_s_lst", "_s_vis", "_s_rst", "_s_alt", "_s_ori", "_s_hud", "_s_exit", "_s_time"];
+		(_d get "HUD_Str") params ["_s_move", "_s_ud", "_s_roll", "_s_rstR", "_s_spd", "_s_fol", "_s_jmp", "_s_lst", "_s_vis", "_s_rst", "_s_alt", "_s_ori", "_s_lat", "_s_hud", "_s_exit", "_s_time"];
 		(_d get "HUD") ctrlSetStructuredText parseText format [
 			"<t align='left' size='1.2' font='RobotoCondensedLight'>" +
 			"SPD: <t color='#00ff00'>%1</t><br/>" +
@@ -750,6 +788,7 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 			"ROL: <t color='#ff00ff'>%3</t><br/>" +
 			"ALT: %8<br/>" +
 			"ORI: %9<br/>" +
+			"LAT: %26<br/>" +
 			"POS: <t color='#ffff00'>%4</t> %5<br/>" +
 			"TGT: <t color='#ffa500'>%6</t><br/>" +
 			"VIS: <t color='#ffa500'>%7</t><br/>" +
@@ -763,8 +802,9 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 			"%15 Follow <t color='#888888'>|</t> %16 Players<br/>" +
 			"%17 List Select <t color='#888888'>|</t> %18 Vision<br/>" +
 			"%19 Reset <t color='#888888'>|</t> %20 Alt Lock<br/>" +
-			"%21 Ori Lock <t color='#888888'>|</t> %22 HUD <t color='#888888'>|</t> %23 Exit<br/>" +
-			"%25 Timescale" +
+			"%21 Ori Lock <t color='#888888'>|</t> %25 Look At<br/>" +
+			"%22 HUD <t color='#888888'>|</t> %23 Exit<br/>" +
+			"%27 Timescale" +
 			"</t></t>",
 			round(_newSpd * 100) / 100,
 			round(_fovNew * 100) / 100,
@@ -776,7 +816,7 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 			_lockTxt,
 			_oriTxt,
 			_s_move, _s_ud, _s_roll, _s_rstR, _s_spd, _s_fol, _s_jmp, _s_lst, _s_vis, _s_rst, _s_alt, _s_ori, _s_hud, _s_exit,
-			accTime, _s_time
+			accTime, _s_lat, _latTxt, _s_time
 		];
 	};
 	// --- NOTIFICATION TIMEOUT ---

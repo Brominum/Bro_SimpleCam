@@ -191,7 +191,11 @@ if (_useSavedState && !isNil "_lastState") then {
 		};
 	};
 } else {
-	_startPos set [2, (_startPos select 2) + 2];
+	// Initialize 2 meters behind and 2 meters up
+	private _vDir = vectorDirVisual player;
+	_vDir set [2,0];
+	if (vectorMagnitude _vDir > 0) then { _vDir = vectorNormalized _vDir; };
+	_startPos = _startPos vectorAdd (_vDir vectorMultiply -2) vectorAdd [0,0,2];
 };
 private _cam = "camera" camCreate _startPos;
 _cam cameraEffect ["Internal", "Back"];
@@ -446,13 +450,17 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 			["Reset: FAILED (Invalid Target)"] call (_d get "fnc_Msg");
 		};
 		private _pPos = getPosASLVisual _target;
-		private _resetPos = _pPos vectorAdd [0,0,2];
+		private _vDir = vectorDirVisual _target;
+		_vDir set [2, 0];
+		if (vectorMagnitude _vDir > 0) then { _vDir = vectorNormalized _vDir; };
+		private _offset = (_vDir vectorMultiply -2) vectorAdd [0,0,2];
+		
 		if (_d get "Follow") then {
-			_d set ["Pos", [0,0,2]];
-			_d set ["PosDes", [0,0,2]];
+			_d set ["Pos", _offset];
+			_d set ["PosDes", _offset];
 		} else {
-			_d set ["Pos", _resetPos];
-			_d set ["PosDes", _resetPos];
+			_d set ["Pos", _pPos vectorAdd _offset];
+			_d set ["PosDes", _pPos vectorAdd _offset];
 		};
 		_d set ["AngDes", [getDir _target, 0]];
 		_d set ["Ang", [getDir _target, 0]];
@@ -501,13 +509,19 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 			if (_idx < 0) then { _idx = (count _list) - 1; };
 			private _newTarget = _list select _idx;
 			_d set ["Target", _newTarget];
+			
 			private _newTPos = getPosASLVisual _newTarget;
+			private _vDir = vectorDirVisual _newTarget;
+			_vDir set [2, 0];
+			if (vectorMagnitude _vDir > 0) then { _vDir = vectorNormalized _vDir; };
+			private _offset = (_vDir vectorMultiply -2) vectorAdd [0,0,2];
+			
 			if (_d get "Follow") then {
-				_d set ["Pos", [0,0,2]];
-				_d set ["PosDes", [0,0,2]];
+				_d set ["Pos", _offset];
+				_d set ["PosDes", _offset];
 			} else {
-				_d set ["Pos", _newTPos vectorAdd [0,0,2]];
-				_d set ["PosDes", _newTPos vectorAdd [0,0,2]];
+				_d set ["Pos", _newTPos vectorAdd _offset];
+				_d set ["PosDes", _newTPos vectorAdd _offset];
 			};
 			_d set ["AngDes", [getDir _newTarget, 0]];
 			_d set ["Ang", [getDir _newTarget, 0]];
@@ -528,13 +542,19 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 			if (_idx < 0) then { _idx = (count _fullList) - 1; };
 			private _newTarget = (_fullList select _idx) select 1;
 			_d set ["Target", _newTarget];
+			
 			private _newTPos = getPosASLVisual _newTarget;
+			private _vDir = vectorDirVisual _newTarget;
+			_vDir set [2, 0];
+			if (vectorMagnitude _vDir > 0) then { _vDir = vectorNormalized _vDir; };
+			private _offset = (_vDir vectorMultiply -2) vectorAdd [0,0,2];
+			
 			if (_d get "Follow") then {
-				_d set ["Pos", [0,0,2]];
-				_d set ["PosDes", [0,0,2]];
+				_d set ["Pos", _offset];
+				_d set ["PosDes", _offset];
 			} else {
-				_d set ["Pos", _newTPos vectorAdd [0,0,2]];
-				_d set ["PosDes", _newTPos vectorAdd [0,0,2]];
+				_d set ["Pos", _newTPos vectorAdd _offset];
+				_d set ["PosDes", _newTPos vectorAdd _offset];
 			};
 			_d set ["AngDes", [getDir _newTarget, 0]];
 			_d set ["Ang", [getDir _newTarget, 0]];

@@ -27,6 +27,12 @@
 ] call CBA_Settings_fnc_init;
 
 [
+	"Bro_SCam_AudioSpectator", "CHECKBOX", 
+	["Enable Audio Spectator (TFAR/ACRE)", "If checked, you hear from the camera position. If unchecked, you hear from your player body."], 
+	"[Bro] Simple Cinematic Camera", true, nil
+] call CBA_Settings_fnc_init;
+
+[
 	"Bro_SCam_Sens", "SLIDER", 
 	["Mouse Sensitivity", "Higher = Faster mouse look."], 
 	"[Bro] Simple Cinematic Camera", [1, 100, 15, 0], nil

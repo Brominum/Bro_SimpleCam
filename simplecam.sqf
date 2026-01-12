@@ -143,6 +143,15 @@ SCam_Data set ["fnc_UpdateListUI", {
 // --- AUDIO INTEGRATION FUNCTION ---
 SCam_Data set ["fnc_SetAudioSpectator", {
 	params ["_state"];
+	
+	// Check CBA Setting
+	private _useSpectatorAudio = missionNamespace getVariable ["Bro_SCam_AudioSpectator", true];
+
+	// Logic:
+	// 1. If we are turning ON (_state is true) AND the setting is FALSE, do not switch audio.
+	// 2. If we are turning OFF (_state is false), we MUST proceed to ensure audio resets to player, regardless of setting.
+	if (_state && !_useSpectatorAudio) exitWith {};
+
 	// TFAR Integration (Support for both 0.9.x and 1.0+)
 	if (isClass (configFile >> "CfgPatches" >> "task_force_radio") || isClass (configFile >> "CfgPatches" >> "TFAR_Core")) then {
 		try {

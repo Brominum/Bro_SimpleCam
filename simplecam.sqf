@@ -301,23 +301,23 @@ private _s_rst  = "Bro_SCam_Reset" call (_d get "fnc_GetKeyName");
 // Generate Controls HTML Once
 private _controlsHTML = format [
     "<t align='right' size='0.8' font='RobotoCondensedBold' shadow='2'>" +
-    "MOVE <t color='%1'>%2</t><br/>" +
-    "ELEV <t color='%1'>%3</t><br/>" +
-    "SPEED <t color='%1'>%4</t><br/>" +
-    "ZOOM <t color='%1'>SCROLL</t><br/>" +
-    "LIST ALL <t color='%1'>%5</t><br/>" +
-    "PLAYERS <t color='%1'>%16</t><br/>" +
-    "SELECT <t color='%1'>[%15]</t><br/>" + 
-    "TIME <t color='%1'>%6</t><br/>" +
+    "MOVE: <t color='%1'>%2</t><br/>" +
+    "ELEV: <t color='%1'>%3</t><br/>" +
+    "SPEED: <t color='%1'>%4</t><br/>" +
+    "ZOOM: <t color='%1'>SCROLL</t><br/>" +
+    "SCROLL ALL: <t color='%1'>%5</t><br/>" +
+    "SCROLL PLYRS: <t color='%1'>%16</t><br/>" +
+    "SELECT: <t color='%1'>[%15]</t><br/>" + 
+    "TIME: <t color='%1'>%6</t><br/>" +
     "-----<br/>" +
-    "FOLLOW <t color='%1'>[%7]</t><br/>" +
-    "LOOKAT <t color='%1'>[%8]</t><br/>" +
-    "LCK ORI <t color='%1'>[%9]</t><br/>" +
-    "LCK ALT <t color='%1'>[%10]</t><br/>" +
-    "VISION <t color='%1'>[%11]</t><br/>" +
-    "RESET <t color='%1'>[%12]</t><br/>" +
-    "TOGGLE HUD <t color='%1'>[%13]</t><br/>" +
-    "EXIT <t color='#ff3333'>[%14]</t>" +
+    "FOLLOW: <t color='%1'>[%7]</t><br/>" +
+    "LOOKAT: <t color='%1'>[%8]</t><br/>" +
+    "LCK ORI: <t color='%1'>[%9]</t><br/>" +
+    "LCK ALT: <t color='%1'>[%10]</t><br/>" +
+    "VISION: <t color='%1'>[%11]</t><br/>" +
+    "RESET: <t color='%1'>[%12]</t><br/>" +
+    "TOGGLE HUD: <t color='%1'>[%13]</t><br/>" +
+    "EXIT: <t color='#ff3333'>[%14]</t>" +
     "</t>",
     C_ACCENT, _s_move, _s_ud, _s_spd, _s_list, _s_time, _s_fol, _s_lat, _s_ori, _s_alt, _s_vis, _s_rst, _s_hud, _s_exit, _s_sel, _s_plyr
 ];

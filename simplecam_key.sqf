@@ -123,3 +123,6 @@ private _modName = "[Bro] Simple Cinematic Camera";
 // List Navigation (Players + AI)
 [_modName, "Bro_SCam_List_Up", "Jump List Up", {}, {}, [DIK_UP, [false, false, false]]] call CBA_fnc_addKeybind;
 [_modName, "Bro_SCam_List_Down", "Jump List Down", {}, {}, [DIK_DOWN, [false, false, false]]] call CBA_fnc_addKeybind;
+
+// Select tgt in Jump list
+[_modName, "Bro_SCam_Select", "Select Target", {}, {}, [DIK_RETURN, [false, false, false]]] call CBA_fnc_addKeybind;

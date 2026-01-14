@@ -2,7 +2,7 @@
 	Simple Cinematic Camera
 	Usage: [] execVM "bro_simplecam\simplecam.sqf";
     
-    Updated: Player-Only Scroll + Confirm Logic
+    Updated: 3-Stage HUD Toggle (Full -> Light -> Off)
 */
 if (!hasInterface) exitWith {};
 disableSerialization;
@@ -131,7 +131,8 @@ SCam_Data set ["fnc_GetSortedUnits", {
 
 SCam_Data set ["fnc_UpdateListUI", {
 	private _d = SCam_Data;
-	if !(_d get "HUD_Vis") exitWith { (_d get "HUD_List") ctrlShow false; };
+	// Only update list if we are in FULL HUD mode (State 0)
+	if ((_d get "HUD_State") != 0) exitWith { (_d get "HUD_List") ctrlShow false; };
 	
 	private _actualTarget = _d get "Target";
     private _listTarget = _d get "ListTarget";
@@ -144,7 +145,6 @@ SCam_Data set ["fnc_UpdateListUI", {
 	private _fullList = call (_d get "fnc_GetSortedUnits");
 	_d set ["CachedList", _fullList];
 	
-    // Find index of the HIGHLIGHTED unit
 	private _curIdx = _fullList findIf { (_x select 1) == _listTarget };
 	if (_curIdx == -1) then { _curIdx = 0; };
 	
@@ -160,12 +160,10 @@ SCam_Data set ["fnc_UpdateListUI", {
         private _color = "#888888"; 
 		if (_isP) then { _color = "#cccccc"; };
 		
-        // Highlight active watch target
         if (_u == _actualTarget) then {
             _color = C_ACCENT; 
         };
 
-        // Highlight selected scroll target
 		if (_i == _curIdx) then { 
              _displayName = format["> %1 <", _displayName];
              _color = "#ffffff";
@@ -242,13 +240,18 @@ SCam_Data set ["Cam", _cam];
 // --- MODERN UI SETUP ---
 disableSerialization;
 private _display = findDisplay 46;
-private _hudDefault = missionNamespace getVariable ["Bro_SCam_HUDDefault", true];
+
+// Determine Initial State
+// 0 = FULL, 1 = LIGHT, 2 = OFF
+private _initState = if (missionNamespace getVariable ["Bro_SCam_HUDDefault", true]) then { 0 } else { 2 };
+private _showBars = (_initState != 2);
+private _showWidgets = (_initState == 0);
 
 // 1. TOP BAR
 private _hudTop = _display ctrlCreate ["RscStructuredText", -1];
 _hudTop ctrlSetPosition [safeZoneX, safeZoneY, safeZoneW, 0.045];
 _hudTop ctrlSetBackgroundColor [0,0,0,0.25];
-_hudTop ctrlShow _hudDefault;
+_hudTop ctrlShow _showBars;
 _hudTop ctrlCommit 0;
 SCam_Data set ["HUD_Top", _hudTop];
 
@@ -256,7 +259,7 @@ SCam_Data set ["HUD_Top", _hudTop];
 private _hudBot = _display ctrlCreate ["RscStructuredText", -1];
 _hudBot ctrlSetPosition [safeZoneX, safeZoneY + safeZoneH - 0.06, safeZoneW, 0.06];
 _hudBot ctrlSetBackgroundColor [0,0,0,0.25];
-_hudBot ctrlShow _hudDefault;
+_hudBot ctrlShow _showBars;
 _hudBot ctrlCommit 0;
 SCam_Data set ["HUD_Bot", _hudBot];
 
@@ -264,7 +267,7 @@ SCam_Data set ["HUD_Bot", _hudBot];
 private _hudList = _display ctrlCreate ["RscStructuredText", -1];
 _hudList ctrlSetPosition [safeZoneX + 0.01, safeZoneY + (safeZoneH * 0.3), 0.45, 0.4];
 _hudList ctrlSetBackgroundColor [0,0,0,0];
-_hudList ctrlShow _hudDefault;
+_hudList ctrlShow _showWidgets;
 _hudList ctrlCommit 0;
 SCam_Data set ["HUD_List", _hudList];
 SCam_Data set ["LastListUpdate", 0];
@@ -274,7 +277,7 @@ SCam_Data set ["CachedList", []];
 private _hudKeys = _display ctrlCreate ["RscStructuredText", -1];
 _hudKeys ctrlSetPosition [safeZoneX + safeZoneW - 0.32, safeZoneY + safeZoneH - 0.65, 0.32, 0.55];
 _hudKeys ctrlSetBackgroundColor [0,0,0,0]; 
-_hudKeys ctrlShow _hudDefault;
+_hudKeys ctrlShow _showWidgets;
 _hudKeys ctrlCommit 0;
 SCam_Data set ["HUD_Keys", _hudKeys];
 
@@ -298,23 +301,23 @@ private _s_rst  = "Bro_SCam_Reset" call (_d get "fnc_GetKeyName");
 // Generate Controls HTML Once
 private _controlsHTML = format [
     "<t align='right' size='0.8' font='RobotoCondensedBold' shadow='2'>" +
-    "MOVE: <t color='%1'>%2</t><br/>" +
-    "ELEV: <t color='%1'>%3</t><br/>" +
-    "SPEED: <t color='%1'>%4</t><br/>" +
-    "ZOOM: <t color='%1'>SCROLL</t><br/>" +
-    "SCROLL ALL: <t color='%1'>%5</t><br/>" +
-    "SCROLL PLYRS: <t color='%1'>%16</t><br/>" +
-    "SELECT: <t color='%1'>[%15]</t><br/>" + 
-    "TIME: <t color='%1'>%6</t><br/>" +
+    "MOVE <t color='%1'>%2</t><br/>" +
+    "ELEV <t color='%1'>%3</t><br/>" +
+    "SPEED <t color='%1'>%4</t><br/>" +
+    "ZOOM <t color='%1'>SCROLL</t><br/>" +
+    "LIST ALL <t color='%1'>%5</t><br/>" +
+    "PLAYERS <t color='%1'>%16</t><br/>" +
+    "SELECT <t color='%1'>[%15]</t><br/>" + 
+    "TIME <t color='%1'>%6</t><br/>" +
     "-----<br/>" +
-    "FOLLOW: <t color='%1'>[%7]</t><br/>" +
-    "LOOK AT: <t color='%1'>[%8]</t><br/>" +
-    "LOCK ORI: <t color='%1'>[%9]</t><br/>" +
-    "LOCK ALT: <t color='%1'>[%10]</t><br/>" +
-    "VISION: <t color='%1'>[%11]</t><br/>" +
-    "RESET: <t color='%1'>[%12]</t><br/>" +
-    "TOGGLE HUD: <t color='%1'>[%13]</t><br/>" +
-    "EXIT: <t color='#ff3333'>[%14]</t>" +
+    "FOLLOW <t color='%1'>[%7]</t><br/>" +
+    "LOOKAT <t color='%1'>[%8]</t><br/>" +
+    "LCK ORI <t color='%1'>[%9]</t><br/>" +
+    "LCK ALT <t color='%1'>[%10]</t><br/>" +
+    "VISION <t color='%1'>[%11]</t><br/>" +
+    "RESET <t color='%1'>[%12]</t><br/>" +
+    "TOGGLE HUD <t color='%1'>[%13]</t><br/>" +
+    "EXIT <t color='#ff3333'>[%14]</t>" +
     "</t>",
     C_ACCENT, _s_move, _s_ud, _s_spd, _s_list, _s_time, _s_fol, _s_lat, _s_ori, _s_alt, _s_vis, _s_rst, _s_hud, _s_exit, _s_sel, _s_plyr
 ];
@@ -347,7 +350,7 @@ SCam_Data set ["SpeedMult", 1.0];
 SCam_Data set ["SpeedMultDes", 1.0];
 SCam_Data set ["Target", _startTarget];
 SCam_Data set ["ListTarget", _startTarget];
-SCam_Data set ["HUD_Vis", _hudDefault];
+SCam_Data set ["HUD_State", _initState]; // Used to be HUD_Vis, now Integer 0,1,2
 SCam_Data set ["EH_List", []];
 SCam_Data set ["Follow", false];
 SCam_Data set ["VisionMode", 0];
@@ -427,18 +430,35 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 		true
 	};
 	if ("K_Exit" call _fnc_Trigger) exitWith { [] call (_d get "fnc_Exit"); true };
-	if ("K_HUD" call _fnc_Trigger) then {
-		private _v = !(_d get "HUD_Vis");
-		_d set ["HUD_Vis", _v];
-        if (_v) then {
+	
+    // UPDATED HUD TOGGLE: Full (0) -> Light (1) -> Off (2)
+    if ("K_HUD" call _fnc_Trigger) then {
+		private _s = _d get "HUD_State";
+        _s = _s + 1;
+        if (_s > 2) then { _s = 0; };
+        _d set ["HUD_State", _s];
+        
+        // Visibility Logic
+        private _showBars = (_s != 2); // Show on Full(0) and Light(1)
+        private _showWidgets = (_s == 0); // Show only on Full(0)
+        
+        // Apply
+		(_d get "HUD_Top") ctrlShow _showBars;
+		(_d get "HUD_Bot") ctrlShow _showBars;
+		(_d get "HUD_List") ctrlShow _showWidgets;
+		(_d get "HUD_Keys") ctrlShow _showWidgets;
+        
+        // If we switched to Full, sync the list target to verify visuals
+        if (_showWidgets) then {
             _d set ["ListTarget", _d get "Target"];
             [] call (_d get "fnc_UpdateListUI");
         };
-		(_d get "HUD_Top") ctrlShow _v;
-		(_d get "HUD_Bot") ctrlShow _v;
-		(_d get "HUD_List") ctrlShow _v;
-		(_d get "HUD_Keys") ctrlShow _v;
+        
+        // Optional Feedback
+        private _msg = switch (_s) do { case 0: {"HUD: FULL"}; case 1: {"HUD: LIGHT"}; case 2: {"HUD: OFF"}; };
+        [_msg] call (_d get "fnc_Msg");
 	};
+    
 	if ("K_Vis" call _fnc_Trigger) then {
 		private _mode = _d get "VisionMode";
 		_mode = _mode + 1;
@@ -589,20 +609,16 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 	};
     // UPDATED: Player-Only Scroll (Left/Right) - Moves Highlight Only
     if (("K_J_Prv" call _fnc_Trigger) || ("K_J_Nxt" call _fnc_Trigger)) then {
-        // Get full list to maintain consistency with UI
 		private _fullList = _d get "CachedList"; 
         if (isNil "_fullList" || {count _fullList == 0}) then { _fullList = call (_d get "fnc_GetSortedUnits"); };
         
-        // Filter for players only
         private _playerList = _fullList select { _x select 2 }; // select isP is true
         
         if (count _playerList > 0) then {
             private _curr = _d get "ListTarget";
             if (isNull _curr) then { _curr = _d get "Target"; };
             
-            // Find where current highlighted target is in the player list
             private _idx = _playerList findIf { (_x select 1) == _curr };
-            // If current highlight is AI (idx -1), jump to first player
             if (_idx == -1) then { _idx = 0; };
             
             if ("K_J_Nxt" call _fnc_Trigger) then { _idx = _idx + 1; } else { _idx = _idx - 1; };
@@ -835,10 +851,10 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 
 	if (diag_tickTime > (_d get "LastListUpdate") + LIST_UPDATE_INTERVAL) then {
 		_d set ["LastListUpdate", diag_tickTime];
-		if (_d get "HUD_Vis") then { [] call (_d get "fnc_UpdateListUI"); };
+		if ((_d get "HUD_State") == 0) then { [] call (_d get "fnc_UpdateListUI"); };
 	};
     
-	if (_d get "HUD_Vis" && {diag_tickTime > (_d get "LastHUDUpdate") + (1 / HUD_UPDATE_FPS)}) then {
+	if ((_d get "HUD_State") != 2 && {diag_tickTime > (_d get "LastHUDUpdate") + (1 / HUD_UPDATE_FPS)}) then {
 		_d set ["LastHUDUpdate", diag_tickTime];
 		
         private _tgtName = "NO TARGET";

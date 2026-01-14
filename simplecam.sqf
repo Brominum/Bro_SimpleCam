@@ -312,8 +312,8 @@ private _controlsHTML = format [
     "-----<br/>" +
     "FOLLOW: <t color='%1'>[%7]</t><br/>" +
     "LOOKAT: <t color='%1'>[%8]</t><br/>" +
-    "LCK ORI: <t color='%1'>[%9]</t><br/>" +
-    "LCK ALT: <t color='%1'>[%10]</t><br/>" +
+    "LOCK ORI: <t color='%1'>[%9]</t><br/>" +
+    "LOCK ALT: <t color='%1'>[%10]</t><br/>" +
     "VISION: <t color='%1'>[%11]</t><br/>" +
     "RESET: <t color='%1'>[%12]</t><br/>" +
     "TOGGLE HUD: <t color='%1'>[%13]</t><br/>" +

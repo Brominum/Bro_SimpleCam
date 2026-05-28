@@ -1,87 +1,166 @@
 #include "\a3\ui_f\hpp\defineDIKCodes.inc"
 
+// Translations are loaded by the PreInit step (see config.cpp). Local alias
+// for brevity; falls through to the key itself if translations failed to load.
+private _L = { _this call Bro_SCam_L };
+private _modName = "[Bro] Simple Cinematic Camera";
+
+// --- LANGUAGE OVERRIDE ---
+// Determines the language used by all in-camera HUD / notifications.
+// "" / "auto" follows the game language. Setting labels (this dialog) always
+// follow the game language because CBA reads them at this point only.
+[
+	"Bro_SCam_Language", "LIST",
+	[["s_lng_lbl"] call _L, ["s_lng_tip"] call _L],
+	_modName,
+	[
+		["", "english", "french", "spanish", "german", "italian", "polish", "russian"],
+		[["s_lng_auto"] call _L, "English", "Français", "Español", "Deutsch", "Italiano", "Polski", "Русский"],
+		0
+	],
+	nil
+] call CBA_Settings_fnc_init;
+
 // --- CBA SETTINGS (Clamped Scales) ---
 
 [
-	"Bro_SCam_Whitelist", "EDITBOX", 
-	["Allowed Users (Whitelist)", "Comma-separated usernames, e.g.: PV1 John,Billy,1LT Bob"], 
-	"[Bro] Simple Cinematic Camera", "", true 
+	"Bro_SCam_Whitelist", "EDITBOX",
+	[["s_wl_lbl"] call _L, ["s_wl_tip"] call _L],
+	_modName, "", true
 ] call CBA_Settings_fnc_init;
 
 [
-	"Bro_SCam_SavePos", "CHECKBOX", 
-	["Save Last Camera Position", "If checked, reopening the camera resumes from where you left it. Uncheck to always reset to player."], 
-	"[Bro] Simple Cinematic Camera", true, nil
+	"Bro_SCam_SavePos", "CHECKBOX",
+	[["s_sp_lbl"] call _L, ["s_sp_tip"] call _L],
+	_modName, true, nil
 ] call CBA_Settings_fnc_init;
 
 [
-	"Bro_SCam_HUDDefault", "CHECKBOX", 
-	["HUD Default On", "If checked, HUD is visible on start."], 
-	"[Bro] Simple Cinematic Camera", true, nil
+	"Bro_SCam_HUDDefault", "CHECKBOX",
+	[["s_hd_lbl"] call _L, ["s_hd_tip"] call _L],
+	_modName, true, nil
 ] call CBA_Settings_fnc_init;
 
 [
-	"Bro_SCam_HideAI", "CHECKBOX", 
-	["Hide AI Units", "If checked, AI units are removed from the jump list, showing only players."], 
-	"[Bro] Simple Cinematic Camera", false, nil
+	"Bro_SCam_HideAI", "CHECKBOX",
+	[["s_ai_lbl"] call _L, ["s_ai_tip"] call _L],
+	_modName, false, nil
 ] call CBA_Settings_fnc_init;
 
 [
-	"Bro_SCam_AudioSpectator", "CHECKBOX", 
-	["Enable Audio Spectator (TFAR/ACRE)", "If checked, you hear from the camera position. If unchecked, you hear from your player body."], 
-	"[Bro] Simple Cinematic Camera", true, nil
+	"Bro_SCam_AudioSpectator", "CHECKBOX",
+	[["s_as_lbl"] call _L, ["s_as_tip"] call _L],
+	_modName, true, nil
 ] call CBA_Settings_fnc_init;
 
 [
-	"Bro_SCam_Sens", "SLIDER", 
-	["Mouse Sensitivity", "Higher = Faster mouse look."], 
-	"[Bro] Simple Cinematic Camera", [1, 100, 15, 0], nil
+	"Bro_SCam_Sens", "SLIDER",
+	[["s_ms_lbl"] call _L, ["s_ms_tip"] call _L],
+	_modName, [1, 100, 15, 0], nil
 ] call CBA_Settings_fnc_init;
 
 [
-	"Bro_SCam_Speed", "SLIDER", 
-	["Base Movement Speed", "Higher = Faster base speed before multiplier."], 
-	"[Bro] Simple Cinematic Camera", [1, 30, 7, 0], nil
+	"Bro_SCam_Speed", "SLIDER",
+	[["s_bs_lbl"] call _L, ["s_bs_tip"] call _L],
+	_modName, [1, 30, 7, 0], nil
 ] call CBA_Settings_fnc_init;
 
 [
-	"Bro_SCam_SmoothPos", "SLIDER", 
-	["Position Responsiveness", "1 = Heavy/Slow, 10 = Instant."], 
-	"[Bro] Simple Cinematic Camera", [0.1, 10, 1, 1], nil
+	"Bro_SCam_SmoothPos", "SLIDER",
+	[["s_pr_lbl"] call _L, ["s_pr_tip"] call _L],
+	_modName, [0.1, 10, 1, 1], nil
 ] call CBA_Settings_fnc_init;
 
 [
-	"Bro_SCam_SmoothRot", "SLIDER", 
-	["Rotation Responsiveness (Mouse)", "1 = Heavy/Smooth, 10 = Instant."], 
-	"[Bro] Simple Cinematic Camera", [0.1, 10, 1, 1], nil
+	"Bro_SCam_SmoothRot", "SLIDER",
+	[["s_rr_lbl"] call _L, ["s_rr_tip"] call _L],
+	_modName, [0.1, 10, 1, 1], nil
 ] call CBA_Settings_fnc_init;
 
 [
-	"Bro_SCam_SmoothBrg", "SLIDER", 
-	["Orientation Lock Responsiveness", "How fast it tracks the target's angles."], 
-	"[Bro] Simple Cinematic Camera", [0.1, 10, 5, 1], nil
+	"Bro_SCam_SmoothBrg", "SLIDER",
+	[["s_or_lbl"] call _L, ["s_or_tip"] call _L],
+	_modName, [0.1, 10, 5, 1], nil
 ] call CBA_Settings_fnc_init;
 
 [
-	"Bro_SCam_SmoothFOV", "SLIDER", 
-	["Zoom Responsiveness", "1 = Slow Zoom, 10 = Instant."], 
-	"[Bro] Simple Cinematic Camera", [0.1, 10, 1, 1], nil
+	"Bro_SCam_SmoothFOV", "SLIDER",
+	[["s_zr_lbl"] call _L, ["s_zr_tip"] call _L],
+	_modName, [0.1, 10, 1, 1], nil
 ] call CBA_Settings_fnc_init;
 
 [
-	"Bro_SCam_SmoothSpd", "SLIDER", 
-	["Speed Change Responsiveness", "How fast Shift/Ctrl changes speed."], 
-	"[Bro] Simple Cinematic Camera", [0.1, 10, 5, 1], nil
+	"Bro_SCam_SmoothSpd", "SLIDER",
+	[["s_sr_lbl"] call _L, ["s_sr_tip"] call _L],
+	_modName, [0.1, 10, 5, 1], nil
 ] call CBA_Settings_fnc_init;
 
 [
-	"Bro_SCam_RollSpeed", "SLIDER", 
-	["Roll Speed", "Higher = Faster rolling."], 
-	"[Bro] Simple Cinematic Camera", [1, 50, 10, 0], nil
+	"Bro_SCam_RollSpeed", "SLIDER",
+	[["s_rs_lbl"] call _L, ["s_rs_tip"] call _L],
+	_modName, [1, 50, 10, 0], nil
 ] call CBA_Settings_fnc_init;
+
+// --- CONTROLLER (XBOX) SETTINGS ---
+[
+	"Bro_SCam_Controller", "CHECKBOX",
+	[["s_pad_lbl"] call _L, ["s_pad_tip"] call _L],
+	_modName, false, nil
+] call CBA_Settings_fnc_init;
+
+[
+	"Bro_SCam_PadDeadzone", "SLIDER",
+	[["s_pdz_lbl"] call _L, ["s_pdz_tip"] call _L],
+	_modName, [0, 0.4, 0.15, 2], nil
+] call CBA_Settings_fnc_init;
+
+[
+	"Bro_SCam_PadLookSens", "SLIDER",
+	[["s_pls_lbl"] call _L, ["s_pls_tip"] call _L],
+	_modName, [10, 400, 120, 0], nil
+] call CBA_Settings_fnc_init;
+
+[
+	"Bro_SCam_PadInvertY", "CHECKBOX",
+	[["s_piy_lbl"] call _L, ["s_piy_tip"] call _L],
+	_modName, false, nil
+] call CBA_Settings_fnc_init;
+
+[
+	"Bro_SCam_PadVertSens", "SLIDER",
+	[["s_pvs_lbl"] call _L, ["s_pvs_tip"] call _L],
+	_modName, [0.5, 50.0, 25.0, 1], nil
+] call CBA_Settings_fnc_init;
+
+// --- START-PAUSED + NUMPAD TIMESCALE PRESETS ---
+[
+	"Bro_SCam_StartPaused", "CHECKBOX",
+	[["s_strtp_lbl"] call _L, ["s_strtp_tip"] call _L],
+	_modName, false, nil
+] call CBA_Settings_fnc_init;
+
+// Numpad 2-9 timescale slider presets (Numpad 0 / 1 are fixed at 0× / 1×).
+// Range 0.05 - 4.0 mirrors what setAccTime accepts (0 = pause; we keep
+// 0.05 as the minimum so the slider can't actually pause via these presets).
+{
+	_x params ["_idx", "_def"];
+	[
+		format ["Bro_SCam_TS_Num%1", _idx], "SLIDER",
+		[format [["s_ts_lbl_fmt"] call _L, _idx], ["s_ts_tip"] call _L],
+		_modName, [0.05, 4.0, _def, 2], nil
+	] call CBA_Settings_fnc_init;
+} forEach [
+	[2, 0.1],   // extreme slow-mo
+	[3, 0.25],  // very slow
+	[4, 0.5],   // slow
+	[5, 0.75],  // slight slow
+	[6, 1.5],   // slight fast
+	[7, 2.0],   // fast
+	[8, 3.0],   // very fast
+	[9, 4.0]    // max
+];
 
 // --- KEYBINDINGS ---
-private _modName = "[Bro] Simple Cinematic Camera";
 
 [_modName, "Bro_SCam_Open", "Open Camera", { [] execVM "bro_simplecam\simplecam.sqf"; }, {}, [DIK_B, [true, true, false]]] call CBA_fnc_addKeybind;
 [_modName, "Bro_SCam_Exit", "Exit Camera", {}, {}, [DIK_SPACE, [false, false, false]]] call CBA_fnc_addKeybind;
@@ -126,3 +205,16 @@ private _modName = "[Bro] Simple Cinematic Camera";
 
 // Select tgt in Jump list
 [_modName, "Bro_SCam_Select", "Select Target", {}, {}, [DIK_RETURN, [false, false, false]]] call CBA_fnc_addKeybind;
+
+// --- NUMPAD TIMESCALE HOTKEYS (global, SP only) ---
+// Numpad 0 and 1 are fixed (pause / normal); 2-9 read their configured slider.
+[_modName, "Bro_SCam_Num0", "Timescale: Numpad 0 (Pause)",  { [0] call Bro_SCam_SetTimescale }, {}, [DIK_NUMPAD0, [false, false, false]]] call CBA_fnc_addKeybind;
+[_modName, "Bro_SCam_Num1", "Timescale: Numpad 1 (Normal)", { [1] call Bro_SCam_SetTimescale }, {}, [DIK_NUMPAD1, [false, false, false]]] call CBA_fnc_addKeybind;
+[_modName, "Bro_SCam_Num2", "Timescale: Numpad 2", { [missionNamespace getVariable ["Bro_SCam_TS_Num2", 0.10]] call Bro_SCam_SetTimescale }, {}, [DIK_NUMPAD2, [false, false, false]]] call CBA_fnc_addKeybind;
+[_modName, "Bro_SCam_Num3", "Timescale: Numpad 3", { [missionNamespace getVariable ["Bro_SCam_TS_Num3", 0.25]] call Bro_SCam_SetTimescale }, {}, [DIK_NUMPAD3, [false, false, false]]] call CBA_fnc_addKeybind;
+[_modName, "Bro_SCam_Num4", "Timescale: Numpad 4", { [missionNamespace getVariable ["Bro_SCam_TS_Num4", 0.50]] call Bro_SCam_SetTimescale }, {}, [DIK_NUMPAD4, [false, false, false]]] call CBA_fnc_addKeybind;
+[_modName, "Bro_SCam_Num5", "Timescale: Numpad 5", { [missionNamespace getVariable ["Bro_SCam_TS_Num5", 0.75]] call Bro_SCam_SetTimescale }, {}, [DIK_NUMPAD5, [false, false, false]]] call CBA_fnc_addKeybind;
+[_modName, "Bro_SCam_Num6", "Timescale: Numpad 6", { [missionNamespace getVariable ["Bro_SCam_TS_Num6", 1.50]] call Bro_SCam_SetTimescale }, {}, [DIK_NUMPAD6, [false, false, false]]] call CBA_fnc_addKeybind;
+[_modName, "Bro_SCam_Num7", "Timescale: Numpad 7", { [missionNamespace getVariable ["Bro_SCam_TS_Num7", 2.00]] call Bro_SCam_SetTimescale }, {}, [DIK_NUMPAD7, [false, false, false]]] call CBA_fnc_addKeybind;
+[_modName, "Bro_SCam_Num8", "Timescale: Numpad 8", { [missionNamespace getVariable ["Bro_SCam_TS_Num8", 3.00]] call Bro_SCam_SetTimescale }, {}, [DIK_NUMPAD8, [false, false, false]]] call CBA_fnc_addKeybind;
+[_modName, "Bro_SCam_Num9", "Timescale: Numpad 9", { [missionNamespace getVariable ["Bro_SCam_TS_Num9", 4.00]] call Bro_SCam_SetTimescale }, {}, [DIK_NUMPAD9, [false, false, false]]] call CBA_fnc_addKeybind;

@@ -14,6 +14,7 @@ A modern cinematic camera system for Arma 3, designed as a spiritual successor t
 - Timescale control: Adjust time speed for slow-motion shots (SP only)
 - TFAR/ACRE integration: Hear radio comms from camera position
 - Fully rebindable controls: Customize all keybinds via CBA
+- Xbox controller support: Full native gamepad layout (sticks, triggers, all buttons) — no rebind required
 - Whitelist support: Server-side access control for cinematographers
 
 ## Requirements
@@ -33,6 +34,38 @@ With ACE: Use self-interact menu -> Cinematic Camera
 
 All controls are displayed on the HUD and fully rebindable in CBA Settings under `[Bro] Simple Cinematic Camera`.
 
+## Xbox Controller
+
+Enable `Enable Xbox Controller Input` in CBA Addon Options. All bindings below are **native** — Arma's standard XInput keycodes wire straight to the camera, no CBA rebind required. The HUD shows the controller layout and a `PAD` indicator in the bottom bar.
+
+| Input | Action |
+|---|---|
+| Left stick | Strafe + forward/back (analog, radial deadzone) |
+| Right stick | Look — yaw + pitch (analog, cubic response curve) |
+| RT (held) | Move UP |
+| LT (held) | Move DOWN |
+| RB (held) | Speed FAST modifier |
+| LB (held) | Speed SLOW modifier |
+| **A (held)** | **FN modifier mode** (`PAD/FN` tag appears on HUD) |
+| A held + LB | FOV out (zoom out, step) |
+| A held + RB | FOV in (zoom in, step) |
+| A held + D-pad ← / → | Roll left / right step |
+| A double-tap | Select highlighted target |
+| B | Exit camera |
+| X | Cycle HUD (Full / Light / Off) |
+| Y | Cycle vision (Normal / NVG / WHOT / BHOT) |
+| L3 (LS click) | Toggle Follow mode |
+| R3 (RS click) | Toggle Look At |
+| D-pad ↑ / ↓ | List prev/next unit (players + AI) |
+| D-pad ← / → | Jump to prev/next player |
+| Start | Reset camera to current target |
+| Back / View | Toggle Altitude Lock |
+
+Controller-specific settings (CBA Addon Options):
+- **Stick deadzone** (default 0.15) — radial deadzone with quadratic response for fine control
+- **Look sensitivity** (default 120) — right-stick rotation speed
+- **Invert look Y** — flight-style pitch inversion
+
 ## Configuration
 
 Settings available in CBA Addon Options:
@@ -41,6 +74,7 @@ Settings available in CBA Addon Options:
 - Rotation smoothing
 - Roll speed
 - HUD defaults
+- Xbox controller (enable + deadzone, sensitivity, invert Y)
 - Whitelist (server-side)
 
 ## Improvements over GCam

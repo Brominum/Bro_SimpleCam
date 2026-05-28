@@ -12,6 +12,27 @@ disableSerialization;
 #define HUD_UPDATE_FPS 30
 #define MIN_GROUND_CLEARANCE 0.25
 
+// --- XBOX CONTROLLER DIK KEYCODES ---
+// Arma 3 routes Xbox / XInput controller buttons through the standard
+// KeyDown event with these extended DIK codes (above 256). Detected
+// natively — no CBA rebind required when controller mode is enabled.
+#define DIK_XBOX_A              327680
+#define DIK_XBOX_B              327681
+#define DIK_XBOX_X              327682
+#define DIK_XBOX_Y              327683
+#define DIK_XBOX_DPAD_UP        327684
+#define DIK_XBOX_DPAD_DOWN      327685
+#define DIK_XBOX_DPAD_LEFT      327686
+#define DIK_XBOX_DPAD_RIGHT     327687
+#define DIK_XBOX_START          327688
+#define DIK_XBOX_BACK           327689
+#define DIK_XBOX_LB             327690
+#define DIK_XBOX_RB             327691
+#define DIK_XBOX_LT             327692
+#define DIK_XBOX_RT             327693
+#define DIK_XBOX_L3             327694
+#define DIK_XBOX_R3             327695
+
 // --- COLORS ---
 #define C_LABEL "#aaaaaa"
 #define C_VAL "#ffffff"
@@ -32,7 +53,7 @@ if (_wlRaw != "") then {
 		_trimmed
 	};
 	if !(profileName in _wlArray) exitWith {
-		systemChat "ACCESS DENIED: You are not on the Cinematic Camera whitelist.";
+		systemChat (["n_denied"] call Bro_SCam_L);
 		breakOut "main_scope";
 	};
 };
@@ -40,7 +61,7 @@ scopeName "main_scope";
 
 // --- PREVENT MULTIPLE INSTANCES ---
 if (!isNil "SCam_Data" && {SCam_Data get "Active"}) exitWith {
-	systemChat "Cinematic Camera is already active!";
+	systemChat (["n_already"] call Bro_SCam_L);
 };
 
 // --- INITIALIZATION ---
@@ -237,6 +258,11 @@ showCinemaBorder false;
 SCam_Data set ["Cam", _cam];
 [true] call (SCam_Data get "fnc_SetAudioSpectator");
 
+// --- START PAUSED (SP only) ---
+if (!isMultiplayer && {missionNamespace getVariable ["Bro_SCam_StartPaused", false]}) then {
+	setAccTime 0;
+};
+
 // --- MODERN UI SETUP ---
 disableSerialization;
 private _display = findDisplay 46;
@@ -298,31 +324,62 @@ private _s_alt  = "Bro_SCam_Lock_Alt" call (_d get "fnc_GetKeyName");
 private _s_vis  = "Bro_SCam_Vision" call (_d get "fnc_GetKeyName");
 private _s_rst  = "Bro_SCam_Reset" call (_d get "fnc_GetKeyName");
 
-// Generate Controls HTML Once
-private _controlsHTML = format [
+// Generate Controls HTML Once. Labels are concatenated from the localization
+// table into the format template, then format substitutes the %N keybinds.
+private _tmpl =
     "<t align='right' size='0.8' font='RobotoCondensedBold' shadow='2'>" +
-    "MOVE: <t color='%1'>%2</t><br/>" +
-    "ELEV: <t color='%1'>%3</t><br/>" +
-    "SPEED: <t color='%1'>%4</t><br/>" +
-    "ZOOM: <t color='%1'>SCROLL</t><br/>" +
-    "SCROLL ALL: <t color='%1'>%5</t><br/>" +
-    "SCROLL PLYRS: <t color='%1'>%16</t><br/>" +
-    "SELECT: <t color='%1'>[%15]</t><br/>" + 
-    "TIME: <t color='%1'>%6</t><br/>" +
+    (["p_move"] call Bro_SCam_L)       + " <t color='%1'>%2</t><br/>" +
+    (["p_elev"] call Bro_SCam_L)       + " <t color='%1'>%3</t><br/>" +
+    (["p_speed"] call Bro_SCam_L)      + " <t color='%1'>%4</t><br/>" +
+    (["p_zoom"] call Bro_SCam_L)       + " <t color='%1'>" + (["p_zoom_val"] call Bro_SCam_L) + "</t><br/>" +
+    (["p_scrollall"] call Bro_SCam_L)  + " <t color='%1'>%5</t><br/>" +
+    (["p_scrollpl"] call Bro_SCam_L)   + " <t color='%1'>%16</t><br/>" +
+    (["p_select"] call Bro_SCam_L)     + " <t color='%1'>[%15]</t><br/>" +
+    (["p_time"] call Bro_SCam_L)       + " <t color='%1'>%6</t><br/>" +
     "-----<br/>" +
-    "FOLLOW: <t color='%1'>[%7]</t><br/>" +
-    "LOOKAT: <t color='%1'>[%8]</t><br/>" +
-    "LOCK ORI: <t color='%1'>[%9]</t><br/>" +
-    "LOCK ALT: <t color='%1'>[%10]</t><br/>" +
-    "VISION: <t color='%1'>[%11]</t><br/>" +
-    "RESET: <t color='%1'>[%12]</t><br/>" +
-    "TOGGLE HUD: <t color='%1'>[%13]</t><br/>" +
-    "EXIT: <t color='#ff3333'>[%14]</t>" +
-    "</t>",
+    (["p_follow"] call Bro_SCam_L)     + " <t color='%1'>[%7]</t><br/>" +
+    (["p_lookat"] call Bro_SCam_L)     + " <t color='%1'>[%8]</t><br/>" +
+    (["p_lockori"] call Bro_SCam_L)    + " <t color='%1'>[%9]</t><br/>" +
+    (["p_lockalt"] call Bro_SCam_L)    + " <t color='%1'>[%10]</t><br/>" +
+    (["p_vision"] call Bro_SCam_L)     + " <t color='%1'>[%11]</t><br/>" +
+    (["p_reset"] call Bro_SCam_L)      + " <t color='%1'>[%12]</t><br/>" +
+    (["p_togglehud"] call Bro_SCam_L)  + " <t color='%1'>[%13]</t><br/>" +
+    (["p_exit"] call Bro_SCam_L)       + " <t color='#ff3333'>[%14]</t>" +
+    "</t>";
+private _controlsHTML = format [
+    _tmpl,
     C_ACCENT, _s_move, _s_ud, _s_spd, _s_list, _s_time, _s_fol, _s_lat, _s_ori, _s_alt, _s_vis, _s_rst, _s_hud, _s_exit, _s_sel, _s_plyr
 ];
 SCam_Data set ["ControlsHTML", _controlsHTML];
-_hudKeys ctrlSetStructuredText parseText _controlsHTML;
+
+// --- CONTROLLER HINT (single panel, native XInput bindings — no rebind needed) ---
+private _padTmpl =
+	"<t align='right' size='0.8' font='RobotoCondensedBold' shadow='2'>" +
+	"<t color='%1'>" + (["c_title"] call Bro_SCam_L) + "</t><br/>" +
+	(["c_move"] call Bro_SCam_L)     + " <t color='%1'>L-STICK</t><br/>" +
+	(["c_look"] call Bro_SCam_L)     + " <t color='%1'>R-STICK</t><br/>" +
+	(["c_updn"] call Bro_SCam_L)     + " <t color='%1'>RT / LT</t><br/>" +
+	(["c_speed"] call Bro_SCam_L)    + " <t color='%1'>RB / LB</t><br/>" +
+	(["c_listud"] call Bro_SCam_L)   + " <t color='%1'>DPAD U/D</t><br/>" +
+	(["c_playerpn"] call Bro_SCam_L) + " <t color='%1'>DPAD L/R</t><br/>" +
+	(["c_fn"] call Bro_SCam_L)       + " <t color='%2'>[A] HOLD</t><br/>" +
+	(["c_fov"] call Bro_SCam_L)      + " <t color='%2'>[A] + LB / RB</t><br/>" +
+	"ROLL: <t color='%2'>[A] + DPAD L/R</t><br/>" +
+	(["c_select"] call Bro_SCam_L)   + " <t color='%1'>[A] x2</t><br/>" +
+	(["c_follow"] call Bro_SCam_L)   + " <t color='%1'>[L3]</t><br/>" +
+	(["c_lookat"] call Bro_SCam_L)   + " <t color='%1'>[R3]</t><br/>" +
+	(["c_vision"] call Bro_SCam_L)   + " <t color='%1'>[Y]</t><br/>" +
+	(["c_hud"] call Bro_SCam_L)      + " <t color='%1'>[X]</t><br/>" +
+	(["c_altlock"] call Bro_SCam_L)  + " <t color='%1'>[BACK]</t><br/>" +
+	(["c_reset"] call Bro_SCam_L)    + " <t color='%1'>[START]</t><br/>" +
+	(["c_exit"] call Bro_SCam_L)     + " <t color='#ff3333'>[B]</t>" +
+	"</t>";
+private _padHTML = format [_padTmpl, C_ACCENT, C_WARN];
+SCam_Data set ["PadHTML", _padHTML];
+SCam_Data set ["LastPadHintMode", -1]; // forces a refresh on first frame
+
+private _initPad = missionNamespace getVariable ["Bro_SCam_Controller", false];
+_hudKeys ctrlSetStructuredText parseText (if (_initPad) then { _padHTML } else { _controlsHTML });
 
 // 5. NOTIFICATION CENTER
 private _notify = _display ctrlCreate ["RscStructuredText", -1];
@@ -455,7 +512,7 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
         };
         
         // Optional Feedback
-        private _msg = switch (_s) do { case 0: {"HUD: FULL"}; case 1: {"HUD: LIGHT"}; case 2: {"HUD: OFF"}; };
+        private _msg = switch (_s) do { case 0: {["n_hud_full"] call Bro_SCam_L}; case 1: {["n_hud_light"] call Bro_SCam_L}; case 2: {["n_hud_off"] call Bro_SCam_L}; };
         [_msg] call (_d get "fnc_Msg");
 	};
     
@@ -465,10 +522,10 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 		if (_mode > 3) then { _mode = 0; };
 		_d set ["VisionMode", _mode];
 		private _msg = switch (_mode) do {
-			case 0: { camUseNVG false; false setCamUseTi 0; "Vision: Normal"; };
-			case 1: { camUseNVG true; false setCamUseTi 0; "Vision: NVG"; };
-			case 2: { camUseNVG false; true setCamUseTi 0; "Vision: White Hot"; };
-			case 3: { camUseNVG false; true setCamUseTi 1; "Vision: Black Hot"; };
+			case 0: { camUseNVG false; false setCamUseTi 0; ["n_vis_norm"] call Bro_SCam_L; };
+			case 1: { camUseNVG true; false setCamUseTi 0; ["n_vis_nvg"] call Bro_SCam_L; };
+			case 2: { camUseNVG false; true setCamUseTi 0; ["n_vis_whot"] call Bro_SCam_L; };
+			case 3: { camUseNVG false; true setCamUseTi 1; ["n_vis_bhot"] call Bro_SCam_L; };
 		};
 		[_msg] call (_d get "fnc_Msg");
 	};
@@ -480,7 +537,7 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 			_next = (round (_next * 100)) / 100;
 			if (_next > 4.0) then { _next = 4.0; };
 			setAccTime _next;
-			[format ["Timescale: %1", _next]] call (_d get "fnc_Msg");
+			[format [["n_ts_fmt"] call Bro_SCam_L, _next]] call (_d get "fnc_Msg");
 		};
 		if ("K_T_Dec" call _fnc_Trigger) then {
 			private _now = accTime;
@@ -489,19 +546,19 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 			_next = (round (_next * 100)) / 100;
 			if (_next < 0) then { _next = 0; };
 			setAccTime _next;
-			[format ["Timescale: %1", _next]] call (_d get "fnc_Msg");
+			[format [["n_ts_fmt"] call Bro_SCam_L, _next]] call (_d get "fnc_Msg");
 		};
 	};
 	if ("K_L_Alt" call _fnc_Trigger) then {
 		private _l = !(_d get "AltLock");
 		_d set ["AltLock", _l];
-		[if (_l) then {"Altitude Lock: ON"} else {"Altitude Lock: OFF"}] call (_d get "fnc_Msg");
+		[if (_l) then {["n_alt_on"] call Bro_SCam_L} else {["n_alt_off"] call Bro_SCam_L}] call (_d get "fnc_Msg");
 	};
 	if ("K_L_At" call _fnc_Trigger) then {
 		private _l = !(_d get "LookAtLock");
 		_d set ["LookAtLock", _l];
 		if (_l) then { _d set ["OrientLock", false]; };
-		[if (_l) then {"Look At Target: ON"} else {"Look At Target: OFF"}] call (_d get "fnc_Msg");
+		[if (_l) then {["n_lat_on"] call Bro_SCam_L} else {["n_lat_off"] call Bro_SCam_L}] call (_d get "fnc_Msg");
 	};
 	if ("K_L_Ori" call _fnc_Trigger) then {
 		private _b = !(_d get "OrientLock");
@@ -513,12 +570,12 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 			private _target = _d get "Target";
 			if (isNull _target || {!alive _target}) exitWith {
 				_d set ["OrientLock", false];
-				["Orientation Lock: FAILED (Invalid Target)"] call (_d get "fnc_Msg");
+				[["n_ori_failt"] call Bro_SCam_L] call (_d get "fnc_Msg");
 			};
 			private _refObj = vehicle _target;
 			if (isNull _refObj || {!alive _refObj}) exitWith {
 				_d set ["OrientLock", false];
-				["Orientation Lock: FAILED (Invalid Vehicle)"] call (_d get "fnc_Msg");
+				[["n_ori_failv"] call Bro_SCam_L] call (_d get "fnc_Msg");
 			};
 			private _tgtDir = getDirVisual _refObj;
 			private _vDir = vectorDirVisual _refObj;
@@ -532,15 +589,15 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 			private _diffPitch = (_currAng select 1) - _tgtPitch;
 			private _diffRoll = _currRoll - _tgtBank;
 			_d set ["RotOffset", [_diffYaw, _diffPitch, _diffRoll]];
-			["Orientation Lock: ON"] call (_d get "fnc_Msg");
+			[["n_ori_on"] call Bro_SCam_L] call (_d get "fnc_Msg");
 		} else {
-			["Orientation Lock: OFF"] call (_d get "fnc_Msg");
+			[["n_ori_off"] call Bro_SCam_L] call (_d get "fnc_Msg");
 		};
 	};
 	if ("K_Rst" call _fnc_Trigger) then {
 		private _target = _d get "Target";
 		if (isNull _target || {!alive _target}) exitWith {
-			["Reset: FAILED (Invalid Target)"] call (_d get "fnc_Msg");
+			[["n_rst_fail"] call Bro_SCam_L] call (_d get "fnc_Msg");
 		};
 		private _pPos = getPosASLVisual _target;
 		private _vDir = vectorDirVisual _target;
@@ -568,14 +625,14 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 		_d set ["OrientLock", false];
 		_d set ["LookAtLock", false];
         _d set ["ListTarget", _target];
-		["Camera Reset"] call (_d get "fnc_Msg");
+		[["n_cam_reset"] call Bro_SCam_L] call (_d get "fnc_Msg");
 		[] call (_d get "fnc_UpdateListUI");
 	};
 	if ("K_Fol" call _fnc_Trigger) then {
 		private _isFollowing = _d get "Follow";
 		private _target = _d get "Target";
 		if (isNull _target || {!alive _target}) exitWith {
-			["Follow: FAILED (Invalid Target)"] call (_d get "fnc_Msg");
+			[["n_fol_fail"] call Bro_SCam_L] call (_d get "fnc_Msg");
 		};
 		private _currPos = _d get "Pos";
 		private _currPosDes = _d get "PosDes";
@@ -583,11 +640,11 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 		if (_isFollowing) then {
 			_d set ["Pos", _tPos vectorAdd _currPos];
 			_d set ["PosDes", _tPos vectorAdd _currPosDes];
-			["Follow Mode: OFF"] call (_d get "fnc_Msg");
+			[["n_fol_off"] call Bro_SCam_L] call (_d get "fnc_Msg");
 		} else {
 			_d set ["Pos", _currPos vectorDiff _tPos];
 			_d set ["PosDes", _currPosDes vectorDiff _tPos];
-			["Follow Mode: ON"] call (_d get "fnc_Msg");
+			[["n_fol_on"] call Bro_SCam_L] call (_d get "fnc_Msg");
 		};
 		_d set ["Follow", !_isFollowing];
 	};
@@ -642,7 +699,7 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 			_vDir set [2, 0];
 			if (vectorMagnitude _vDir > 0) then { _vDir = vectorNormalized _vDir; };
 			private _offset = (_vDir vectorMultiply -2) vectorAdd [0,0,2];
-			
+
 			if (_d get "Follow") then {
 				_d set ["Pos", _offset];
 				_d set ["PosDes", _offset];
@@ -654,8 +711,194 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 			_d set ["Ang", [getDir _newTarget, 0]];
 			_d set ["RollDes", 0];
 			_d set ["Roll", 0];
-			[format ["Target: %1", name _newTarget]] call (_d get "fnc_Msg");
+			[format [["n_tgt_fmt"] call Bro_SCam_L, name _newTarget]] call (_d get "fnc_Msg");
 			[] call (_d get "fnc_UpdateListUI");
+        };
+    };
+
+    // --- NATIVE XBOX CONTROLLER DISPATCHER (tap-style actions) ---
+    // Xbox buttons arrive through the standard KeyDown event with extended DIK codes.
+    // Tap actions are dispatched here; held actions (LT/RT vertical, LB/RB speed) are
+    // read from the Keys array in the EachFrame loop.
+    if (missionNamespace getVariable ["Bro_SCam_Controller", false]) then {
+        private _fnc_msg = _d get "fnc_Msg";
+        switch (_key) do {
+            // A — FN modifier (hold) / double-tap = Select highlighted target.
+            // Hold A alone = enters FN mode (Pad_A_Down flag + FN tag on HUD).
+            // Hold A + LB/RB = FOV adjust (handled in the LB/RB cases below).
+            // Tap A twice within 0.4s = fire Select (the original A action).
+            case DIK_XBOX_A: {
+                // Only act on the initial press; ignore autorepeat while held.
+                if !(_d getOrDefault ["Pad_A_Down", false]) then {
+                    _d set ["Pad_A_Down", true];
+                    private _now = diag_tickTime;
+                    private _last = _d getOrDefault ["Pad_A_LastPress", 0];
+                    if ((_now - _last) > 0 && {(_now - _last) < 0.4}) then {
+                        // Double-tap → original Select Target action
+                        private _newTarget = _d get "ListTarget";
+                        if (!isNull _newTarget && {alive _newTarget}) then {
+                            _d set ["Target", _newTarget];
+                            private _newTPos = getPosASLVisual _newTarget;
+                            private _vDir = vectorDirVisual _newTarget;
+                            _vDir set [2, 0];
+                            if (vectorMagnitude _vDir > 0) then { _vDir = vectorNormalized _vDir; };
+                            private _offset = (_vDir vectorMultiply -2) vectorAdd [0,0,2];
+                            if (_d get "Follow") then {
+                                _d set ["Pos", _offset]; _d set ["PosDes", _offset];
+                            } else {
+                                _d set ["Pos", _newTPos vectorAdd _offset]; _d set ["PosDes", _newTPos vectorAdd _offset];
+                            };
+                            _d set ["AngDes", [getDir _newTarget, 0]]; _d set ["Ang", [getDir _newTarget, 0]];
+                            _d set ["RollDes", 0]; _d set ["Roll", 0];
+                            [format [["n_tgt_fmt"] call Bro_SCam_L, name _newTarget]] call _fnc_msg;
+                            [] call (_d get "fnc_UpdateListUI");
+                        };
+                        _d set ["Pad_A_LastPress", 0]; // reset to avoid chain triggers
+                    } else {
+                        _d set ["Pad_A_LastPress", _now];
+                    };
+                };
+            };
+            // LB — A+LB = FOV out (bare LB held = speed slow, handled in EachFrame)
+            case DIK_XBOX_LB: {
+                if (DIK_XBOX_A in _keys) then {
+                    private _curr = _d get "FovDes";
+                    _d set ["FovDes", (_curr + 0.05) min 2.0];
+                };
+            };
+            // RB — A+RB = FOV in (bare RB held = speed fast, handled in EachFrame)
+            case DIK_XBOX_RB: {
+                if (DIK_XBOX_A in _keys) then {
+                    private _curr = _d get "FovDes";
+                    _d set ["FovDes", (_curr - 0.05) max 0.05];
+                };
+            };
+            // B — Exit camera
+            case DIK_XBOX_B: { [] call (_d get "fnc_Exit"); };
+            // X — Cycle HUD
+            case DIK_XBOX_X: {
+                private _s = ((_d get "HUD_State") + 1) mod 3;
+                _d set ["HUD_State", _s];
+                private _showBars = (_s != 2);
+                private _showWidgets = (_s == 0);
+                (_d get "HUD_Top") ctrlShow _showBars;
+                (_d get "HUD_Bot") ctrlShow _showBars;
+                (_d get "HUD_List") ctrlShow _showWidgets;
+                (_d get "HUD_Keys") ctrlShow _showWidgets;
+                if (_showWidgets) then {
+                    _d set ["ListTarget", _d get "Target"];
+                    [] call (_d get "fnc_UpdateListUI");
+                };
+                [switch (_s) do { case 0: {["n_hud_full"] call Bro_SCam_L}; case 1: {["n_hud_light"] call Bro_SCam_L}; case 2: {["n_hud_off"] call Bro_SCam_L}; }] call _fnc_msg;
+            };
+            // Y — Cycle vision
+            case DIK_XBOX_Y: {
+                private _mode = ((_d get "VisionMode") + 1) mod 4;
+                _d set ["VisionMode", _mode];
+                [switch (_mode) do {
+                    case 0: { camUseNVG false; false setCamUseTi 0; ["n_vis_norm"] call Bro_SCam_L; };
+                    case 1: { camUseNVG true;  false setCamUseTi 0; ["n_vis_nvg"] call Bro_SCam_L; };
+                    case 2: { camUseNVG false; true  setCamUseTi 0; ["n_vis_whot"] call Bro_SCam_L; };
+                    case 3: { camUseNVG false; true  setCamUseTi 1; ["n_vis_bhot"] call Bro_SCam_L; };
+                }] call _fnc_msg;
+            };
+            // L3 — Follow toggle
+            case DIK_XBOX_L3: {
+                private _isFol = _d get "Follow";
+                private _t = _d get "Target";
+                if (isNull _t || {!alive _t}) exitWith { [["n_fol_fail"] call Bro_SCam_L] call _fnc_msg; };
+                private _currPos = _d get "Pos";
+                private _currPosDes = _d get "PosDes";
+                private _tPos = getPosASLVisual _t;
+                if (_isFol) then {
+                    _d set ["Pos", _tPos vectorAdd _currPos];
+                    _d set ["PosDes", _tPos vectorAdd _currPosDes];
+                    [["n_fol_off"] call Bro_SCam_L] call _fnc_msg;
+                } else {
+                    _d set ["Pos", _currPos vectorDiff _tPos];
+                    _d set ["PosDes", _currPosDes vectorDiff _tPos];
+                    [["n_fol_on"] call Bro_SCam_L] call _fnc_msg;
+                };
+                _d set ["Follow", !_isFol];
+            };
+            // R3 — Look At toggle
+            case DIK_XBOX_R3: {
+                private _l = !(_d get "LookAtLock");
+                _d set ["LookAtLock", _l];
+                if (_l) then { _d set ["OrientLock", false]; };
+                [if (_l) then {["n_lat_on"] call Bro_SCam_L} else {["n_lat_off"] call Bro_SCam_L}] call _fnc_msg;
+            };
+            // D-pad UP / DOWN — list nav
+            case DIK_XBOX_DPAD_UP;
+            case DIK_XBOX_DPAD_DOWN: {
+                private _fullList = call (_d get "fnc_GetSortedUnits");
+                if (count _fullList > 0) then {
+                    private _curr = _d get "ListTarget";
+                    if (isNull _curr) then { _curr = _d get "Target"; };
+                    private _idx = _fullList findIf { (_x select 1) == _curr };
+                    if (_idx == -1) then { _idx = 0; };
+                    _idx = if (_key == DIK_XBOX_DPAD_DOWN) then { _idx + 1 } else { _idx - 1 };
+                    if (_idx >= count _fullList) then { _idx = 0; };
+                    if (_idx < 0) then { _idx = (count _fullList) - 1; };
+                    _d set ["ListTarget", (_fullList select _idx) select 1];
+                    [] call (_d get "fnc_UpdateListUI");
+                };
+            };
+            // D-pad LEFT / RIGHT — prev/next player (or roll step if A held = FN mode)
+            case DIK_XBOX_DPAD_LEFT;
+            case DIK_XBOX_DPAD_RIGHT: {
+                if (DIK_XBOX_A in _keys) then {
+                    // A + D-pad L/R = roll step (~5° per tap, scaled by RollSpeed setting)
+                    private _rs = (missionNamespace getVariable ["Bro_SCam_RollSpeed", 10]) / 100;
+                    private _step = (_rs * 50) * (if (_key == DIK_XBOX_DPAD_RIGHT) then { 1 } else { -1 });
+                    _d set ["RollDes", (_d get "RollDes") + _step];
+                } else {
+                    private _fullList = _d get "CachedList";
+                    if (isNil "_fullList" || {count _fullList == 0}) then { _fullList = call (_d get "fnc_GetSortedUnits"); };
+                    private _playerList = _fullList select { _x select 2 };
+                    if (count _playerList > 0) then {
+                        private _curr = _d get "ListTarget";
+                        if (isNull _curr) then { _curr = _d get "Target"; };
+                        private _idx = _playerList findIf { (_x select 1) == _curr };
+                        if (_idx == -1) then { _idx = 0; };
+                        _idx = if (_key == DIK_XBOX_DPAD_RIGHT) then { _idx + 1 } else { _idx - 1 };
+                        if (_idx >= count _playerList) then { _idx = 0; };
+                        if (_idx < 0) then { _idx = (count _playerList) - 1; };
+                        _d set ["ListTarget", (_playerList select _idx) select 1];
+                        [] call (_d get "fnc_UpdateListUI");
+                    };
+                };
+            };
+            // Start — Reset to current target
+            case DIK_XBOX_START: {
+                private _t = _d get "Target";
+                if (isNull _t || {!alive _t}) exitWith { [["n_rst_fail"] call Bro_SCam_L] call _fnc_msg; };
+                private _pPos = getPosASLVisual _t;
+                private _vDir = vectorDirVisual _t;
+                _vDir set [2, 0];
+                if (vectorMagnitude _vDir > 0) then { _vDir = vectorNormalized _vDir; };
+                private _offset = (_vDir vectorMultiply -2) vectorAdd [0,0,2];
+                if (_d get "Follow") then {
+                    _d set ["Pos", _offset]; _d set ["PosDes", _offset];
+                } else {
+                    _d set ["Pos", _pPos vectorAdd _offset]; _d set ["PosDes", _pPos vectorAdd _offset];
+                };
+                _d set ["AngDes", [getDir _t, 0]]; _d set ["Ang", [getDir _t, 0]];
+                _d set ["RollDes", 0]; _d set ["Roll", 0];
+                _d set ["SpeedMultDes", 1.0]; _d set ["SpeedMult", 1.0];
+                _d set ["FovDes", 0.7]; _d set ["Fov", 0.7];
+                (_d get "Cam") camSetFov 0.7;
+                _d set ["AltLock", false]; _d set ["OrientLock", false]; _d set ["LookAtLock", false];
+                _d set ["ListTarget", _t];
+                [["n_cam_reset"] call Bro_SCam_L] call _fnc_msg;
+                [] call (_d get "fnc_UpdateListUI");
+            };
+            // Back / View — Toggle Altitude Lock
+            case DIK_XBOX_BACK: {
+                private _l = !(_d get "AltLock");
+                _d set ["AltLock", _l];
+                [if (_l) then {["n_alt_on"] call Bro_SCam_L} else {["n_alt_off"] call Bro_SCam_L}] call _fnc_msg;
+            };
         };
     };
 	false
@@ -666,6 +909,8 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyUp", {
 	if (isNil "_d" || {!(_d get "Active")}) exitWith { true };
 	_d set ["KeyMods", [_shift, _ctrl, _alt]];
 	_d set ["Keys", (_d get "Keys") - [_key]];
+	// Track Xbox A release for double-tap detection (see KeyDown case DIK_XBOX_A)
+	if (_key == DIK_XBOX_A) then { _d set ["Pad_A_Down", false]; };
 	false
 }]);
 _ehIds pushBack (_display displayAddEventHandler ["MouseMoving", {
@@ -683,6 +928,7 @@ _ehIds pushBack (_display displayAddEventHandler ["MouseZChanged", {
 	_d set ["FovDes", (_des - _change) max 0.01 min 2.0];
 	false
 }]);
+
 _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	if (isNil "SCam_Data" || {!(SCam_Data get "Active")}) exitWith {
 		removeMissionEventHandler ["EachFrame", _thisEventHandler];
@@ -705,12 +951,47 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	private _angCurr = _d get "Ang";
 	private _rollDes = _d get "RollDes";
 	private _checkKey = _d get "fnc_CheckKey";
-	
+
+	// --- CONTROLLER POLLING (RIGHT STICK -> piped through _mouse delta) ---
+	// Arma's "AimUp/Down/Left/Right" actions include BOTH the right stick AND the
+	// mouse axes — so polling them while the mouse is moving would double-count
+	// the mouse delta (cam goes too fast, mouse-edge clamping triggers).
+	// Workaround: only poll the stick when the mouse delta is zero this frame.
+	// When the user releases the mouse, the stick takes over seamlessly.
+	private _usePad = missionNamespace getVariable ["Bro_SCam_Controller", false];
+	private _mouseActive = ((abs (_mouse select 0)) > 0.001) || {(abs (_mouse select 1)) > 0.001};
+	if (_usePad && !_mouseActive) then {
+		private _padDz = missionNamespace getVariable ["Bro_SCam_PadDeadzone", 0.15];
+		private _padLookSens = (missionNamespace getVariable ["Bro_SCam_PadLookSens", 120]) / 100;
+		private _padInvY = missionNamespace getVariable ["Bro_SCam_PadInvertY", false];
+
+		// Right stick (look) — additive to mouse delta.
+		// X: cubic curve for fine yaw aim near center.
+		// Y: linear, with a dedicated multiplier slider so the user can compensate
+		// for Arma's built-in vertical aim dampening on controllers without
+		// affecting yaw responsiveness.
+		private _padVertSens = missionNamespace getVariable ["Bro_SCam_PadVertSens", 25.0];
+		private _rsX = (inputAction "AimRight") - (inputAction "AimLeft");
+		private _rsY = (inputAction "AimUp")    - (inputAction "AimDown");
+		if (abs _rsX < _padDz) then { _rsX = 0 } else { _rsX = (_rsX - (_padDz * (_rsX/abs _rsX))) / (1 - _padDz); };
+		if (abs _rsY < _padDz) then { _rsY = 0 } else { _rsY = (_rsY - (_padDz * (_rsY/abs _rsY))) / (1 - _padDz); };
+		_rsX = (_rsX * abs _rsX) * (abs _rsX);  // cubic response on yaw
+		_rsY = _rsY * _padVertSens;             // linear pitch with user-tunable multiplier
+		if (_padInvY) then { _rsY = -_rsY; };
+
+		// Treat stick as equivalent mouse delta per frame. Scale to mouse-style units
+		// so existing _sens (= cfgSens * fov) gives a sane feel; tune via PadLookSens.
+		private _dt = diag_deltaTime max 0.001;
+		private _padScale = _padLookSens * _dt * 0.6 / (_cfgSens max 0.01);
+		_mouse = [(_mouse select 0) + (_rsX * _padScale), (_mouse select 1) - (_rsY * _padScale)];
+	};
+
+
 	if (_d get "LookAtLock") then {
 		private _target = _d get "Target";
 		if (isNull _target || {!alive _target}) then {
 			_d set ["LookAtLock", false];
-			["Look At: DISABLED (Target Lost)"] call (_d get "fnc_Msg");
+			[["n_lat_dis"] call Bro_SCam_L] call (_d get "fnc_Msg");
 		} else {
 			private _tPosReal = getPosASLVisual _target;
 			private _camPosAbs = if (_d get "Follow") then { _tPosReal vectorAdd (_d get "Pos") } else { _d get "Pos" };
@@ -732,7 +1013,7 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 			private _target = _d get "Target";
 			if (isNull _target || {!alive _target}) then {
 				_d set ["OrientLock", false];
-				["Orientation Lock: DISABLED (Target Lost)"] call (_d get "fnc_Msg");
+				[["n_ori_dist"] call Bro_SCam_L] call (_d get "fnc_Msg");
 			} else {
 				private _rotOffset = _d get "RotOffset";
 				_rotOffset set [0, (_rotOffset select 0) + ((_mouse select 0) * _sens)];
@@ -756,7 +1037,7 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 					_d set ["RollDes", _rollDes];
 				} else {
 					_d set ["OrientLock", false];
-					["Orientation Lock: DISABLED (Vehicle Lost)"] call (_d get "fnc_Msg");
+					[["n_ori_disv"] call Bro_SCam_L] call (_d get "fnc_Msg");
 				};
 			};
 		} else {
@@ -800,6 +1081,14 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	private _spdDes = _d get "SpeedMultDes";
 	if (["K_S_Fst", false] call _checkKey) then { _spdDes = _spdDes * 1.02; };
 	if (["K_S_Slw", false] call _checkKey) then { _spdDes = _spdDes * 0.98; };
+	if (_usePad) then {
+		private _keysHeldS = _d get "Keys";
+		// Suppress LB/RB speed when A is held (FN mode) so A+LB/RB does FOV only
+		if !(DIK_XBOX_A in _keysHeldS) then {
+			if (DIK_XBOX_RB in _keysHeldS) then { _spdDes = _spdDes * 1.02; };
+			if (DIK_XBOX_LB in _keysHeldS) then { _spdDes = _spdDes * 0.98; };
+		};
+	};
 	_spdDes = _spdDes max 0.01 min 200;
 	_d set ["SpeedMultDes", _spdDes];
 	private _currSpd = _d get "SpeedMult";
@@ -815,8 +1104,48 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	if (["K_M_L", false] call _checkKey) then { _moveVec = _moveVec vectorDiff _vecRightH; };
 	if (["K_M_U", false] call _checkKey) then { _moveVec = _moveVec vectorAdd [0,0,1]; };
 	if (["K_M_D", false] call _checkKey) then { _moveVec = _moveVec vectorAdd [0,0,-1]; };
-	if (vectorMagnitude _moveVec > 0) then {
-		_moveVec = (vectorNormalized _moveVec) vectorMultiply _finalSpeed;
+
+	// --- CONTROLLER: Left stick translation + LB/RB vertical/zoom ---
+	// inputAction returns the MAX of all sources for that action (W key + stick = max 1),
+	// so keyboard + stick can over-contribute to _moveVec. The magnitude clamp below
+	// (clamps when > 1) absorbs the overlap without dragging the direction back to zero,
+	// which avoids breaking users who have rebinded movement keys away from WASD.
+	if (_usePad) then {
+		private _padDz = missionNamespace getVariable ["Bro_SCam_PadDeadzone", 0.15];
+		// Arma's default Xbox preset wires LS forward through MoveFastForward/MoveSlowForward
+		// (not MoveForward, which is W-key only). Poll all candidates with max so the stick
+		// fires whichever variant the user's preset uses.
+		private _fwdIn = (inputAction "MoveForward") max (inputAction "MoveFastForward") max (inputAction "MoveSlowForward");
+		private _bckIn = (inputAction "MoveBack")    max (inputAction "MoveFastBack")    max (inputAction "MoveSlowBack");
+		private _rgtIn = (inputAction "TurnRight")   max (inputAction "MoveRight");
+		private _lftIn = (inputAction "TurnLeft")    max (inputAction "MoveLeft");
+		private _lsX = _rgtIn - _lftIn;
+		private _lsY = _fwdIn - _bckIn;
+		// Radial deadzone + quadratic response for smoother slow-pushes near center
+		private _mag2 = sqrt (_lsX*_lsX + _lsY*_lsY);
+		if (_mag2 < _padDz) then {
+			_lsX = 0; _lsY = 0;
+		} else {
+			private _adj = ((_mag2 - _padDz) / (1 - _padDz)) min 1;
+			private _scaled = (_adj * _adj) / _mag2; // quadratic
+			_lsX = _lsX * _scaled;
+			_lsY = _lsY * _scaled;
+		};
+		if (_lsX != 0) then { _moveVec = _moveVec vectorAdd (_vecRightH vectorMultiply _lsX); };
+		if (_lsY != 0) then { _moveVec = _moveVec vectorAdd (_fwdRef    vectorMultiply _lsY); };
+
+		// Triggers (LT down / RT up) — detected via Keys array using extended Xbox DIK codes.
+		// LT/RT fire as digital KeyDown events when pulled past Arma's threshold.
+		private _keysHeld = _d get "Keys";
+		if (DIK_XBOX_RT in _keysHeld) then { _moveVec = _moveVec vectorAdd [0,0, 1]; };
+		if (DIK_XBOX_LT in _keysHeld) then { _moveVec = _moveVec vectorAdd [0,0,-1]; };
+	};
+
+	// Clamp magnitude to 1 (so diagonal isn't faster) but PRESERVE analog magnitudes < 1
+	private _moveMag = vectorMagnitude _moveVec;
+	if (_moveMag > 0) then {
+		if (_moveMag > 1) then { _moveVec = vectorNormalized _moveVec; };
+		_moveVec = _moveVec vectorMultiply _finalSpeed;
 	};
 	private _posDes = (_d get "PosDes") vectorAdd _moveVec;
 
@@ -856,15 +1185,26 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
     
 	if ((_d get "HUD_State") != 2 && {diag_tickTime > (_d get "LastHUDUpdate") + (1 / HUD_UPDATE_FPS)}) then {
 		_d set ["LastHUDUpdate", diag_tickTime];
-		
-        private _tgtName = "NO TARGET";
+
+        // Refresh the controls hint panel when controller mode / secondary state changes
+        if ((_d get "HUD_State") == 0) then {
+            // _hintMode: -1 = keyboard, 1 = pad
+            private _hintMode = if (_usePad) then { 1 } else { -1 };
+            if (_hintMode != (_d get "LastPadHintMode")) then {
+                _d set ["LastPadHintMode", _hintMode];
+                private _html = if (_usePad) then { _d get "PadHTML" } else { _d get "ControlsHTML" };
+                (_d get "HUD_Keys") ctrlSetStructuredText parseText _html;
+            };
+        };
+
+        private _tgtName = ["h_notgt"] call Bro_SCam_L;
 		if (!isNull _target && {alive _target}) then { _tgtName = name _target; };
-        
+
         private _cAlt = if (_d get "AltLock") then { C_GOOD } else { "#444444" };
         private _cOri = if (_d get "OrientLock") then { C_GOOD } else { "#444444" };
         private _cLat = if (_d get "LookAtLock") then { C_GOOD } else { "#444444" };
         private _cFol = if (_d get "Follow") then { C_WARN } else { "#444444" };
-        
+
         private _visMode = _d get "VisionMode";
         private _vText = ["NRM", "NVG", "WHOT", "BHOT"] select _visMode;
         private _cVis = if (_visMode > 0) then { C_ACCENT } else { C_LABEL };
@@ -874,10 +1214,10 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
         private _timeStr = [daytime, "HH:MM"] call BIS_fnc_timeToString;
         
 		(_d get "HUD_Top") ctrlSetStructuredText parseText format [
-            "<t valign='middle' size='1.1' shadow='2'>" + 
-            "<t align='left' font='RobotoCondensedBold' color='%1'> %2 <t color='#888888'>|</t> %3 <t color='#888888'>|</t> T.SCALE: <t color='%6'>%7x</t></t>" +
+            "<t valign='middle' size='1.1' shadow='2'>" +
+            "<t align='left' font='RobotoCondensedBold' color='%1'> %2 <t color='#888888'>|</t> %3 <t color='#888888'>|</t> %8: <t color='%6'>%7x</t></t>" +
             "<t align='center' font='RobotoCondensedBold'>%4</t>" +
-            "<t align='right' font='RobotoCondensedBold' color='%1'>GRID: %5 </t>" +
+            "<t align='right' font='RobotoCondensedBold' color='%1'>%9: %5 </t>" +
             "</t>",
             C_ACCENT, // 1
             _dateStr, // 2
@@ -885,25 +1225,37 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
             toUpper(_tgtName), // 4
             mapGridPosition _finalCamPos, // 5
             if (accTime != 1) then { C_WARN } else { "#888888" }, // 6
-            accTime // 7
+            accTime, // 7
+            ["h_tscale"] call Bro_SCam_L, // 8
+            ["h_grid"] call Bro_SCam_L // 9
         ];
         
+        private _padTag = "";
+        if (_usePad) then {
+            private _isFn = DIK_XBOX_A in (_d get "Keys");
+            _padTag = if (_isFn) then {
+                format ["   <t color='%1'>PAD/FN</t>", C_WARN]
+            } else {
+                format ["   <t color='%1'>PAD</t>", C_ACCENT]
+            };
+        };
+
         (_d get "HUD_Bot") ctrlSetStructuredText parseText format [
              "<t valign='middle' size='1.1' shadow='2'>" +
              "<t align='left' font='RobotoCondensedBold'> SPD <t color='%1'>%2</t>  FOV <t color='%1'>%3</t>  ROLL <t color='%1'>%4</t></t>" +
-             "<t align='center' font='RobotoCondensedBold'>" + 
+             "<t align='center' font='RobotoCondensedBold'>" +
              "<t color='%5'>ALT</t>  " +
              "<t color='%6'>ORI</t>  " +
              "<t color='%7'>LAT</t>  " +
              "<t color='%8'>FOL</t>   " +
-             "VIS:<t color='%9'>%10</t>" +
+             "VIS:<t color='%9'>%10</t>%11" +
              "</t>" +
              "</t>",
              C_ACCENT, // 1
              (round(_newSpd * 100) / 100) toFixed 2, // 2
              (round(_fovNew * 100) / 100) toFixed 2, // 3
              (round(_rollNew * 10) / 10) toFixed 1, // 4
-             _cAlt, _cOri, _cLat, _cFol, _cVis, _vText
+             _cAlt, _cOri, _cLat, _cFol, _cVis, _vText, _padTag
         ];
 	};
     
@@ -920,5 +1272,5 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 }]);
 SCam_Data set ["EH_List", _ehIds];
 
-["Cinematic Camera ON"] call (SCam_Data get "fnc_Msg");
+[["n_cam_on"] call Bro_SCam_L] call (SCam_Data get "fnc_Msg");
 [] call (SCam_Data get "fnc_UpdateListUI");

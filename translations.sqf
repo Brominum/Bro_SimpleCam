@@ -17,13 +17,12 @@
 		_msg = format [["n_tgt_fmt"] call Bro_SCam_L, name _target];
 */
 
-Bro_SCam_AllTranslations = createHashMap;
+private _map = createHashMap;
 
 // =====================================================================
 // ENGLISH (base / fallback)
 // =====================================================================
 private _en = createHashMapFromArray [
-	// --- Settings ---
 	["s_wl_lbl", "Allowed Users (Whitelist)"],
 	["s_wl_tip", "Comma-separated usernames, e.g.: PV1 John,Billy,1LT Bob"],
 	["s_sp_lbl", "Save Last Camera Position"],
@@ -63,8 +62,6 @@ private _en = createHashMapFromArray [
 	["s_lng_lbl", "Language"],
 	["s_lng_tip", "Override the in-camera display language. 'Auto' follows the game language. The setting labels above always follow the game language."],
 	["s_lng_auto", "Auto (game language)"],
-
-	// --- Notifications ---
 	["n_denied", "ACCESS DENIED: You are not on the Cinematic Camera whitelist."],
 	["n_already", "Cinematic Camera is already active!"],
 	["n_hud_full", "HUD: FULL"],
@@ -96,13 +93,9 @@ private _en = createHashMapFromArray [
 	["n_roll_reset", "Roll: RESET"],
 	["n_spd_reset", "Speed: x1.0"],
 	["n_fov_fmt", "FOV Preset: %1"],
-
-	// --- HUD ---
 	["h_notgt", "NO TARGET"],
 	["h_grid", "GRID"],
 	["h_tscale", "T.SCALE"],
-
-	// --- Keyboard controls panel ---
 	["p_move", "MOVE:"],
 	["p_elev", "ELEV:"],
 	["p_speed", "SPEED:"],
@@ -120,8 +113,6 @@ private _en = createHashMapFromArray [
 	["p_reset", "RESET:"],
 	["p_togglehud", "TOGGLE HUD:"],
 	["p_exit", "EXIT:"],
-
-	// --- Controller controls panel ---
 	["c_title", "XBOX CONTROLLER"],
 	["c_move", "MOVE:"],
 	["c_look", "LOOK:"],
@@ -139,14 +130,12 @@ private _en = createHashMapFromArray [
 	["c_exit", "EXIT:"],
 	["c_fov", "FOV:"],
 	["c_fn", "FN MODE:"],
-
-	// --- Start-paused + Numpad timescale ---
 	["s_strtp_lbl", "Start Camera Paused"],
 	["s_strtp_tip", "If checked, opening the camera immediately pauses the game (timescale 0). Single-player only."],
 	["s_ts_lbl_fmt", "Numpad %1 Timescale"],
 	["s_ts_tip", "Timescale applied when this numpad key is pressed. 1.0 = normal, <1 = slow-mo, >1 = sped up. Single-player only."]
 ];
-Bro_SCam_AllTranslations set ["english", _en];
+_map set ["english", _en];
 
 // =====================================================================
 // FRENCH
@@ -191,7 +180,6 @@ private _fr = createHashMapFromArray [
 	["s_lng_lbl", "Langue"],
 	["s_lng_tip", "Forcer la langue d'affichage en caméra. 'Auto' suit la langue du jeu. Les labels des réglages ci-dessus suivent toujours la langue du jeu."],
 	["s_lng_auto", "Auto (langue du jeu)"],
-
 	["n_denied", "ACCÈS REFUSÉ : vous n'êtes pas sur la whitelist de la Cinematic Camera."],
 	["n_already", "La Cinematic Camera est déjà active !"],
 	["n_hud_full", "HUD : COMPLET"],
@@ -223,11 +211,9 @@ private _fr = createHashMapFromArray [
 	["n_roll_reset", "Roulis : reset"],
 	["n_spd_reset", "Vitesse : x1.0"],
 	["n_fov_fmt", "Préréglage FOV : %1"],
-
 	["h_notgt", "AUCUNE CIBLE"],
 	["h_grid", "GRILLE"],
 	["h_tscale", "T.SCALE"],
-
 	["p_move", "DÉPLAC. :"],
 	["p_elev", "ÉLÉV :"],
 	["p_speed", "VITESSE :"],
@@ -245,7 +231,6 @@ private _fr = createHashMapFromArray [
 	["p_reset", "RESET :"],
 	["p_togglehud", "HUD :"],
 	["p_exit", "SORTIE :"],
-
 	["c_title", "MANETTE XBOX"],
 	["c_move", "DÉPLAC. :"],
 	["c_look", "VISÉE :"],
@@ -263,13 +248,12 @@ private _fr = createHashMapFromArray [
 	["c_exit", "SORTIE :"],
 	["c_fov", "FOV :"],
 	["c_fn", "MOD FN :"],
-
 	["s_strtp_lbl", "Démarrer caméra en pause"],
 	["s_strtp_tip", "Si coché, ouvrir la caméra met immédiatement le jeu en pause (timescale 0). Solo uniquement."],
 	["s_ts_lbl_fmt", "Pavé num. %1 - Timescale"],
 	["s_ts_tip", "Échelle temps appliquée par cette touche du pavé numérique. 1.0 = normal, <1 = ralenti, >1 = accéléré. Solo uniquement."]
 ];
-Bro_SCam_AllTranslations set ["french", _fr];
+_map set ["french", _fr];
 
 // =====================================================================
 // SPANISH
@@ -314,7 +298,6 @@ private _es = createHashMapFromArray [
 	["s_lng_lbl", "Idioma"],
 	["s_lng_tip", "Forzar el idioma de visualización en cámara. 'Auto' sigue el idioma del juego. Las etiquetas de ajustes arriba siempre siguen el idioma del juego."],
 	["s_lng_auto", "Auto (idioma del juego)"],
-
 	["n_denied", "ACCESO DENEGADO: no estás en la lista blanca de la Cinematic Camera."],
 	["n_already", "¡La Cinematic Camera ya está activa!"],
 	["n_hud_full", "HUD: COMPLETO"],
@@ -346,11 +329,9 @@ private _es = createHashMapFromArray [
 	["n_roll_reset", "Inclinación: RESET"],
 	["n_spd_reset", "Velocidad: x1.0"],
 	["n_fov_fmt", "Preajuste FOV: %1"],
-
 	["h_notgt", "SIN OBJETIVO"],
 	["h_grid", "CUADRÍCULA"],
 	["h_tscale", "T.ESCALA"],
-
 	["p_move", "MOVER:"],
 	["p_elev", "ELEV:"],
 	["p_speed", "VELOC.:"],
@@ -368,7 +349,6 @@ private _es = createHashMapFromArray [
 	["p_reset", "RESET:"],
 	["p_togglehud", "HUD:"],
 	["p_exit", "SALIR:"],
-
 	["c_title", "MANDO XBOX"],
 	["c_move", "MOVER:"],
 	["c_look", "MIRAR:"],
@@ -386,13 +366,12 @@ private _es = createHashMapFromArray [
 	["c_exit", "SALIR:"],
 	["c_fov", "FOV:"],
 	["c_fn", "MODO FN:"],
-
 	["s_strtp_lbl", "Iniciar cámara en pausa"],
 	["s_strtp_tip", "Si está marcado, al abrir la cámara se pausa el juego (timescale 0). Solo un jugador."],
 	["s_ts_lbl_fmt", "Numpad %1 - Escala de tiempo"],
 	["s_ts_tip", "Escala de tiempo aplicada al pulsar esta tecla del teclado numérico. 1.0 = normal, <1 = cámara lenta, >1 = acelerado. Solo un jugador."]
 ];
-Bro_SCam_AllTranslations set ["spanish", _es];
+_map set ["spanish", _es];
 
 // =====================================================================
 // GERMAN
@@ -437,7 +416,6 @@ private _de = createHashMapFromArray [
 	["s_lng_lbl", "Sprache"],
 	["s_lng_tip", "Anzeigesprache in der Kamera überschreiben. 'Auto' folgt der Spielsprache. Die Einstellungsnamen oben folgen immer der Spielsprache."],
 	["s_lng_auto", "Auto (Spielsprache)"],
-
 	["n_denied", "ZUGRIFF VERWEIGERT: Sie sind nicht auf der Whitelist der Cinematic Camera."],
 	["n_already", "Cinematic Camera ist bereits aktiv!"],
 	["n_hud_full", "HUD: VOLL"],
@@ -469,11 +447,9 @@ private _de = createHashMapFromArray [
 	["n_roll_reset", "Rollen: ZURÜCKGESETZT"],
 	["n_spd_reset", "Geschwindigkeit: x1.0"],
 	["n_fov_fmt", "FOV-Voreinstellung: %1"],
-
 	["h_notgt", "KEIN ZIEL"],
 	["h_grid", "RASTER"],
 	["h_tscale", "T.SKALA"],
-
 	["p_move", "BEW.:"],
 	["p_elev", "HÖHE:"],
 	["p_speed", "GESCHW.:"],
@@ -491,7 +467,6 @@ private _de = createHashMapFromArray [
 	["p_reset", "RESET:"],
 	["p_togglehud", "HUD:"],
 	["p_exit", "BEENDEN:"],
-
 	["c_title", "XBOX-CONTROLLER"],
 	["c_move", "BEW.:"],
 	["c_look", "BLICK:"],
@@ -509,13 +484,12 @@ private _de = createHashMapFromArray [
 	["c_exit", "BEENDEN:"],
 	["c_fov", "FOV:"],
 	["c_fn", "FN-MODUS:"],
-
 	["s_strtp_lbl", "Kamera pausiert starten"],
 	["s_strtp_tip", "Wenn aktiviert, pausiert die Kamera beim Öffnen sofort das Spiel (Zeitskala 0). Nur im Einzelspieler."],
 	["s_ts_lbl_fmt", "Numpad %1 - Zeitskala"],
 	["s_ts_tip", "Zeitskala bei Druck dieser Nummernblock-Taste. 1.0 = normal, <1 = Zeitlupe, >1 = beschleunigt. Nur Einzelspieler."]
 ];
-Bro_SCam_AllTranslations set ["german", _de];
+_map set ["german", _de];
 
 // =====================================================================
 // ITALIAN
@@ -560,7 +534,6 @@ private _it = createHashMapFromArray [
 	["s_lng_lbl", "Lingua"],
 	["s_lng_tip", "Sovrascrivi la lingua di visualizzazione in camera. 'Auto' segue la lingua del gioco. Le etichette delle impostazioni sopra seguono sempre la lingua del gioco."],
 	["s_lng_auto", "Auto (lingua del gioco)"],
-
 	["n_denied", "ACCESSO NEGATO: non sei nella whitelist della Cinematic Camera."],
 	["n_already", "La Cinematic Camera è già attiva!"],
 	["n_hud_full", "HUD: COMPLETO"],
@@ -592,11 +565,9 @@ private _it = createHashMapFromArray [
 	["n_roll_reset", "Rollio: RESET"],
 	["n_spd_reset", "Velocità: x1.0"],
 	["n_fov_fmt", "Preset FOV: %1"],
-
 	["h_notgt", "NESSUN BERSAGLIO"],
 	["h_grid", "GRIGLIA"],
 	["h_tscale", "T.SCALA"],
-
 	["p_move", "MOVI.:"],
 	["p_elev", "ELEV:"],
 	["p_speed", "VEL.:"],
@@ -614,7 +585,6 @@ private _it = createHashMapFromArray [
 	["p_reset", "RESET:"],
 	["p_togglehud", "HUD:"],
 	["p_exit", "ESCI:"],
-
 	["c_title", "CONTROLLER XBOX"],
 	["c_move", "MOVI.:"],
 	["c_look", "MIRA:"],
@@ -632,13 +602,12 @@ private _it = createHashMapFromArray [
 	["c_exit", "ESCI:"],
 	["c_fov", "FOV:"],
 	["c_fn", "MODALITÀ FN:"],
-
 	["s_strtp_lbl", "Avvia camera in pausa"],
 	["s_strtp_tip", "Se selezionato, l'apertura della camera mette in pausa il gioco (timescale 0). Solo singleplayer."],
 	["s_ts_lbl_fmt", "Tastierino %1 - Timescale"],
 	["s_ts_tip", "Scala temporale applicata premendo questo tasto del tastierino numerico. 1.0 = normale, <1 = rallentatore, >1 = accelerato. Solo singleplayer."]
 ];
-Bro_SCam_AllTranslations set ["italian", _it];
+_map set ["italian", _it];
 
 // =====================================================================
 // POLISH
@@ -683,7 +652,6 @@ private _pl = createHashMapFromArray [
 	["s_lng_lbl", "Język"],
 	["s_lng_tip", "Wymuś język wyświetlania w kamerze. 'Auto' używa języka gry. Etykiety ustawień powyżej zawsze używają języka gry."],
 	["s_lng_auto", "Auto (język gry)"],
-
 	["n_denied", "ODMOWA DOSTĘPU: nie jesteś na białej liście Cinematic Camera."],
 	["n_already", "Cinematic Camera jest już aktywna!"],
 	["n_hud_full", "HUD: PEŁNY"],
@@ -715,11 +683,9 @@ private _pl = createHashMapFromArray [
 	["n_roll_reset", "Przechył: RESET"],
 	["n_spd_reset", "Prędkość: x1.0"],
 	["n_fov_fmt", "Preset FOV: %1"],
-
 	["h_notgt", "BRAK CELU"],
 	["h_grid", "SIATKA"],
 	["h_tscale", "T.SKALA"],
-
 	["p_move", "RUCH:"],
 	["p_elev", "WYS.:"],
 	["p_speed", "PRĘD.:"],
@@ -737,7 +703,6 @@ private _pl = createHashMapFromArray [
 	["p_reset", "RESET:"],
 	["p_togglehud", "HUD:"],
 	["p_exit", "WYJŚCIE:"],
-
 	["c_title", "KONTROLER XBOX"],
 	["c_move", "RUCH:"],
 	["c_look", "PATRZ:"],
@@ -755,13 +720,12 @@ private _pl = createHashMapFromArray [
 	["c_exit", "WYJŚCIE:"],
 	["c_fov", "FOV:"],
 	["c_fn", "TRYB FN:"],
-
 	["s_strtp_lbl", "Uruchom kamerę z pauzą"],
 	["s_strtp_tip", "Jeśli zaznaczone, otwarcie kamery natychmiast wstrzymuje grę (skala czasu 0). Tylko tryb jednoosobowy."],
 	["s_ts_lbl_fmt", "Numpad %1 - Skala czasu"],
 	["s_ts_tip", "Skala czasu zastosowana po naciśnięciu tego klawisza numerycznego. 1.0 = normalna, <1 = slow-mo, >1 = przyspieszone. Tylko tryb jednoosobowy."]
 ];
-Bro_SCam_AllTranslations set ["polish", _pl];
+_map set ["polish", _pl];
 
 // =====================================================================
 // RUSSIAN
@@ -806,7 +770,6 @@ private _ru = createHashMapFromArray [
 	["s_lng_lbl", "Язык"],
 	["s_lng_tip", "Переопределить язык отображения камеры. 'Авто' использует язык игры. Метки настроек выше всегда используют язык игры."],
 	["s_lng_auto", "Авто (язык игры)"],
-
 	["n_denied", "ДОСТУП ЗАПРЕЩЁН: вас нет в белом списке Cinematic Camera."],
 	["n_already", "Cinematic Camera уже активна!"],
 	["n_hud_full", "HUD: ПОЛНЫЙ"],
@@ -838,11 +801,9 @@ private _ru = createHashMapFromArray [
 	["n_roll_reset", "Крен: СБРОС"],
 	["n_spd_reset", "Скорость: x1.0"],
 	["n_fov_fmt", "Пресет FOV: %1"],
-
 	["h_notgt", "НЕТ ЦЕЛИ"],
 	["h_grid", "КВАДРАТ"],
 	["h_tscale", "T.SCALE"],
-
 	["p_move", "ДВИЖ.:"],
 	["p_elev", "ВЫСОТА:"],
 	["p_speed", "СКОР.:"],
@@ -860,7 +821,6 @@ private _ru = createHashMapFromArray [
 	["p_reset", "СБРОС:"],
 	["p_togglehud", "HUD:"],
 	["p_exit", "ВЫХОД:"],
-
 	["c_title", "КОНТРОЛЛЕР XBOX"],
 	["c_move", "ДВИЖ.:"],
 	["c_look", "ОБЗОР:"],
@@ -878,29 +838,26 @@ private _ru = createHashMapFromArray [
 	["c_exit", "ВЫХОД:"],
 	["c_fov", "FOV:"],
 	["c_fn", "РЕЖИМ FN:"],
-
 	["s_strtp_lbl", "Запустить камеру в паузе"],
 	["s_strtp_tip", "Если включено, открытие камеры сразу ставит игру на паузу (шкала времени 0). Только одиночная игра."],
 	["s_ts_lbl_fmt", "Numpad %1 - Шкала времени"],
 	["s_ts_tip", "Шкала времени применяется при нажатии этой клавиши numpad. 1.0 = нормальная, <1 = slow-mo, >1 = ускоренная. Только одиночная игра."]
 ];
-Bro_SCam_AllTranslations set ["russian", _ru];
+_map set ["russian", _ru];
+
+// Store in uiNamespace to avoid polluting missionNamespace
+uiNamespace setVariable ["Bro_SCam_Translations", _map];
 
 // =====================================================================
 // LOOKUP FUNCTION
 // =====================================================================
-// Returns the translated string for _key, respecting the runtime override
-// in `Bro_SCam_Language` (set via the CBA addon options). When override
-// is "" or "auto", falls back to the game's current language. Unknown
-// languages fall back to English. Unknown keys return themselves (so a
-// missing translation is visible but doesn't crash).
 Bro_SCam_L = {
 	params ["_key"];
-	if (isNil "Bro_SCam_AllTranslations") exitWith { _key };
+	private _allTrans = uiNamespace getVariable ["Bro_SCam_Translations", createHashMap];
 	private _override = missionNamespace getVariable ["Bro_SCam_Language", ""];
 	private _lang = if (_override == "" || _override == "auto") then { language } else { _override };
-	private _fallback = Bro_SCam_AllTranslations getOrDefault ["english", createHashMap];
-	private _table = Bro_SCam_AllTranslations getOrDefault [_lang, _fallback];
+	private _fallback = _allTrans getOrDefault ["english", createHashMap];
+	private _table = _allTrans getOrDefault [_lang, _fallback];
 	private _val = _table getOrDefault [_key, ""];
 	if (_val == "") then { _val = _fallback getOrDefault [_key, _key]; };
 	_val
@@ -909,16 +866,15 @@ Bro_SCam_L = {
 // =====================================================================
 // TIMESCALE HOTKEY HELPER
 // =====================================================================
-// Applies setAccTime safely (SP only) and routes the notification through
-// the camera's notify panel if active, otherwise systemChat.
 Bro_SCam_SetTimescale = {
 	params ["_value"];
 	if (isMultiplayer) exitWith {};
 	_value = _value max 0 min 4;
 	setAccTime _value;
 	private _msg = format [["n_ts_fmt"] call Bro_SCam_L, _value];
-	if (!isNil "SCam_Data" && {SCam_Data getOrDefault ["Active", false]}) then {
-		[_msg] call (SCam_Data get "fnc_Msg");
+	private _d = uiNamespace getVariable ["Bro_SCam_Data", nil];
+	if (!isNil "_d" && {_d getOrDefault ["Active", false]}) then {
+		[_msg] call (_d get "fnc_Msg");
 	} else {
 		systemChat _msg;
 	};

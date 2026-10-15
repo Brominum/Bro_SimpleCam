@@ -90,6 +90,7 @@ private _en = createHashMapFromArray [
 	["n_fol_fail", "Follow: FAILED (Invalid Target)"],
 	["n_tgt_fmt", "Target: %1"],
 	["n_cam_on", "Cinematic Camera ON"],
+	["n_zeus", "Can't open Cinematic Camera in Zeus!"],
 	["h_notgt", "NO TARGET"],
 	["h_grid", "GRID"],
 	["h_tscale", "T.SCALE"],

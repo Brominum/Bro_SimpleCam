@@ -49,6 +49,7 @@ if (!_allowed) exitWith { systemChat (["n_denied"] call Bro_SCam_L) };
 if ((uiNamespace getVariable ["Bro_SCam_Data", createHashMap]) getOrDefault ["Active", false]) exitWith {
 	systemChat (["n_already"] call Bro_SCam_L);
 };
+if (!isNull findDisplay 312) exitWith { systemChat (["n_zeus"] call Bro_SCam_L) };
 
 // --- STATE ---
 private _d = createHashMap;

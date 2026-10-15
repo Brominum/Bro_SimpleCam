@@ -542,6 +542,9 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	};
 	private _mouse = _d get "MouseD";
 	_d set ["MouseD", [0, 0]];
+	// MouseMoving deltas are inversely scaled by timescale; cancel it (floor keeps the paused case usable)
+	private _tsComp = accTime max 0.05;
+	_mouse = [(_mouse select 0) * _tsComp, (_mouse select 1) * _tsComp];
 	private _fov = _d get "Fov";
 	private _sens = _cfgSens * _fov;
 

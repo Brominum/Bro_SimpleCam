@@ -854,7 +854,7 @@ Bro_SCam_SetTimescale = {
 	private _msg = format [["n_ts_fmt"] call Bro_SCam_L, _value];
 	private _d = uiNamespace getVariable ["Bro_SCam_Data", nil];
 	if (!isNil "_d" && {_d getOrDefault ["Active", false]}) then {
-		[_msg] call (_d get "fnc_Msg");
+		[_d, _msg] call (_d get "fnc_Msg");
 	} else {
 		systemChat _msg;
 	};

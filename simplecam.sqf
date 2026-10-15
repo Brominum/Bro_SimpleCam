@@ -75,7 +75,8 @@ private _initState = if (missionNamespace getVariable ["Bro_SCam_HUDDefault", tr
 	["PosDes", [0, 0, 0]],
 	["Ang", [0, 0]],
 	["AngDes", [0, 0]],
-	["RotOffset", [0, 0, 0]],
+	["OrientRef", objNull],
+	["LastCam", [[0, 0, 0], [0, 1, 0], [0, 0, 1]]],
 	["Roll", 0],
 	["RollDes", 0],
 	["Fov", 0.7],
@@ -111,11 +112,36 @@ _d set ["fnc_Msg", {
 	_ctrl ctrlShow true;
 	_d set ["NotifyEnd", diag_tickTime + NOTIFY_DURATION];
 }];
-// Returns [dir, pitch, bank] of an object
-_d set ["fnc_Att", {
-	private _vDir = vectorDirVisual _this;
-	private _vUp = vectorUpVisual _this;
-	[getDirVisual _this, asin (_vDir select 2), ((_vDir vectorCrossProduct _vUp) select 2) atan2 (_vUp select 2)]
+// Sets the pose from a position and dir/up vectors in whatever space they were given
+_d set ["fnc_SetPose", {
+	params ["_d", "_pos", "_dir", "_up"];
+	private _yaw = (_dir select 0) atan2 (_dir select 1);
+	private _pit = asin (_dir select 2) max -89 min 89;
+	private _rightH = [cos _yaw, -(sin _yaw), 0];
+	private _roll = (_up vectorDotProduct _rightH) atan2 (_up vectorDotProduct (_rightH vectorCrossProduct _dir));
+	_d set ["Pos", _pos];
+	_d set ["PosDes", +_pos];
+	_d set ["Ang", [_yaw, _pit]];
+	_d set ["AngDes", [_yaw, _pit]];
+	{ _d set [_x, _roll] } forEach ["Roll", "RollDes"];
+}];
+// Converts the last rendered world pose into a vehicle's model space
+_d set ["fnc_Glue", {
+	params ["_d", "_ref"];
+	(_d get "LastCam") params ["_p", "_wDir", "_wUp"];
+	[_d, _ref worldToModelVisual (ASLToAGL _p), _ref vectorWorldToModelVisual _wDir, _ref vectorWorldToModelVisual _wUp] call (_d get "fnc_SetPose");
+	_d set ["OrientRef", _ref];
+}];
+// Switches Orientation Lock, converting the pose between world and vehicle space
+_d set ["fnc_Orient", {
+	params ["_d", "_on"];
+	if (_on isEqualTo (_d get "OrientLock")) exitWith {};
+	_d set ["OrientLock", _on];
+	if (_on) exitWith { [_d, vehicle (_d get "Target")] call (_d get "fnc_Glue") };
+	(_d get "LastCam") params ["_p", "_wDir", "_wUp"];
+	private _t = _d get "Target";
+	if ((_d get "Follow") && {!isNull _t && {alive _t}}) then { _p = _p vectorDiff (getPosASLVisual _t) };
+	[_d, _p, _wDir, _wUp] call (_d get "fnc_SetPose");
 }];
 _d set ["fnc_SetAudioSpectator", {
 	params ["_state"];
@@ -198,14 +224,21 @@ _d set ["fnc_Nav", {
 // Puts the camera behind a unit; _full also resets speed, FOV and locks
 _d set ["fnc_Focus", {
 	params ["_d", "_t", "_full"];
-	private _dir = vectorDirVisual _t;
-	_dir set [2, 0];
-	private _pos = ((vectorNormalized _dir) vectorMultiply -2) vectorAdd [0, 0, 2];
-	if !(_d get "Follow") then { _pos = _pos vectorAdd (getPosASLVisual _t) };
+	private _pos = [0, -2, 2];
+	private _ang = [0, 0];
+	if (!_full && {_d get "OrientLock"}) then {
+		_d set ["OrientRef", vehicle _t];
+	} else {
+		private _dir = vectorDirVisual _t;
+		_dir set [2, 0];
+		_pos = ((vectorNormalized _dir) vectorMultiply -2) vectorAdd [0, 0, 2];
+		if !(_d get "Follow") then { _pos = _pos vectorAdd (getPosASLVisual _t) };
+		_ang = [getDir _t, 0];
+	};
 	_d set ["Pos", _pos];
 	_d set ["PosDes", +_pos];
-	_d set ["Ang", [getDir _t, 0]];
-	_d set ["AngDes", [getDir _t, 0]];
+	_d set ["Ang", _ang];
+	_d set ["AngDes", +_ang];
 	_d set ["Roll", 0];
 	_d set ["RollDes", 0];
 	_d set ["ListTarget", _t];
@@ -218,6 +251,7 @@ _d set ["fnc_Focus", {
 _d set ["fnc_Exit", {
 	disableSerialization;
 	params ["_d"];
+	[_d, false] call (_d get "fnc_Orient");
 	_d set ["Active", false];
 	private _tgt = _d get "Target";
 	if (missionNamespace getVariable ["Bro_SCam_SavePos", false]) then {
@@ -291,25 +325,19 @@ _d set ["fnc_Act", {
 		};
 		case "Look_At": {
 			private _on = !(_d get "LookAtLock");
+			if (_on) then { [_d, false] call (_d get "fnc_Orient") };
 			_d set ["LookAtLock", _on];
-			if (_on) then { _d set ["OrientLock", false] };
 			_msgKey = ["n_lat_off", "n_lat_on"] select _on;
 		};
 		case "Lock_Ori": {
 			if (_d get "OrientLock") exitWith {
-				_d set ["OrientLock", false];
+				[_d, false] call (_d get "fnc_Orient");
 				_msgKey = "n_ori_off";
 			};
 			_d set ["LookAtLock", false];
 			if (!_valid) exitWith { _msgKey = "n_ori_failt" };
-			private _ref = vehicle _tgt;
-			if (!alive _ref) exitWith { _msgKey = "n_ori_failv" };
-			private _ang = _d get "AngDes";
-			(_ref call (_d get "fnc_Att")) params ["_refDir", "_refPitch", "_refBank"];
-			private _yaw = (_ang select 0) - _refDir;
-			_yaw = _yaw - (360 * floor ((_yaw + 180) / 360));
-			_d set ["RotOffset", [_yaw, (_ang select 1) - _refPitch, (_d get "RollDes") - _refBank]];
-			_d set ["OrientLock", true];
+			if (!alive (vehicle _tgt)) exitWith { _msgKey = "n_ori_failv" };
+			[_d, true] call (_d get "fnc_Orient");
 			_msgKey = "n_ori_on";
 		};
 		case "Reset": {
@@ -542,9 +570,6 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	};
 	private _mouse = _d get "MouseD";
 	_d set ["MouseD", [0, 0]];
-	// MouseMoving deltas are inversely scaled by timescale; cancel it (floor keeps the paused case usable)
-	private _tsComp = accTime max 0.05;
-	_mouse = [(_mouse select 0) * _tsComp, (_mouse select 1) * _tsComp];
 	private _fov = _d get "Fov";
 	private _sens = _cfgSens * _fov;
 
@@ -578,9 +603,10 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	};
 	if (_lostKey != "") then {
 		_d set ["LookAtLock", _lookAt];
-		_d set ["OrientLock", _orient];
+		[_d, _orient] call (_d get "fnc_Orient");
 		[_d, [_lostKey] call Bro_SCam_L] call (_d get "fnc_Msg");
 	};
+	if (_orient && {_ref != (_d get "OrientRef")}) then { [_d, _ref] call (_d get "fnc_Glue") };
 
 	private _rollDelta = ([0, _cfgRoll] select ("Roll_Right" call _held)) - ([0, _cfgRoll] select ("Roll_Left" call _held));
 	private _rollReset = "Roll_Reset" call _held;
@@ -597,27 +623,17 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 		_angDes = [(_look select 0) atan2 (_look select 1), if (_dist > 0) then { asin ((_look select 2) / _dist) } else { 0 }];
 		_rollDes = if (_rollReset) then { 0 } else { _rollDes + _rollDelta };
 	} else {
-		if (_orient) then {
-			private _off = _d get "RotOffset";
-			_off set [0, (_off select 0) + _mx];
-			_off set [1, ((_off select 1) - _my) max -89 min 89];
-			_off set [2, if (_rollReset) then { 0 } else { (_off select 2) + _rollDelta }];
-			(_ref call (_d get "fnc_Att")) params ["_refDir", "_refPitch", "_refBank"];
-			_angDes = [_refDir + (_off select 0), _refPitch + (_off select 1)];
-			_rollDes = _refBank + (_off select 2);
-		} else {
-			_angDes = [(_angDes select 0) + _mx, ((_angDes select 1) - _my) max -89 min 89];
-			_rollDes = if (_rollReset) then { 0 } else { _rollDes + _rollDelta };
-		};
+		_angDes = [(_angDes select 0) + _mx, ((_angDes select 1) - _my) max -89 min 89];
+		_rollDes = if (_rollReset) then { 0 } else { _rollDes + _rollDelta };
 	};
 	_d set ["AngDes", _angDes];
 	_d set ["RollDes", _rollDes];
 
 	private _ang = _d get "Ang";
-	private _rotSmooth = [_cfgSmoothRot, _cfgSmoothBrg] select (_orient || _lookAt);
+	private _rotSmooth = [_cfgSmoothRot, _cfgSmoothBrg] select _lookAt;
 	private _yaw = [_ang select 0, _angDes select 0, _rotSmooth] call _lerpAngle;
 	private _pit = [_ang select 1, _angDes select 1, _rotSmooth] call _lerp;
-	private _rollNew = [_d get "Roll", _rollDes, [_cfgSmoothRot, _rotSmooth] select _orient] call _lerpAngle;
+	private _rollNew = [_d get "Roll", _rollDes, _cfgSmoothRot] call _lerpAngle;
 	_d set ["Ang", [_yaw, _pit]];
 	_d set ["Roll", _rollNew];
 
@@ -661,15 +677,23 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	// Clamp to 1 so diagonals aren't faster, but keep analog magnitudes below 1
 	if (vectorMagnitude _move > 1) then { _move = vectorNormalized _move };
 
-	private _base = if (_follow && {_hasTarget}) then { getPosASLVisual _target } else { [0, 0, 0] };
+	private _base = [0, 0, 0];
+	if (!_orient && {_follow && {_hasTarget}}) then { _base = getPosASLVisual _target };
 	private _abs = _base vectorAdd ((_d get "PosDes") vectorAdd (_move vectorMultiply (_speed * _newSpd)));
-	_abs set [2, (_abs select 2) max ((getTerrainHeightASL _abs) + MIN_GROUND_CLEARANCE)];
+	// Ground clearance is skipped while glued so the rig stays rigid
+	if (!_orient) then { _abs set [2, (_abs select 2) max ((getTerrainHeightASL _abs) + MIN_GROUND_CLEARANCE)] };
 	private _posDes = _abs vectorDiff _base;
 	_d set ["PosDes", _posDes];
 	private _pos = _d get "Pos";
 	_pos = _pos vectorAdd ((_posDes vectorDiff _pos) vectorMultiply _cfgSmoothPos);
 	_d set ["Pos", _pos];
 	private _camPos = _base vectorAdd _pos;
+	// Glued: Pos, direction and up are in the vehicle's model space, so convert to world
+	if (_orient) then {
+		_camPos = _ref modelToWorldVisualWorld _camPos;
+		_vecDir = _ref vectorModelToWorldVisual _vecDir;
+		_vecUp = _ref vectorModelToWorldVisual _vecUp;
+	};
 
 	private _fovNew = [_fov, _d get "FovDes", _cfgSmoothFOV] call _lerp;
 	_d set ["Fov", _fovNew];
@@ -732,6 +756,7 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	private _notify = _d get "Notify";
 	if (ctrlShown _notify && {diag_tickTime > (_d get "NotifyEnd")}) then { _notify ctrlShow false };
 
+	_d set ["LastCam", [_camPos, _vecDir, _vecUp]];
 	_cam setPosASL _camPos;
 	_cam setVectorDirAndUp [_vecDir, _vecUp];
 	_cam camCommit 0;

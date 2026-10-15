@@ -1,0 +1,953 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="Bro_SimpleCam">
+	<Package name="Main">
+		<Key ID="STR_Bro_SCam_s_wl_lbl">
+			<English>Allowed Users (Whitelist)</English>
+			<French>Utilisateurs autorisés (Whitelist)</French>
+			<Spanish>Usuarios autorizados (Lista blanca)</Spanish>
+			<German>Erlaubte Benutzer (Whitelist)</German>
+			<Italian>Utenti consentiti (Whitelist)</Italian>
+			<Polish>Dozwoleni użytkownicy (Whitelist)</Polish>
+			<Russian>Разрешённые пользователи (Белый список)</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_wl_tip">
+			<English>Comma-separated usernames, e.g.: PV1 John,Billy,1LT Bob</English>
+			<French>Noms d'utilisateur séparés par virgules, ex.: PV1 John,Billy,1LT Bob</French>
+			<Spanish>Nombres de usuario separados por comas, p. ej.: PV1 John,Billy,1LT Bob</Spanish>
+			<German>Komma-getrennte Benutzernamen, z. B.: PV1 John,Billy,1LT Bob</German>
+			<Italian>Nomi utente separati da virgole, es.: PV1 John,Billy,1LT Bob</Italian>
+			<Polish>Nazwy użytkowników oddzielone przecinkami, np.: PV1 John,Billy,1LT Bob</Polish>
+			<Russian>Имена пользователей через запятую, напр.: PV1 John,Billy,1LT Bob</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_sp_lbl">
+			<English>Save Last Camera Position</English>
+			<French>Sauvegarder dernière position caméra</French>
+			<Spanish>Guardar última posición de cámara</Spanish>
+			<German>Letzte Kameraposition speichern</German>
+			<Italian>Salva ultima posizione camera</Italian>
+			<Polish>Zapisz ostatnią pozycję kamery</Polish>
+			<Russian>Сохранять последнюю позицию камеры</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_sp_tip">
+			<English>If checked, reopening the camera resumes from where you left it. Uncheck to always reset to player.</English>
+			<French>Si coché, la caméra reprend où vous l'avez quittée. Décochez pour toujours revenir sur le joueur.</French>
+			<Spanish>Si está marcado, al reabrir la cámara se reanuda donde la dejaste. Desmárcalo para volver siempre al jugador.</Spanish>
+			<German>Wenn aktiviert, fährt die Kamera dort fort, wo Sie aufgehört haben. Deaktivieren, um stets zum Spieler zurückzukehren.</German>
+			<Italian>Se selezionato, riaprire la camera riprende da dove l'hai lasciata. Deseleziona per tornare sempre al giocatore.</Italian>
+			<Polish>Jeśli zaznaczone, ponowne otwarcie kamery wznawia z miejsca opuszczenia. Odznacz, aby zawsze wracać do gracza.</Polish>
+			<Russian>Если включено, открытие камеры возобновляет с последней позиции. Снимите галочку, чтобы всегда сбрасывать на игрока.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_hd_lbl">
+			<English>HUD Default On</English>
+			<French>HUD activé par défaut</French>
+			<Spanish>HUD activado por defecto</Spanish>
+			<German>HUD standardmäßig an</German>
+			<Italian>HUD attivo all'avvio</Italian>
+			<Polish>HUD domyślnie włączony</Polish>
+			<Russian>HUD включён по умолчанию</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_hd_tip">
+			<English>If checked, HUD is visible on start.</English>
+			<French>Si coché, le HUD est visible au démarrage.</French>
+			<Spanish>Si está marcado, el HUD es visible al inicio.</Spanish>
+			<German>Wenn aktiviert, ist das HUD beim Start sichtbar.</German>
+			<Italian>Se selezionato, l'HUD è visibile all'avvio.</Italian>
+			<Polish>Jeśli zaznaczone, HUD jest widoczny po uruchomieniu.</Polish>
+			<Russian>Если включено, HUD виден при запуске.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_ai_lbl">
+			<English>Hide AI Units</English>
+			<French>Masquer les unités IA</French>
+			<Spanish>Ocultar unidades IA</Spanish>
+			<German>KI-Einheiten ausblenden</German>
+			<Italian>Nascondi unità IA</Italian>
+			<Polish>Ukryj jednostki AI</Polish>
+			<Russian>Скрыть юниты ИИ</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_ai_tip">
+			<English>If checked, AI units are hidden from the unit list, showing only players.</English>
+			<French>Si coché, les unités IA sont masquées de la liste des unités, ne montrant que les joueurs.</French>
+			<Spanish>Si está marcado, las unidades IA se ocultan de la lista de unidades, mostrando solo jugadores.</Spanish>
+			<German>Wenn aktiviert, werden KI-Einheiten aus der Einheitenliste ausgeblendet, nur Spieler werden angezeigt.</German>
+			<Italian>Se selezionato, le unità IA sono nascoste dalla lista delle unità, mostrando solo i giocatori.</Italian>
+			<Polish>Jeśli zaznaczone, jednostki AI są ukryte na liście jednostek, pokazując tylko graczy.</Polish>
+			<Russian>Если включено, юниты ИИ скрыты из списка, отображаются только игроки.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_as_lbl">
+			<English>Enable Audio Spectator (TFAR/ACRE)</English>
+			<French>Activer audio spectateur (TFAR/ACRE)</French>
+			<Spanish>Activar audio espectador (TFAR/ACRE)</Spanish>
+			<German>Audio-Zuschauer aktivieren (TFAR/ACRE)</German>
+			<Italian>Abilita audio spettatore (TFAR/ACRE)</Italian>
+			<Polish>Włącz audio obserwatora (TFAR/ACRE)</Polish>
+			<Russian>Включить аудио наблюдателя (TFAR/ACRE)</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_as_tip">
+			<English>If checked, you hear from the camera position. If unchecked, you hear from your player body.</English>
+			<French>Si coché, vous entendez depuis la caméra. Sinon, depuis votre personnage.</French>
+			<Spanish>Si está marcado, escuchas desde la cámara. Si no, desde tu personaje.</Spanish>
+			<German>Wenn aktiviert, hören Sie von der Kameraposition. Sonst von Ihrer Spielerfigur.</German>
+			<Italian>Se selezionato, senti dalla camera. Altrimenti dal corpo del giocatore.</Italian>
+			<Polish>Jeśli zaznaczone, słyszysz z pozycji kamery. W przeciwnym razie z postaci gracza.</Polish>
+			<Russian>Если включено, вы слышите с позиции камеры. Иначе — с персонажа.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_ms_lbl">
+			<English>Mouse Sensitivity</English>
+			<French>Sensibilité souris</French>
+			<Spanish>Sensibilidad del ratón</Spanish>
+			<German>Maus-Empfindlichkeit</German>
+			<Italian>Sensibilità mouse</Italian>
+			<Polish>Czułość myszy</Polish>
+			<Russian>Чувствительность мыши</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_ms_tip">
+			<English>Higher = Faster mouse look.</English>
+			<French>Plus haut = visée souris plus rapide.</French>
+			<Spanish>Más alto = vista de ratón más rápida.</Spanish>
+			<German>Höher = schnellere Mausbewegung.</German>
+			<Italian>Più alto = movimento mouse più veloce.</Italian>
+			<Polish>Wyżej = szybsze celowanie myszą.</Polish>
+			<Russian>Выше = быстрее обзор мышью.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_bs_lbl">
+			<English>Base Movement Speed</English>
+			<French>Vitesse de déplacement de base</French>
+			<Spanish>Velocidad de movimiento base</Spanish>
+			<German>Basis-Bewegungsgeschwindigkeit</German>
+			<Italian>Velocità di movimento base</Italian>
+			<Polish>Bazowa prędkość ruchu</Polish>
+			<Russian>Базовая скорость движения</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_bs_tip">
+			<English>Higher = Faster base speed before multiplier.</English>
+			<French>Plus haut = vitesse de base plus rapide avant multiplicateur.</French>
+			<Spanish>Más alto = velocidad base más rápida antes del multiplicador.</Spanish>
+			<German>Höher = höhere Basisgeschwindigkeit vor Multiplikator.</German>
+			<Italian>Più alto = velocità base più alta prima del moltiplicatore.</Italian>
+			<Polish>Wyżej = wyższa prędkość bazowa przed mnożnikiem.</Polish>
+			<Russian>Выше = выше базовая скорость до множителя.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_pr_lbl">
+			<English>Position Responsiveness</English>
+			<French>Réactivité de position</French>
+			<Spanish>Respuesta de posición</Spanish>
+			<German>Positions-Reaktion</German>
+			<Italian>Reattività di posizione</Italian>
+			<Polish>Reaktywność pozycji</Polish>
+			<Russian>Отзывчивость позиции</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_pr_tip">
+			<English>1 = Heavy/Slow, 10 = Instant.</English>
+			<French>1 = lourd/lent, 10 = instantané.</French>
+			<Spanish>1 = pesado/lento, 10 = instantáneo.</Spanish>
+			<German>1 = schwer/langsam, 10 = sofort.</German>
+			<Italian>1 = pesante/lento, 10 = istantaneo.</Italian>
+			<Polish>1 = ciężki/wolny, 10 = natychmiast.</Polish>
+			<Russian>1 = тяжело/медленно, 10 = мгновенно.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_rr_lbl">
+			<English>Rotation Responsiveness (Mouse)</English>
+			<French>Réactivité de rotation (souris)</French>
+			<Spanish>Respuesta de rotación (ratón)</Spanish>
+			<German>Rotations-Reaktion (Maus)</German>
+			<Italian>Reattività di rotazione (mouse)</Italian>
+			<Polish>Reaktywność obrotu (mysz)</Polish>
+			<Russian>Отзывчивость поворота (мышь)</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_rr_tip">
+			<English>1 = Heavy/Smooth, 10 = Instant.</English>
+			<French>1 = lourd/lisse, 10 = instantané.</French>
+			<Spanish>1 = pesado/suave, 10 = instantáneo.</Spanish>
+			<German>1 = schwer/sanft, 10 = sofort.</German>
+			<Italian>1 = pesante/fluido, 10 = istantaneo.</Italian>
+			<Polish>1 = ciężki/płynny, 10 = natychmiast.</Polish>
+			<Russian>1 = тяжело/плавно, 10 = мгновенно.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_or_lbl">
+			<English>Orientation Lock Responsiveness</English>
+			<French>Réactivité du verrouillage d'orientation</French>
+			<Spanish>Respuesta del bloqueo de orientación</Spanish>
+			<German>Reaktion der Orientierungsfixierung</German>
+			<Italian>Reattività blocco orientamento</Italian>
+			<Polish>Reaktywność blokady orientacji</Polish>
+			<Russian>Отзывчивость блокировки ориентации</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_or_tip">
+			<English>How fast it tracks the target's angles.</English>
+			<French>Vitesse de suivi des angles de la cible.</French>
+			<Spanish>Velocidad de seguimiento de los ángulos del objetivo.</Spanish>
+			<German>Wie schnell die Zielwinkel verfolgt werden.</German>
+			<Italian>Velocità di tracciamento degli angoli del bersaglio.</Italian>
+			<Polish>Szybkość śledzenia kątów celu.</Polish>
+			<Russian>Скорость отслеживания углов цели.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_zr_lbl">
+			<English>Zoom Responsiveness</English>
+			<French>Réactivité du zoom</French>
+			<Spanish>Respuesta del zoom</Spanish>
+			<German>Zoom-Reaktion</German>
+			<Italian>Reattività dello zoom</Italian>
+			<Polish>Reaktywność zoomu</Polish>
+			<Russian>Отзывчивость зума</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_zr_tip">
+			<English>1 = Slow Zoom, 10 = Instant.</English>
+			<French>1 = zoom lent, 10 = instantané.</French>
+			<Spanish>1 = zoom lento, 10 = instantáneo.</Spanish>
+			<German>1 = langsamer Zoom, 10 = sofort.</German>
+			<Italian>1 = zoom lento, 10 = istantaneo.</Italian>
+			<Polish>1 = wolny zoom, 10 = natychmiast.</Polish>
+			<Russian>1 = медленный зум, 10 = мгновенно.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_sr_lbl">
+			<English>Speed Change Responsiveness</English>
+			<French>Réactivité du changement de vitesse</French>
+			<Spanish>Respuesta del cambio de velocidad</Spanish>
+			<German>Geschwindigkeitswechsel-Reaktion</German>
+			<Italian>Reattività cambio velocità</Italian>
+			<Polish>Reaktywność zmiany prędkości</Polish>
+			<Russian>Отзывчивость смены скорости</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_sr_tip">
+			<English>How fast Shift/Ctrl changes speed.</English>
+			<French>Vitesse de changement par Shift/Ctrl.</French>
+			<Spanish>Velocidad a la que Shift/Ctrl cambia la velocidad.</Spanish>
+			<German>Wie schnell Shift/Strg die Geschwindigkeit ändert.</German>
+			<Italian>Velocità a cui Shift/Ctrl cambia la velocità.</Italian>
+			<Polish>Jak szybko Shift/Ctrl zmienia prędkość.</Polish>
+			<Russian>Насколько быстро Shift/Ctrl меняет скорость.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_rs_lbl">
+			<English>Roll Speed</English>
+			<French>Vitesse de roulis</French>
+			<Spanish>Velocidad de inclinación</Spanish>
+			<German>Rollgeschwindigkeit</German>
+			<Italian>Velocità di rollio</Italian>
+			<Polish>Prędkość przechyłu</Polish>
+			<Russian>Скорость крена</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_rs_tip">
+			<English>Higher = Faster rolling.</English>
+			<French>Plus haut = roulis plus rapide.</French>
+			<Spanish>Más alto = inclinación más rápida.</Spanish>
+			<German>Höher = schnelleres Rollen.</German>
+			<Italian>Più alto = rollio più veloce.</Italian>
+			<Polish>Wyżej = szybszy przechył.</Polish>
+			<Russian>Выше = быстрее крен.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_pad_lbl">
+			<English>Enable Xbox Controller Input</English>
+			<French>Activer manette Xbox</French>
+			<Spanish>Activar mando Xbox</Spanish>
+			<German>Xbox-Controller aktivieren</German>
+			<Italian>Abilita controller Xbox</Italian>
+			<Polish>Włącz kontroler Xbox</Polish>
+			<Russian>Включить контроллер Xbox</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_pad_tip">
+			<English>Adds analog stick + button support for the camera.</English>
+			<French>Ajoute le support des sticks analogiques et boutons pour la caméra.</French>
+			<Spanish>Añade soporte para palancas analógicas y botones.</Spanish>
+			<German>Fügt Unterstützung für analoge Sticks und Tasten hinzu.</German>
+			<Italian>Aggiunge supporto per stick analogici e pulsanti.</Italian>
+			<Polish>Dodaje obsługę analogowych gałek i przycisków.</Polish>
+			<Russian>Добавляет поддержку аналоговых стиков и кнопок для камеры.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_pdz_lbl">
+			<English>Controller Stick Deadzone</English>
+			<French>Zone morte des sticks</French>
+			<Spanish>Zona muerta del joystick</Spanish>
+			<German>Stick-Totzone</German>
+			<Italian>Zona morta stick</Italian>
+			<Polish>Martwa strefa gałki</Polish>
+			<Russian>Мёртвая зона стика</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_pdz_tip">
+			<English>Higher = more stick travel needed before the camera responds. Helps with drift.</English>
+			<French>Plus haut = il faut pousser plus le stick pour que la caméra réagisse. Évite le drift.</French>
+			<Spanish>Más alto = más recorrido necesario antes de que la cámara responda. Ayuda con el drift.</Spanish>
+			<German>Höher = mehr Stick-Weg nötig, bevor die Kamera reagiert. Hilft gegen Drift.</German>
+			<Italian>Più alto = serve più corsa dello stick prima che la camera risponda. Aiuta con il drift.</Italian>
+			<Polish>Wyżej = większy ruch gałki potrzebny zanim kamera zareaguje. Pomaga w driftcie.</Polish>
+			<Russian>Выше = больше отклонения стика нужно прежде чем камера среагирует. Помогает с дрифтом.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_pls_lbl">
+			<English>Controller Look Sensitivity</English>
+			<French>Sensibilité de visée manette</French>
+			<Spanish>Sensibilidad de mira (mando)</Spanish>
+			<German>Controller-Empfindlichkeit</German>
+			<Italian>Sensibilità mira controller</Italian>
+			<Polish>Czułość celowania pada</Polish>
+			<Russian>Чувствительность обзора контроллера</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_pls_tip">
+			<English>Right-stick rotation speed. Higher = snappier look.</English>
+			<French>Vitesse de rotation du stick droit. Plus haut = visée plus vive.</French>
+			<Spanish>Velocidad de rotación de la palanca derecha. Más alto = más ágil.</Spanish>
+			<German>Rotationsgeschwindigkeit des rechten Sticks. Höher = schnellere Sicht.</German>
+			<Italian>Velocità di rotazione dello stick destro. Più alto = movimento più rapido.</Italian>
+			<Polish>Prędkość obrotu prawej gałki. Wyżej = szybsze patrzenie.</Polish>
+			<Russian>Скорость поворота правого стика. Выше = резче обзор.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_piy_lbl">
+			<English>Invert Controller Look Y</English>
+			<French>Inverser visée Y (manette)</French>
+			<Spanish>Invertir Y de mira (mando)</Spanish>
+			<German>Y-Achse invertieren (Controller)</German>
+			<Italian>Inverti asse Y mira (controller)</Italian>
+			<Polish>Odwróć oś Y celowania (pad)</Polish>
+			<Russian>Инвертировать ось Y обзора (контроллер)</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_piy_tip">
+			<English>If checked, right stick UP looks down (flight-style).</English>
+			<French>Si coché, stick droit vers le haut = regarder en bas (style avion).</French>
+			<Spanish>Si está marcado, palanca derecha ARRIBA mira hacia abajo (estilo avión).</Spanish>
+			<German>Wenn aktiviert, rechter Stick HOCH schaut nach unten (Flieger-Stil).</German>
+			<Italian>Se selezionato, stick destro SU guarda in basso (stile aereo).</Italian>
+			<Polish>Jeśli zaznaczone, prawa gałka W GÓRĘ patrzy w dół (styl lotniczy).</Polish>
+			<Russian>Если включено, правый стик ВВЕРХ смотрит вниз (стиль авиации).</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_pvs_lbl">
+			<English>Controller Vertical Look Multiplier</English>
+			<French>Multiplicateur visée verticale manette</French>
+			<Spanish>Multiplicador vertical mando</Spanish>
+			<German>Controller-Vertikalmultiplikator</German>
+			<Italian>Moltiplicatore verticale controller</Italian>
+			<Polish>Mnożnik pionowy pada</Polish>
+			<Russian>Множитель вертикального обзора контроллера</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_pvs_tip">
+			<English>Boosts the right-stick vertical (pitch) speed only — useful if the Y axis feels sluggish compared to X. 1.0 = same as horizontal.</English>
+			<French>Booste uniquement la vitesse verticale du stick droit — utile si l'axe Y semble mou par rapport à X. 1.0 = identique à l'horizontal.</French>
+			<Spanish>Aumenta solo la velocidad vertical de la palanca derecha — útil si el eje Y se siente lento respecto al X. 1.0 = igual que horizontal.</Spanish>
+			<German>Verstärkt nur die vertikale Geschwindigkeit des rechten Sticks — nützlich wenn die Y-Achse träger als X wirkt. 1.0 = gleich wie horizontal.</German>
+			<Italian>Aumenta solo la velocità verticale dello stick destro — utile se l'asse Y sembra lento rispetto all'X. 1.0 = uguale all'orizzontale.</Italian>
+			<Polish>Zwiększa tylko prędkość pionową prawej gałki — przydatne gdy oś Y wydaje się powolna w porównaniu do X. 1.0 = tak samo jak poziom.</Polish>
+			<Russian>Усиливает только вертикальную (тангаж) скорость правого стика — полезно если ось Y кажется вялой по сравнению с X. 1.0 = такая же как горизонтальная.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_strtp_lbl">
+			<English>Start Camera Paused</English>
+			<French>Démarrer caméra en pause</French>
+			<Spanish>Iniciar cámara en pausa</Spanish>
+			<German>Kamera pausiert starten</German>
+			<Italian>Avvia camera in pausa</Italian>
+			<Polish>Uruchom kamerę z pauzą</Polish>
+			<Russian>Запустить камеру в паузе</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_strtp_tip">
+			<English>If checked, opening the camera immediately pauses the game (timescale 0). Single-player only.</English>
+			<French>Si coché, ouvrir la caméra met immédiatement le jeu en pause (timescale 0). Solo uniquement.</French>
+			<Spanish>Si está marcado, al abrir la cámara se pausa el juego (timescale 0). Solo un jugador.</Spanish>
+			<German>Wenn aktiviert, pausiert die Kamera beim Öffnen sofort das Spiel (Zeitskala 0). Nur im Einzelspieler.</German>
+			<Italian>Se selezionato, l'apertura della camera mette in pausa il gioco (timescale 0). Solo singleplayer.</Italian>
+			<Polish>Jeśli zaznaczone, otwarcie kamery natychmiast wstrzymuje grę (skala czasu 0). Tylko tryb jednoosobowy.</Polish>
+			<Russian>Если включено, открытие камеры сразу ставит игру на паузу (шкала времени 0). Только одиночная игра.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_ts_lbl_fmt">
+			<English>Numpad %1 Timescale</English>
+			<French>Pavé num. %1 - Timescale</French>
+			<Spanish>Numpad %1 - Escala de tiempo</Spanish>
+			<German>Numpad %1 - Zeitskala</German>
+			<Italian>Tastierino %1 - Timescale</Italian>
+			<Polish>Numpad %1 - Skala czasu</Polish>
+			<Russian>Numpad %1 - Шкала времени</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_ts_tip">
+			<English>Timescale applied when this numpad key is pressed. 1.0 = normal, &lt;1 = slow-mo, &gt;1 = sped up. Single-player only.</English>
+			<French>Échelle temps appliquée par cette touche du pavé numérique. 1.0 = normal, &lt;1 = ralenti, &gt;1 = accéléré. Solo uniquement.</French>
+			<Spanish>Escala de tiempo aplicada al pulsar esta tecla del teclado numérico. 1.0 = normal, &lt;1 = cámara lenta, &gt;1 = acelerado. Solo un jugador.</Spanish>
+			<German>Zeitskala bei Druck dieser Nummernblock-Taste. 1.0 = normal, &lt;1 = Zeitlupe, &gt;1 = beschleunigt. Nur Einzelspieler.</German>
+			<Italian>Scala temporale applicata premendo questo tasto del tastierino numerico. 1.0 = normale, &lt;1 = rallentatore, &gt;1 = accelerato. Solo singleplayer.</Italian>
+			<Polish>Skala czasu zastosowana po naciśnięciu tego klawisza numerycznego. 1.0 = normalna, &lt;1 = slow-mo, &gt;1 = przyspieszone. Tylko tryb jednoosobowy.</Polish>
+			<Russian>Шкала времени применяется при нажатии этой клавиши numpad. 1.0 = нормальная, &lt;1 = slow-mo, &gt;1 = ускоренная. Только одиночная игра.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_denied">
+			<English>ACCESS DENIED: You are not on the Cinematic Camera whitelist.</English>
+			<French>ACCÈS REFUSÉ : vous n'êtes pas sur la whitelist de la Cinematic Camera.</French>
+			<Spanish>ACCESO DENEGADO: no estás en la lista blanca de la Cinematic Camera.</Spanish>
+			<German>ZUGRIFF VERWEIGERT: Sie sind nicht auf der Whitelist der Cinematic Camera.</German>
+			<Italian>ACCESSO NEGATO: non sei nella whitelist della Cinematic Camera.</Italian>
+			<Polish>ODMOWA DOSTĘPU: nie jesteś na białej liście Cinematic Camera.</Polish>
+			<Russian>ДОСТУП ЗАПРЕЩЁН: вас нет в белом списке Cinematic Camera.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_already">
+			<English>Cinematic Camera is already active!</English>
+			<French>La Cinematic Camera est déjà active !</French>
+			<Spanish>¡La Cinematic Camera ya está activa!</Spanish>
+			<German>Cinematic Camera ist bereits aktiv!</German>
+			<Italian>La Cinematic Camera è già attiva!</Italian>
+			<Polish>Cinematic Camera jest już aktywna!</Polish>
+			<Russian>Cinematic Camera уже активна!</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_hud_full">
+			<English>HUD: FULL</English>
+			<French>HUD : COMPLET</French>
+			<Spanish>HUD: COMPLETO</Spanish>
+			<German>HUD: VOLL</German>
+			<Italian>HUD: COMPLETO</Italian>
+			<Polish>HUD: PEŁNY</Polish>
+			<Russian>HUD: ПОЛНЫЙ</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_hud_light">
+			<English>HUD: LIGHT</English>
+			<French>HUD : ALLÉGÉ</French>
+			<Spanish>HUD: LIGERO</Spanish>
+			<German>HUD: LEICHT</German>
+			<Italian>HUD: RIDOTTO</Italian>
+			<Polish>HUD: LEKKI</Polish>
+			<Russian>HUD: ЛЁГКИЙ</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_hud_off">
+			<English>HUD: OFF</English>
+			<French>HUD : OFF</French>
+			<Spanish>HUD: OFF</Spanish>
+			<German>HUD: AUS</German>
+			<Italian>HUD: OFF</Italian>
+			<Polish>HUD: WYŁ.</Polish>
+			<Russian>HUD: ВЫКЛ.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_vis_norm">
+			<English>Vision: Normal</English>
+			<French>Vision : normale</French>
+			<Spanish>Visión: Normal</Spanish>
+			<German>Sicht: Normal</German>
+			<Italian>Visione: Normale</Italian>
+			<Polish>Widok: Normalny</Polish>
+			<Russian>Зрение: Нормальное</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_vis_nvg">
+			<English>Vision: NVG</English>
+			<French>Vision : NVG</French>
+			<Spanish>Visión: NVG</Spanish>
+			<German>Sicht: NVG</German>
+			<Italian>Visione: NVG</Italian>
+			<Polish>Widok: NVG</Polish>
+			<Russian>Зрение: ПНВ</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_vis_whot">
+			<English>Vision: White Hot</English>
+			<French>Vision : blanc chaud</French>
+			<Spanish>Visión: Blanco caliente</Spanish>
+			<German>Sicht: Weiß-Heiß</German>
+			<Italian>Visione: Bianco caldo</Italian>
+			<Polish>Widok: Biały gorący</Polish>
+			<Russian>Зрение: Горячий белый</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_vis_bhot">
+			<English>Vision: Black Hot</English>
+			<French>Vision : noir chaud</French>
+			<Spanish>Visión: Negro caliente</Spanish>
+			<German>Sicht: Schwarz-Heiß</German>
+			<Italian>Visione: Nero caldo</Italian>
+			<Polish>Widok: Czarny gorący</Polish>
+			<Russian>Зрение: Горячий чёрный</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_ts_fmt">
+			<English>Timescale: %1</English>
+			<French>Échelle temps : %1</French>
+			<Spanish>Escala de tiempo: %1</Spanish>
+			<German>Zeitskala: %1</German>
+			<Italian>Scala del tempo: %1</Italian>
+			<Polish>Skala czasu: %1</Polish>
+			<Russian>Шкала времени: %1</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_alt_on">
+			<English>Altitude Lock: ON</English>
+			<French>Verrouillage de l'altitude : ON</French>
+			<Spanish>Bloqueo altitud: ON</Spanish>
+			<German>Höhenfixierung: AN</German>
+			<Italian>Blocco altitudine: ON</Italian>
+			<Polish>Blokada wysokości: WŁ.</Polish>
+			<Russian>Фиксация высоты: ВКЛ.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_alt_off">
+			<English>Altitude Lock: OFF</English>
+			<French>Verrouillage de l'altitude : OFF</French>
+			<Spanish>Bloqueo altitud: OFF</Spanish>
+			<German>Höhenfixierung: AUS</German>
+			<Italian>Blocco altitudine: OFF</Italian>
+			<Polish>Blokada wysokości: WYŁ.</Polish>
+			<Russian>Фиксация высоты: ВЫКЛ.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_lat_on">
+			<English>Look At Target: ON</English>
+			<French>Regarder cible : ON</French>
+			<Spanish>Mirar al objetivo: ON</Spanish>
+			<German>Auf Ziel schauen: AN</German>
+			<Italian>Guarda bersaglio: ON</Italian>
+			<Polish>Patrz na cel: WŁ.</Polish>
+			<Russian>Смотреть на цель: ВКЛ.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_lat_off">
+			<English>Look At Target: OFF</English>
+			<French>Regarder cible : OFF</French>
+			<Spanish>Mirar al objetivo: OFF</Spanish>
+			<German>Auf Ziel schauen: AUS</German>
+			<Italian>Guarda bersaglio: OFF</Italian>
+			<Polish>Patrz na cel: WYŁ.</Polish>
+			<Russian>Смотреть на цель: ВЫКЛ.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_lat_dis">
+			<English>Look At: DISABLED (Target Lost)</English>
+			<French>Regarder : désactivé (cible perdue)</French>
+			<Spanish>Mirar a: DESACTIVADO (objetivo perdido)</Spanish>
+			<German>Schauen: DEAKTIVIERT (Ziel verloren)</German>
+			<Italian>Guarda: DISATTIVATO (bersaglio perso)</Italian>
+			<Polish>Patrz: WYŁĄCZONE (cel utracony)</Polish>
+			<Russian>Смотреть: ОТКЛЮЧЕНО (цель потеряна)</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_ori_on">
+			<English>Orientation Lock: ON</English>
+			<French>Verrouillage de l'orientation : ON</French>
+			<Spanish>Bloqueo orientación: ON</Spanish>
+			<German>Orientierungsfixierung: AN</German>
+			<Italian>Blocco orientamento: ON</Italian>
+			<Polish>Blokada orientacji: WŁ.</Polish>
+			<Russian>Фиксация ориентации: ВКЛ.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_ori_off">
+			<English>Orientation Lock: OFF</English>
+			<French>Verrouillage de l'orientation : OFF</French>
+			<Spanish>Bloqueo orientación: OFF</Spanish>
+			<German>Orientierungsfixierung: AUS</German>
+			<Italian>Blocco orientamento: OFF</Italian>
+			<Polish>Blokada orientacji: WYŁ.</Polish>
+			<Russian>Фиксация ориентации: ВЫКЛ.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_ori_failt">
+			<English>Orientation Lock: FAILED (Invalid Target)</English>
+			<French>Verrou orientation : échec (cible invalide)</French>
+			<Spanish>Bloqueo orientación: FALLO (objetivo inválido)</Spanish>
+			<German>Orientierungsfixierung: FEHLER (ungültiges Ziel)</German>
+			<Italian>Blocco orientamento: FALLITO (bersaglio non valido)</Italian>
+			<Polish>Blokada orientacji: BŁĄD (nieprawidłowy cel)</Polish>
+			<Russian>Фиксация ориентации: ОШИБКА (неверная цель)</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_ori_failv">
+			<English>Orientation Lock: FAILED (Invalid Vehicle)</English>
+			<French>Verrou orientation : échec (véhicule invalide)</French>
+			<Spanish>Bloqueo orientación: FALLO (vehículo inválido)</Spanish>
+			<German>Orientierungsfixierung: FEHLER (ungültiges Fahrzeug)</German>
+			<Italian>Blocco orientamento: FALLITO (veicolo non valido)</Italian>
+			<Polish>Blokada orientacji: BŁĄD (nieprawidłowy pojazd)</Polish>
+			<Russian>Фиксация ориентации: ОШИБКА (неверная машина)</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_ori_dist">
+			<English>Orientation Lock: DISABLED (Target Lost)</English>
+			<French>Verrou orientation : désactivé (cible perdue)</French>
+			<Spanish>Bloqueo orientación: DESACTIVADO (objetivo perdido)</Spanish>
+			<German>Orientierungsfixierung: DEAKTIVIERT (Ziel verloren)</German>
+			<Italian>Blocco orientamento: DISATTIVATO (bersaglio perso)</Italian>
+			<Polish>Blokada orientacji: WYŁĄCZONA (cel utracony)</Polish>
+			<Russian>Фиксация ориентации: ОТКЛЮЧЕНА (цель потеряна)</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_ori_disv">
+			<English>Orientation Lock: DISABLED (Vehicle Lost)</English>
+			<French>Verrou orientation : désactivé (véhicule perdu)</French>
+			<Spanish>Bloqueo orientación: DESACTIVADO (vehículo perdido)</Spanish>
+			<German>Orientierungsfixierung: DEAKTIVIERT (Fahrzeug verloren)</German>
+			<Italian>Blocco orientamento: DISATTIVATO (veicolo perso)</Italian>
+			<Polish>Blokada orientacji: WYŁĄCZONA (pojazd utracony)</Polish>
+			<Russian>Фиксация ориентации: ОТКЛЮЧЕНА (машина потеряна)</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_rst_fail">
+			<English>Reset: FAILED (Invalid Target)</English>
+			<French>Reset : échec (cible invalide)</French>
+			<Spanish>Restablecer: FALLO (objetivo inválido)</Spanish>
+			<German>Zurücksetzen: FEHLER (ungültiges Ziel)</German>
+			<Italian>Reset: FALLITO (bersaglio non valido)</Italian>
+			<Polish>Reset: BŁĄD (nieprawidłowy cel)</Polish>
+			<Russian>Сброс: ОШИБКА (неверная цель)</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_cam_reset">
+			<English>Camera Reset</English>
+			<French>Caméra réinitialisée</French>
+			<Spanish>Cámara restablecida</Spanish>
+			<German>Kamera zurückgesetzt</German>
+			<Italian>Camera resettata</Italian>
+			<Polish>Kamera zresetowana</Polish>
+			<Russian>Камера сброшена</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_fol_on">
+			<English>Follow Mode: ON</English>
+			<French>Mode suivi : ON</French>
+			<Spanish>Modo seguir: ON</Spanish>
+			<German>Folgemodus: AN</German>
+			<Italian>Modalità segui: ON</Italian>
+			<Polish>Tryb podążania: WŁ.</Polish>
+			<Russian>Режим следования: ВКЛ.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_fol_off">
+			<English>Follow Mode: OFF</English>
+			<French>Mode suivi : OFF</French>
+			<Spanish>Modo seguir: OFF</Spanish>
+			<German>Folgemodus: AUS</German>
+			<Italian>Modalità segui: OFF</Italian>
+			<Polish>Tryb podążania: WYŁ.</Polish>
+			<Russian>Режим следования: ВЫКЛ.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_fol_fail">
+			<English>Follow: FAILED (Invalid Target)</English>
+			<French>Suivi : échec (cible invalide)</French>
+			<Spanish>Seguir: FALLO (objetivo inválido)</Spanish>
+			<German>Folgen: FEHLER (ungültiges Ziel)</German>
+			<Italian>Segui: FALLITO (bersaglio non valido)</Italian>
+			<Polish>Podążaj: BŁĄD (nieprawidłowy cel)</Polish>
+			<Russian>Следование: ОШИБКА (неверная цель)</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_tgt_fmt">
+			<English>Target: %1</English>
+			<French>Cible : %1</French>
+			<Spanish>Objetivo: %1</Spanish>
+			<German>Ziel: %1</German>
+			<Italian>Bersaglio: %1</Italian>
+			<Polish>Cel: %1</Polish>
+			<Russian>Цель: %1</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_cam_on">
+			<English>Cinematic Camera ON</English>
+			<French>Cinematic Camera ON</French>
+			<Spanish>Cinematic Camera ON</Spanish>
+			<German>Cinematic Camera AN</German>
+			<Italian>Cinematic Camera ON</Italian>
+			<Polish>Cinematic Camera WŁ.</Polish>
+			<Russian>Cinematic Camera ВКЛ.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_zeus">
+			<English>Can't open Cinematic Camera in Zeus!</English>
+		</Key>
+		<Key ID="STR_Bro_SCam_h_notgt">
+			<English>NO TARGET</English>
+			<French>AUCUNE CIBLE</French>
+			<Spanish>SIN OBJETIVO</Spanish>
+			<German>KEIN ZIEL</German>
+			<Italian>NESSUN BERSAGLIO</Italian>
+			<Polish>BRAK CELU</Polish>
+			<Russian>НЕТ ЦЕЛИ</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_h_grid">
+			<English>GRID</English>
+			<French>GRILLE</French>
+			<Spanish>CUADRÍCULA</Spanish>
+			<German>RASTER</German>
+			<Italian>GRIGLIA</Italian>
+			<Polish>SIATKA</Polish>
+			<Russian>КВАДРАТ</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_h_tscale">
+			<English>T.SCALE</English>
+			<French>T.SCALE</French>
+			<Spanish>T.ESCALA</Spanish>
+			<German>T.SKALA</German>
+			<Italian>T.SCALA</Italian>
+			<Polish>T.SKALA</Polish>
+			<Russian>T.SCALE</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_p_move">
+			<English>MOVE:</English>
+			<French>DÉPLAC. :</French>
+			<Spanish>MOVER:</Spanish>
+			<German>BEW.:</German>
+			<Italian>MOVI.:</Italian>
+			<Polish>RUCH:</Polish>
+			<Russian>ДВИЖ.:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_p_elev">
+			<English>ELEV:</English>
+			<French>ÉLÉV :</French>
+			<Spanish>ELEV:</Spanish>
+			<German>HÖHE:</German>
+			<Italian>ELEV:</Italian>
+			<Polish>WYS.:</Polish>
+			<Russian>ВЫСОТА:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_p_speed">
+			<English>SPEED:</English>
+			<French>VITESSE :</French>
+			<Spanish>VELOC.:</Spanish>
+			<German>GESCHW.:</German>
+			<Italian>VEL.:</Italian>
+			<Polish>PRĘD.:</Polish>
+			<Russian>СКОР.:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_p_zoom">
+			<English>ZOOM:</English>
+			<French>ZOOM :</French>
+			<Spanish>ZOOM:</Spanish>
+			<German>ZOOM:</German>
+			<Italian>ZOOM:</Italian>
+			<Polish>ZOOM:</Polish>
+			<Russian>ЗУМ:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_p_zoom_val">
+			<English>SCROLL</English>
+			<French>MOLETTE</French>
+			<Spanish>RUEDA</Spanish>
+			<German>SCROLL</German>
+			<Italian>ROTELLA</Italian>
+			<Polish>ROLKA</Polish>
+			<Russian>КОЛЕСО</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_p_scrollall">
+			<English>SCROLL ALL:</English>
+			<French>LISTE TOUS :</French>
+			<Spanish>LISTA TODOS:</Spanish>
+			<German>LISTE ALLE:</German>
+			<Italian>LISTA TUTTI:</Italian>
+			<Polish>LISTA WSZ.:</Polish>
+			<Russian>СПИСОК ВСЕ:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_p_scrollpl">
+			<English>SCROLL PLYRS:</English>
+			<French>LISTE JOUEURS :</French>
+			<Spanish>LISTA JUGAD.:</Spanish>
+			<German>LISTE SPIELER:</German>
+			<Italian>LISTA GIOC.:</Italian>
+			<Polish>LISTA GRACZY:</Polish>
+			<Russian>СПИСОК ИГРОКИ:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_p_select">
+			<English>SELECT:</English>
+			<French>SÉLECT. :</French>
+			<Spanish>SELECC.:</Spanish>
+			<German>AUSWÄHLEN:</German>
+			<Italian>SELEZ.:</Italian>
+			<Polish>WYBIERZ:</Polish>
+			<Russian>ВЫБРАТЬ:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_p_time">
+			<English>TIME:</English>
+			<French>TEMPS :</French>
+			<Spanish>TIEMPO:</Spanish>
+			<German>ZEIT:</German>
+			<Italian>TEMPO:</Italian>
+			<Polish>CZAS:</Polish>
+			<Russian>ВРЕМЯ:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_p_follow">
+			<English>FOLLOW:</English>
+			<French>SUIVI :</French>
+			<Spanish>SEGUIR:</Spanish>
+			<German>FOLGEN:</German>
+			<Italian>SEGUI:</Italian>
+			<Polish>PODĄŻAJ:</Polish>
+			<Russian>СЛЕДОВАТЬ:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_p_lookat">
+			<English>LOOKAT:</English>
+			<French>REGARDER :</French>
+			<Spanish>MIRAR:</Spanish>
+			<German>BLICK:</German>
+			<Italian>GUARDA:</Italian>
+			<Polish>PATRZ:</Polish>
+			<Russian>СМОТРЕТЬ:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_p_lockori">
+			<English>LOCK ORI:</English>
+			<French>VERROU ORI :</French>
+			<Spanish>BLOQ ORI:</Spanish>
+			<German>ORI FIX:</German>
+			<Italian>BLOCCO ORI:</Italian>
+			<Polish>BLOK. ORI:</Polish>
+			<Russian>БЛОК ОРИ:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_p_lockalt">
+			<English>LOCK ALT:</English>
+			<French>VERROU ALT :</French>
+			<Spanish>BLOQ ALT:</Spanish>
+			<German>ALT FIX:</German>
+			<Italian>BLOCCO ALT:</Italian>
+			<Polish>BLOK. ALT:</Polish>
+			<Russian>БЛОК ВЫС:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_p_vision">
+			<English>VISION:</English>
+			<French>VISION :</French>
+			<Spanish>VISIÓN:</Spanish>
+			<German>SICHT:</German>
+			<Italian>VISIONE:</Italian>
+			<Polish>WIDOK:</Polish>
+			<Russian>ЗРЕНИЕ:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_p_reset">
+			<English>RESET:</English>
+			<French>RESET :</French>
+			<Spanish>RESET:</Spanish>
+			<German>RESET:</German>
+			<Italian>RESET:</Italian>
+			<Polish>RESET:</Polish>
+			<Russian>СБРОС:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_p_togglehud">
+			<English>TOGGLE HUD:</English>
+			<French>HUD :</French>
+			<Spanish>HUD:</Spanish>
+			<German>HUD:</German>
+			<Italian>HUD:</Italian>
+			<Polish>HUD:</Polish>
+			<Russian>HUD:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_p_exit">
+			<English>EXIT:</English>
+			<French>SORTIE :</French>
+			<Spanish>SALIR:</Spanish>
+			<German>BEENDEN:</German>
+			<Italian>ESCI:</Italian>
+			<Polish>WYJŚCIE:</Polish>
+			<Russian>ВЫХОД:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_c_title">
+			<English>XBOX CONTROLLER</English>
+			<French>MANETTE XBOX</French>
+			<Spanish>MANDO XBOX</Spanish>
+			<German>XBOX-CONTROLLER</German>
+			<Italian>CONTROLLER XBOX</Italian>
+			<Polish>KONTROLER XBOX</Polish>
+			<Russian>КОНТРОЛЛЕР XBOX</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_c_move">
+			<English>MOVE:</English>
+			<French>DÉPLAC. :</French>
+			<Spanish>MOVER:</Spanish>
+			<German>BEW.:</German>
+			<Italian>MOVI.:</Italian>
+			<Polish>RUCH:</Polish>
+			<Russian>ДВИЖ.:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_c_look">
+			<English>LOOK:</English>
+			<French>VISÉE :</French>
+			<Spanish>MIRAR:</Spanish>
+			<German>BLICK:</German>
+			<Italian>MIRA:</Italian>
+			<Polish>PATRZ:</Polish>
+			<Russian>ОБЗОР:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_c_updn">
+			<English>UP / DOWN:</English>
+			<French>HAUT / BAS :</French>
+			<Spanish>ARR / ABJ:</Spanish>
+			<German>HOCH / RUNTER:</German>
+			<Italian>SU / GIÙ:</Italian>
+			<Polish>GÓRA / DÓŁ:</Polish>
+			<Russian>ВВЕРХ / ВНИЗ:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_c_speed">
+			<English>SPEED +/-:</English>
+			<French>VITESSE +/- :</French>
+			<Spanish>VEL. +/-:</Spanish>
+			<German>GESCHW. +/-:</German>
+			<Italian>VEL. +/-:</Italian>
+			<Polish>PRĘD. +/-:</Polish>
+			<Russian>СКОР. +/-:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_c_listud">
+			<English>LIST U/D:</English>
+			<French>LISTE H/B :</French>
+			<Spanish>LISTA ARR/ABJ:</Spanish>
+			<German>LISTE H/R:</German>
+			<Italian>LISTA SU/GIÙ:</Italian>
+			<Polish>LISTA G/D:</Polish>
+			<Russian>СПИСОК В/Н:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_c_playerpn">
+			<English>PLAYER P/N:</English>
+			<French>JOUEUR P/S :</French>
+			<Spanish>JUGADOR P/S:</Spanish>
+			<German>SPIELER V/N:</German>
+			<Italian>GIOCATORE P/S:</Italian>
+			<Polish>GRACZ P/N:</Polish>
+			<Russian>ИГРОК П/С:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_c_select">
+			<English>SELECT:</English>
+			<French>SÉLECT. :</French>
+			<Spanish>SELECC.:</Spanish>
+			<German>AUSWÄHLEN:</German>
+			<Italian>SELEZ.:</Italian>
+			<Polish>WYBIERZ:</Polish>
+			<Russian>ВЫБРАТЬ:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_c_follow">
+			<English>FOLLOW:</English>
+			<French>SUIVI :</French>
+			<Spanish>SEGUIR:</Spanish>
+			<German>FOLGEN:</German>
+			<Italian>SEGUI:</Italian>
+			<Polish>PODĄŻAJ:</Polish>
+			<Russian>СЛЕДОВАТЬ:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_c_lookat">
+			<English>LOOKAT:</English>
+			<French>REGARDER :</French>
+			<Spanish>MIRAR:</Spanish>
+			<German>BLICK:</German>
+			<Italian>GUARDA:</Italian>
+			<Polish>PATRZ:</Polish>
+			<Russian>СМОТРЕТЬ:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_c_vision">
+			<English>VISION:</English>
+			<French>VISION :</French>
+			<Spanish>VISIÓN:</Spanish>
+			<German>SICHT:</German>
+			<Italian>VISIONE:</Italian>
+			<Polish>WIDOK:</Polish>
+			<Russian>ЗРЕНИЕ:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_c_hud">
+			<English>HUD:</English>
+			<French>HUD :</French>
+			<Spanish>HUD:</Spanish>
+			<German>HUD:</German>
+			<Italian>HUD:</Italian>
+			<Polish>HUD:</Polish>
+			<Russian>HUD:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_c_altlock">
+			<English>ALT LOCK:</English>
+			<French>VERROU ALT :</French>
+			<Spanish>BLOQ ALT:</Spanish>
+			<German>ALT FIX:</German>
+			<Italian>BLOCCO ALT:</Italian>
+			<Polish>BLOK. ALT:</Polish>
+			<Russian>БЛОК ВЫС:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_c_reset">
+			<English>RESET:</English>
+			<French>RESET :</French>
+			<Spanish>RESET:</Spanish>
+			<German>RESET:</German>
+			<Italian>RESET:</Italian>
+			<Polish>RESET:</Polish>
+			<Russian>СБРОС:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_c_exit">
+			<English>EXIT:</English>
+			<French>SORTIE :</French>
+			<Spanish>SALIR:</Spanish>
+			<German>BEENDEN:</German>
+			<Italian>ESCI:</Italian>
+			<Polish>WYJŚCIE:</Polish>
+			<Russian>ВЫХОД:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_c_fov">
+			<English>FOV:</English>
+			<French>FOV :</French>
+			<Spanish>FOV:</Spanish>
+			<German>FOV:</German>
+			<Italian>FOV:</Italian>
+			<Polish>FOV:</Polish>
+			<Russian>FOV:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_c_fn">
+			<English>FN MODE:</English>
+			<French>MOD FN :</French>
+			<Spanish>MODO FN:</Spanish>
+			<German>FN-MODUS:</German>
+			<Italian>MODALITÀ FN:</Italian>
+			<Polish>TRYB FN:</Polish>
+			<Russian>РЕЖИМ FN:</Russian>
+		</Key>
+	</Package>
+</Project>

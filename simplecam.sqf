@@ -45,11 +45,11 @@ if (!_allowed) then {
 		if (_name == profileName) exitWith { _allowed = true };
 	} forEach (_wlRaw splitString ",");
 };
-if (!_allowed) exitWith { systemChat (["n_denied"] call Bro_SCam_L) };
+if (!_allowed) exitWith { systemChat localize "STR_Bro_SCam_n_denied" };
 if ((uiNamespace getVariable ["Bro_SCam_Data", createHashMap]) getOrDefault ["Active", false]) exitWith {
-	systemChat (["n_already"] call Bro_SCam_L);
+	systemChat localize "STR_Bro_SCam_n_already";
 };
-if (!isNull findDisplay 312) exitWith { systemChat (["n_zeus"] call Bro_SCam_L) };
+if (!isNull findDisplay 312) exitWith { systemChat localize "STR_Bro_SCam_n_zeus" };
 
 // --- STATE ---
 private _d = createHashMap;
@@ -100,8 +100,8 @@ private _initState = if (missionNamespace getVariable ["Bro_SCam_HUDDefault", tr
 	["BotText", ""],
 	["PadMode", -1],
 	["EH_List", []],
-	["NoTgt", ["h_notgt"] call Bro_SCam_L],
-	["TopTmpl", "<t valign='middle' size='1.1' shadow='2'><t align='left' font='RobotoCondensedBold' color='%1'> %2 <t color='" + C_DIM + "'>|</t> %3 <t color='" + C_DIM + "'>|</t> " + (["h_tscale"] call Bro_SCam_L) + ": <t color='%4'>%5x</t></t><t align='center' font='RobotoCondensedBold'>%6</t><t align='right' font='RobotoCondensedBold' color='%1'>" + (["h_grid"] call Bro_SCam_L) + ": %7 </t></t>"]
+	["NoTgt", localize "STR_Bro_SCam_h_notgt"],
+	["TopTmpl", "<t valign='middle' size='1.1' shadow='2'><t align='left' font='RobotoCondensedBold' color='%1'> %2 <t color='" + C_DIM + "'>|</t> %3 <t color='" + C_DIM + "'>|</t> " + localize "STR_Bro_SCam_h_tscale" + ": <t color='%4'>%5x</t></t><t align='center' font='RobotoCondensedBold'>%6</t><t align='right' font='RobotoCondensedBold' color='%1'>" + localize "STR_Bro_SCam_h_grid" + ": %7 </t></t>"]
 ];
 
 // --- FUNCTIONS (first param is always the data map) ---
@@ -378,7 +378,7 @@ _d set ["fnc_Act", {
 			_d set ["RollDes", (_d get "RollDes") + ([-_step, _step] select (_act == "RollR"))];
 		};
 	};
-	if (_msgKey != "") then { [_d, format ([[_msgKey] call Bro_SCam_L] + _args)] call (_d get "fnc_Msg") };
+	if (_msgKey != "") then { [_d, format ([localize ("STR_Bro_SCam_" + _msgKey)] + _args)] call (_d get "fnc_Msg") };
 }];
 
 // --- CAMERA ---
@@ -435,7 +435,7 @@ private _rows = [
 	["p_move", [["Move_Fwd", "Move_Left", "Move_Back", "Move_Right"], ""] call _keyName],
 	["p_elev", [["Move_Up", "Move_Down"]] call _keyName],
 	["p_speed", [["Speed_Fast", "Speed_Slow"]] call _keyName],
-	["p_zoom", ["p_zoom_val"] call Bro_SCam_L],
+	["p_zoom", localize "STR_Bro_SCam_p_zoom_val"],
 	["p_scrollall", [["List_Up", "List_Down"]] call _keyName],
 	["p_scrollpl", [["Jump_Prev", "Jump_Next"]] call _keyName],
 	["p_select", "Select" call _single],
@@ -452,9 +452,9 @@ private _rows = [
 private _html = "<t align='right' size='0.8' font='RobotoCondensedBold' shadow='2'>";
 {
 	_x params ["_label", "_val"];
-	_html = _html + (if (_label == "") then { "-----<br/>" } else { format ["%1 <t color='%2'>%3</t><br/>", [_label] call Bro_SCam_L, C_ACCENT, _val] });
+	_html = _html + (if (_label == "") then { "-----<br/>" } else { format ["%1 <t color='%2'>%3</t><br/>", localize ("STR_Bro_SCam_" + _label), C_ACCENT, _val] });
 } forEach _rows;
-_d set ["ControlsHTML", _html + format ["%1 <t color='%2'>%3</t></t>", ["p_exit"] call Bro_SCam_L, C_ERR, "Exit" call _single]];
+_d set ["ControlsHTML", _html + format ["%1 <t color='%2'>%3</t></t>", localize "STR_Bro_SCam_p_exit", C_ERR, "Exit" call _single]];
 
 // Controller hint panel; labels missing from the translation table (ROLL:) show as written
 private _padRows = [
@@ -475,12 +475,12 @@ private _padRows = [
 	["c_altlock", "[BACK]", C_ACCENT],
 	["c_reset", "[START]", C_ACCENT]
 ];
-_html = format ["<t align='right' size='0.8' font='RobotoCondensedBold' shadow='2'><t color='%1'>%2</t><br/>", C_ACCENT, ["c_title"] call Bro_SCam_L];
+_html = format ["<t align='right' size='0.8' font='RobotoCondensedBold' shadow='2'><t color='%1'>%2</t><br/>", C_ACCENT, localize "STR_Bro_SCam_c_title"];
 {
 	_x params ["_label", "_val", "_color"];
-	_html = _html + format ["%1 <t color='%2'>%3</t><br/>", [_label] call Bro_SCam_L, _color, _val];
+	_html = _html + format ["%1 <t color='%2'>%3</t><br/>", if (_label == "ROLL:") then { _label } else { localize ("STR_Bro_SCam_" + _label) }, _color, _val];
 } forEach _padRows;
-_d set ["PadHTML", _html + format ["%1 <t color='%2'>[B]</t></t>", ["c_exit"] call Bro_SCam_L, C_ERR]];
+_d set ["PadHTML", _html + format ["%1 <t color='%2'>[B]</t></t>", localize "STR_Bro_SCam_c_exit", C_ERR]];
 
 // --- EVENT HANDLERS ---
 private _ehIds = [];
@@ -570,6 +570,9 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	};
 	private _mouse = _d get "MouseD";
 	_d set ["MouseD", [0, 0]];
+	// MouseMoving deltas are inversely scaled by timescale; cancel it (floor keeps the paused case usable)
+	private _tsComp = accTime max 0.1;
+	_mouse = [(_mouse select 0) * _tsComp, (_mouse select 1) * _tsComp];
 	private _fov = _d get "Fov";
 	private _sens = _cfgSens * _fov;
 
@@ -604,7 +607,7 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	if (_lostKey != "") then {
 		_d set ["LookAtLock", _lookAt];
 		[_d, _orient] call (_d get "fnc_Orient");
-		[_d, [_lostKey] call Bro_SCam_L] call (_d get "fnc_Msg");
+		[_d, localize ("STR_Bro_SCam_" + _lostKey)] call (_d get "fnc_Msg");
 	};
 	if (_orient && {_ref != (_d get "OrientRef")}) then { [_d, _ref] call (_d get "fnc_Glue") };
 
@@ -762,6 +765,6 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	_cam camCommit 0;
 }]);
 _d set ["EH_List", _ehIds];
-[_d, ["n_cam_on"] call Bro_SCam_L] call (_d get "fnc_Msg");
+[_d, localize "STR_Bro_SCam_n_cam_on"] call (_d get "fnc_Msg");
 [_d] call (_d get "fnc_RefreshList");
 [_d] call (_d get "fnc_UpdateListUI");

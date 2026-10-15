@@ -1,20 +1,30 @@
 #include "\a3\ui_f\hpp\defineDIKCodes.inc"
 if (!hasInterface) exitWith {};
 private _modName = "[Bro] Simple Cinematic Camera";
+
+Bro_SCam_SetTimescale = {
+	params ["_value"];
+	if (isMultiplayer) exitWith {};
+	_value = _value max 0 min 4;
+	setAccTime _value;
+	private _msg = format [localize "STR_Bro_SCam_n_ts_fmt", _value];
+	private _d = uiNamespace getVariable ["Bro_SCam_Data", nil];
+	if (!isNil "_d" && {_d getOrDefault ["Active", false]}) then {
+		[_d, _msg] call (_d get "fnc_Msg");
+	} else {
+		systemChat _msg;
+	};
+};
+
 // Setting labels follow the game language: CBA reads them only at this point
 {
 	_x params ["_id", "_name", "_type", "_value", ["_global", false]];
 	[
 		"Bro_SCam_" + _name, _type,
-		[[_id + "_lbl"] call Bro_SCam_L, [_id + "_tip"] call Bro_SCam_L],
+		[localize ("STR_Bro_SCam_" + _id + "_lbl"), localize ("STR_Bro_SCam_" + _id + "_tip")],
 		_modName, _value, _global
 	] call CBA_Settings_fnc_init;
 } forEach [
-	["s_lng", "Language", "LIST", [
-		["", "english", "french", "spanish", "german", "italian", "polish", "russian"],
-		[["s_lng_auto"] call Bro_SCam_L, "English", "Français", "Español", "Deutsch", "Italiano", "Polski", "Русский"],
-		0
-	]],
 	["s_wl", "Whitelist", "EDITBOX", "", true],
 	["s_sp", "SavePos", "CHECKBOX", true],
 	["s_hd", "HUDDefault", "CHECKBOX", true],
@@ -35,12 +45,13 @@ private _modName = "[Bro] Simple Cinematic Camera";
 	["s_pvs", "PadVertSens", "SLIDER", [0.5, 50, 25, 1]],
 	["s_strtp", "StartPaused", "CHECKBOX", false]
 ];
+
 // Numpad 2-9 timescale presets (Numpad 0 / 1 are fixed at pause / normal)
 private _tsPresets = [0.1, 0.25, 0.5, 0.75, 1.5, 2, 3, 4];
 {
 	[
 		format ["Bro_SCam_TS_Num%1", 2 + _forEachIndex], "SLIDER",
-		[format [["s_ts_lbl_fmt"] call Bro_SCam_L, 2 + _forEachIndex], ["s_ts_tip"] call Bro_SCam_L],
+		[format [localize "STR_Bro_SCam_s_ts_lbl_fmt", 2 + _forEachIndex], localize "STR_Bro_SCam_s_ts_tip"],
 		_modName, [0.05, 4, _x, 2]
 	] call CBA_Settings_fnc_init;
 } forEach _tsPresets;

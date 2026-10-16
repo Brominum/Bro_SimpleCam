@@ -46,6 +46,12 @@ if (!_allowed) then {
 	} forEach (_wlRaw splitString ",");
 };
 if (!_allowed) exitWith { systemChat localize "STR_Bro_SCam_n_denied" };
+
+private _oldData = uiNamespace getVariable ["Bro_SCam_Data", createHashMap];
+if (_oldData getOrDefault ["Active", false] && {isNull (_oldData getOrDefault ["Cam", objNull])}) then {
+	uiNamespace setVariable ["Bro_SCam_Data", nil];
+};
+
 if ((uiNamespace getVariable ["Bro_SCam_Data", createHashMap]) getOrDefault ["Active", false]) exitWith {
 	systemChat localize "STR_Bro_SCam_n_already";
 };

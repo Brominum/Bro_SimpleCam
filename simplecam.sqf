@@ -54,7 +54,7 @@ if (!isNull findDisplay 312) exitWith { systemChat localize "STR_Bro_SCam_n_zeus
 // --- STATE ---
 private _d = createHashMap;
 uiNamespace setVariable ["Bro_SCam_Data", _d];
-private _tapActs = ["Exit", "HUD", "Vision", "Time_Inc", "Time_Dec", "Lock_Alt", "Look_At", "Lock_Ori", "Reset", "Follow", "List_Up", "List_Down", "Jump_Prev", "Jump_Next", "Select"];
+private _tapActs = ["Exit", "HUD", "Vision", "Time_Inc", "Time_Dec", "Lock_Alt", "Look_At", "Lock_Ori", "Reset", "Follow", "List_Up", "List_Down", "Jump_Prev", "Jump_Next", "Select", "Names", "Reset_Full"];
 private _binds = createHashMap;
 {
 	private _bind = [MOD_NAME, "Bro_SCam_" + _x] call CBA_fnc_getKeybind;
@@ -100,6 +100,7 @@ private _initState = if (missionNamespace getVariable ["Bro_SCam_HUDDefault", tr
 	["BotText", ""],
 	["PadMode", -1],
 	["EH_List", []],
+	["EH_Names", -1],
 	["NoTgt", localize "STR_Bro_SCam_h_notgt"],
 	["TopTmpl", "<t valign='middle' size='1.1' shadow='2'><t align='left' font='RobotoCondensedBold' color='%1'> %2 <t color='" + C_DIM + "'>|</t> %3 <t color='" + C_DIM + "'>|</t> " + localize "STR_Bro_SCam_h_tscale" + ": <t color='%4'>%5x</t></t><t align='center' font='RobotoCondensedBold'>%6</t><t align='right' font='RobotoCondensedBold' color='%1'>" + localize "STR_Bro_SCam_h_grid" + ": %7 </t></t>"]
 ];
@@ -268,6 +269,11 @@ _d set ["fnc_Exit", {
 		_display displayRemoveEventHandler ["MouseZChanged", _eh select 3];
 	};
 	if (count _eh > 0) then { removeMissionEventHandler ["EachFrame", _eh select 4] };
+	if ((_d get "EH_Names") >= 0) then {
+		removeMissionEventHandler ["Draw3D", _d get "EH_Names"];
+		_d set ["EH_Names", -1];
+		cameraEffectEnableHUD false;
+	};
 	private _cam = _d get "Cam";
 	_cam cameraEffect ["Terminate", "Back"];
 	camDestroy _cam;
@@ -342,9 +348,21 @@ _d set ["fnc_Act", {
 		};
 		case "Reset": {
 			if (!_valid) exitWith { _msgKey = "n_rst_fail" };
-			[_d, _tgt, true] call (_d get "fnc_Focus");
+			[_d, _tgt, false] call (_d get "fnc_Focus");
 			[_d] call (_d get "fnc_UpdateListUI");
 			_msgKey = "n_cam_reset";
+		};
+		case "Reset_Full": {
+			if (!alive player) exitWith { _msgKey = "n_rst_fail" };
+			[_d, false] call (_d get "fnc_Orient");
+			_d set ["Follow", false];
+			_d set ["Target", player];
+			[_d, player, true] call (_d get "fnc_Focus");
+			_d set ["VisionMode", 0];
+			camUseNVG false;
+			false setCamUseTi 0;
+			[_d] call (_d get "fnc_UpdateListUI");
+			_msgKey = "n_cam_reset_full";
 		};
 		case "Follow": {
 			if (!_valid) exitWith { _msgKey = "n_fol_fail" };
@@ -369,6 +387,42 @@ _d set ["fnc_Act", {
 			[_d] call (_d get "fnc_UpdateListUI");
 			_msgKey = "n_tgt_fmt";
 			_args = [name _new];
+		};
+		case "Names": {
+			private _on = (_d get "EH_Names") < 0;
+			if (_on) then {
+				_d set ["EH_Names", addMissionEventHandler ["Draw3D", {
+					private _d = uiNamespace getVariable ["Bro_SCam_Data", createHashMap];
+					if !(_d getOrDefault ["Active", false]) exitWith { removeMissionEventHandler ["Draw3D", _thisEventHandler] };
+					private _vehNames = _d get "VehNames";
+					{
+						private _sideColor = [side _x] call BIS_fnc_sideColor;
+						private _posArray = [ASLToAGL getPosASLVisual _x select 0, ASLToAGL getPosASLVisual _x select 1, (ASLToAGL getPosASLVisual _x select 2) + 2.3];
+						private _tgtName = name _x;
+						private _veh = vehicle _x;
+						if (_veh != _x) then {
+							private _type = typeOf _veh;
+							private _vName = _vehNames getOrDefault [_type, ""];
+							if (_vName == "") then {
+								_vName = getText (configFile >> "CfgVehicles" >> _type >> "displayName");
+								_vehNames set [_type, _vName];
+							};
+							_tgtName = format ["%1 (%2)", _tgtName, _vName];
+							// Sit above the vehicle and stack crew labels so they don't overlap
+							private _vPos = ASLToAGL getPosASLVisual _veh;
+							_posArray = [_vPos select 0, _vPos select 1, (_vPos select 2) + (((boundingBoxReal _veh) select 1) select 2) + 0.5 + (0.4 * ((crew _veh) find _x))];
+						};
+						drawIcon3D ["\a3\ui_f\data\IGUI\Cfg\Targeting\Empty_ca.paa", _sideColor, _posArray, 0.1, 0.1, 0, _tgtName, 2, 0.035, "RobotoCondensedBold", "center"];
+					} forEach (allPlayers select { alive _x && {side group _x != sideLogic} });
+				}]];
+				// drawIcon3D is only visible through a custom camera while its HUD is enabled
+				cameraEffectEnableHUD true;
+			} else {
+				removeMissionEventHandler ["Draw3D", _d get "EH_Names"];
+				_d set ["EH_Names", -1];
+				cameraEffectEnableHUD false;
+			};
+			_msgKey = ["n_names_off", "n_names_on"] select _on;
 		};
 		case "FovOut": { _d set ["FovDes", ((_d get "FovDes") + 0.05) min 2] };
 		case "FovIn": { _d set ["FovDes", ((_d get "FovDes") - 0.05) max 0.05] };
@@ -446,7 +500,9 @@ private _rows = [
 	["p_lockori", "Lock_Ori" call _single],
 	["p_lockalt", "Lock_Alt" call _single],
 	["p_vision", "Vision" call _single],
+	["p_names", "Names" call _single],
 	["p_reset", "Reset" call _single],
+	["p_resetfull", "Reset_Full" call _single],
 	["p_togglehud", "HUD" call _single]
 ];
 private _html = "<t align='right' size='0.8' font='RobotoCondensedBold' shadow='2'>";

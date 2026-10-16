@@ -949,5 +949,50 @@
 			<Polish>TRYB FN:</Polish>
 			<Russian>РЕЖИМ FN:</Russian>
 		</Key>
+		<Key ID="STR_Bro_SCam_n_names_on">
+			<English>Player Names: ON</English>
+			<French>Noms des joueurs : ON</French>
+			<Spanish>Nombres de jugadores: ON</Spanish>
+			<German>Spielernamen: AN</German>
+			<Italian>Nomi giocatori: ON</Italian>
+			<Polish>Nazwy graczy: WŁ.</Polish>
+			<Russian>Имена игроков: ВКЛ.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_names_off">
+			<English>Player Names: OFF</English>
+			<French>Noms des joueurs : OFF</French>
+			<Spanish>Nombres de jugadores: OFF</Spanish>
+			<German>Spielernamen: AUS</German>
+			<Italian>Nomi giocatori: OFF</Italian>
+			<Polish>Nazwy graczy: WYŁ.</Polish>
+			<Russian>Имена игроков: ВЫКЛ.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_p_names">
+			<English>PLAYER NAMES:</English>
+			<French>NOMS :</French>
+			<Spanish>NOMBRES:</Spanish>
+			<German>NAMEN:</German>
+			<Italian>NOMI:</Italian>
+			<Polish>NAZWY:</Polish>
+			<Russian>ИМЕНА:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_cam_reset_full">
+			<English>Camera Fully Reset</English>
+			<French>Caméra entièrement réinitialisée</French>
+			<Spanish>Cámara reiniciada por completo</Spanish>
+			<German>Kamera vollständig zurückgesetzt</German>
+			<Italian>Camera ripristinata completamente</Italian>
+			<Polish>Kamera w pełni zresetowana</Polish>
+			<Russian>Камера полностью сброшена</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_p_resetfull">
+			<English>FULL RESET:</English>
+			<French>RESET TOTAL :</French>
+			<Spanish>RESET TOTAL:</Spanish>
+			<German>VOLLRESET:</German>
+			<Italian>RESET TOTALE:</Italian>
+			<Polish>PEŁNY RESET:</Polish>
+			<Russian>ПОЛНЫЙ СБРОС:</Russian>
+		</Key>
 	</Package>
 </Project>

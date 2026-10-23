@@ -2,49 +2,49 @@
 <Project name="Bro_SimpleCam">
 	<Package name="Main">
 		<Key ID="STR_Bro_SCam_sec_gen">
-			<English>General</English>
-			<French>Général</French>
-			<Spanish>General</Spanish>
-			<German>Allgemein</German>
-			<Italian>Generale</Italian>
-			<Polish>Ogólne</Polish>
-			<Russian>Общие</Russian>
+			<English>1. General</English>
+			<French>1. Général</French>
+			<Spanish>1. General</Spanish>
+			<German>1. Allgemein</German>
+			<Italian>1. Generale</Italian>
+			<Polish>1. Ogólne</Polish>
+			<Russian>1. Общие</Russian>
 		</Key>
 		<Key ID="STR_Bro_SCam_sec_mov">
-			<English>Movement</English>
-			<French>Déplacement</French>
-			<Spanish>Movimiento</Spanish>
-			<German>Bewegung</German>
-			<Italian>Movimento</Italian>
-			<Polish>Ruch</Polish>
-			<Russian>Движение</Russian>
+			<English>3. Movement</English>
+			<French>3. Déplacement</French>
+			<Spanish>3. Movimiento</Spanish>
+			<German>3. Bewegung</German>
+			<Italian>3. Movimento</Italian>
+			<Polish>3. Ruch</Polish>
+			<Russian>3. Движение</Russian>
 		</Key>
 		<Key ID="STR_Bro_SCam_sec_view">
-			<English>View</English>
-			<French>Vue</French>
-			<Spanish>Vista</Spanish>
-			<German>Ansicht</German>
-			<Italian>Visuale</Italian>
-			<Polish>Widok</Polish>
-			<Russian>Обзор</Russian>
+			<English>2. View</English>
+			<French>2. Vue</French>
+			<Spanish>2. Vista</Spanish>
+			<German>2. Ansicht</German>
+			<Italian>2. Visuale</Italian>
+			<Polish>2. Widok</Polish>
+			<Russian>2. Обзор</Russian>
 		</Key>
 		<Key ID="STR_Bro_SCam_sec_pad">
-			<English>Controller</English>
-			<French>Manette</French>
-			<Spanish>Mando</Spanish>
-			<German>Controller</German>
-			<Italian>Controller</Italian>
-			<Polish>Kontroler</Polish>
-			<Russian>Геймпад</Russian>
+			<English>4. Controller</English>
+			<French>4. Manette</French>
+			<Spanish>4. Mando</Spanish>
+			<German>4. Controller</German>
+			<Italian>4. Controller</Italian>
+			<Polish>4. Kontroler</Polish>
+			<Russian>4. Геймпад</Russian>
 		</Key>
 		<Key ID="STR_Bro_SCam_sec_ts">
-			<English>Timescale</English>
-			<French>Échelle de temps</French>
-			<Spanish>Escala de tiempo</Spanish>
-			<German>Zeitskala</German>
-			<Italian>Scala temporale</Italian>
-			<Polish>Skala czasu</Polish>
-			<Russian>Шкала времени</Russian>
+			<English>5. Timescale</English>
+			<French>5. Échelle de temps</French>
+			<Spanish>5. Escala de tiempo</Spanish>
+			<German>5. Zeitskala</German>
+			<Italian>5. Scala temporale</Italian>
+			<Polish>5. Skala czasu</Polish>
+			<Russian>5. Шкала времени</Russian>
 		</Key>
 		<Key ID="STR_Bro_SCam_s_wl_lbl">
 			<English>Allowed Users (Whitelist)</English>

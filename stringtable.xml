@@ -388,6 +388,123 @@
 			<Polish>Jeśli zaznaczone, otwarcie kamery natychmiast wstrzymuje grę (skala czasu 0). Tylko tryb jednoosobowy.</Polish>
 			<Russian>Если включено, открытие камеры сразу ставит игру на паузу (шкала времени 0). Только одиночная игра.</Russian>
 		</Key>
+		<Key ID="STR_Bro_SCam_s_dof_lbl">
+			<English>Depth of Field (Auto Focus)</English>
+			<French>Profondeur de champ (mise au point auto)</French>
+			<Spanish>Profundidad de campo (enfoque automático)</Spanish>
+			<German>Tiefenschärfe (Autofokus)</German>
+			<Italian>Profondità di campo (messa a fuoco automatica)</Italian>
+			<Polish>Głębia ostrości (autofokus)</Polish>
+			<Russian>Глубина резкости (автофокус)</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_dof_tip">
+			<English>If checked, the camera focuses on the current target and blurs objects at other distances. The Depth of Field video option must be on.</English>
+			<French>Si coché, la caméra fait la mise au point sur la cible actuelle et floute les objets à d'autres distances. L'option vidéo Profondeur de champ doit être activée.</French>
+			<Spanish>Si está marcado, la cámara enfoca al objetivo actual y desenfoca los objetos a otras distancias. La opción de vídeo Profundidad de campo debe estar activada.</Spanish>
+			<German>Wenn aktiviert, fokussiert die Kamera das aktuelle Ziel und macht Objekte in anderen Entfernungen unscharf. Die Videooption Tiefenschärfe muss aktiv sein.</German>
+			<Italian>Se selezionato, la camera mette a fuoco il bersaglio attuale e sfoca gli oggetti ad altre distanze. L'opzione video Profondità di campo deve essere attiva.</Italian>
+			<Polish>Jeśli zaznaczone, kamera ustawia ostrość na bieżącym celu i rozmywa obiekty w innych odległościach. Opcja wideo Głębia ostrości musi być włączona.</Polish>
+			<Russian>Если включено, камера фокусируется на текущей цели и размывает объекты на других расстояниях. Видеоопция «Глубина резкости» должна быть включена.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_bmm_lbl">
+			<English>Bookmark Transition</English>
+			<French>Transition des signets</French>
+			<Spanish>Transición de marcadores</Spanish>
+			<German>Lesezeichen-Übergang</German>
+			<Italian>Transizione segnalibri</Italian>
+			<Polish>Przejście zakładek</Polish>
+			<Russian>Переход к закладке</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_bmm_tip">
+			<English>How the camera goes to a bookmark when you load it. Instant: the camera jumps. Ease In/Out: the camera moves smoothly during the Bookmark Transition Time.</English>
+			<French>Comment la caméra va vers un signet chargé. Instantané : la caméra saute. Entrée/Sortie progressive : la caméra se déplace en douceur pendant la Durée de transition des signets.</French>
+			<Spanish>Cómo va la cámara a un marcador al cargarlo. Instantáneo: la cámara salta. Suavizado de entrada/salida: la cámara se mueve suavemente durante el Tiempo de transición de marcadores.</Spanish>
+			<German>Wie die Kamera beim Laden zu einem Lesezeichen wechselt. Sofort: Die Kamera springt. Sanft ein/aus: Die Kamera bewegt sich weich während der Lesezeichen-Übergangszeit.</German>
+			<Italian>Come la camera va a un segnalibro caricato. Istantaneo: la camera salta. Graduale in entrata/uscita: la camera si muove in modo fluido per la Durata transizione segnalibri.</Italian>
+			<Polish>Jak kamera przechodzi do wczytanej zakładki. Natychmiast: kamera przeskakuje. Płynne wejście/wyjście: kamera porusza się płynnie przez Czas przejścia zakładek.</Polish>
+			<Russian>Как камера переходит к загруженной закладке. Мгновенно: камера перескакивает. Плавный разгон/торможение: камера плавно движется в течение Времени перехода к закладке.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_bmm_inst">
+			<English>Instant</English>
+			<French>Instantané</French>
+			<Spanish>Instantáneo</Spanish>
+			<German>Sofort</German>
+			<Italian>Istantaneo</Italian>
+			<Polish>Natychmiast</Polish>
+			<Russian>Мгновенно</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_bmm_ease">
+			<English>Ease In/Out</English>
+			<French>Entrée/Sortie progressive</French>
+			<Spanish>Suavizado de entrada/salida</Spanish>
+			<German>Sanft ein/aus</German>
+			<Italian>Graduale in entrata/uscita</Italian>
+			<Polish>Płynne wejście/wyjście</Polish>
+			<Russian>Плавный разгон/торможение</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_bmt_lbl">
+			<English>Bookmark Transition Time (s)</English>
+			<French>Durée de transition des signets (s)</French>
+			<Spanish>Tiempo de transición de marcadores (s)</Spanish>
+			<German>Lesezeichen-Übergangszeit (s)</German>
+			<Italian>Durata transizione segnalibri (s)</Italian>
+			<Polish>Czas przejścia zakładek (s)</Polish>
+			<Russian>Время перехода к закладке (с)</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_bmt_tip">
+			<English>Ease In/Out only. Seconds for the camera to move to a bookmark: from 0.1 to 300 (5 minutes). This is real time: timescale and pause have no effect. A camera action key (for example Reset) stops the movement.</English>
+			<French>Entrée/Sortie progressive uniquement. Secondes pour que la caméra aille au signet : de 0,1 à 300 (5 minutes). C'est du temps réel : l'échelle de temps et la pause n'ont pas d'effet. Une touche d'action caméra (par ex. Réinitialiser) arrête le mouvement.</French>
+			<Spanish>Solo para Suavizado de entrada/salida. Segundos para que la cámara llegue al marcador: de 0,1 a 300 (5 minutos). Es tiempo real: la escala de tiempo y la pausa no tienen efecto. Una tecla de acción de cámara (p. ej. Reiniciar) detiene el movimiento.</Spanish>
+			<German>Nur für Sanft ein/aus. Sekunden, bis die Kamera das Lesezeichen erreicht: 0,1 bis 300 (5 Minuten). Dies ist Echtzeit: Zeitskala und Pause haben keine Wirkung. Eine Kamera-Aktionstaste (z. B. Zurücksetzen) stoppt die Bewegung.</German>
+			<Italian>Solo per Graduale in entrata/uscita. Secondi per raggiungere il segnalibro: da 0,1 a 300 (5 minuti). È tempo reale: scala temporale e pausa non hanno effetto. Un tasto azione della camera (es. Reimposta) ferma il movimento.</Italian>
+			<Polish>Tylko dla Płynnego wejścia/wyjścia. Sekundy na dojście kamery do zakładki: od 0,1 do 300 (5 minut). To czas rzeczywisty: skala czasu i pauza nie mają wpływu. Klawisz akcji kamery (np. Reset) zatrzymuje ruch.</Polish>
+			<Russian>Только для плавного режима. Секунды на переход камеры к закладке: от 0,1 до 300 (5 минут). Это реальное время: шкала времени и пауза не влияют. Клавиша действия камеры (например, Сброс) останавливает движение.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_bm_save_fmt">
+			<English>Bookmark %1 saved</English>
+			<French>Signet %1 enregistré</French>
+			<Spanish>Marcador %1 guardado</Spanish>
+			<German>Lesezeichen %1 gespeichert</German>
+			<Italian>Segnalibro %1 salvato</Italian>
+			<Polish>Zakładka %1 zapisana</Polish>
+			<Russian>Закладка %1 сохранена</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_bm_load_fmt">
+			<English>Going to bookmark %1</English>
+			<French>Vers le signet %1</French>
+			<Spanish>Yendo al marcador %1</Spanish>
+			<German>Zu Lesezeichen %1</German>
+			<Italian>Verso il segnalibro %1</Italian>
+			<Polish>Przejście do zakładki %1</Polish>
+			<Russian>Переход к закладке %1</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_n_bm_empty_fmt">
+			<English>Bookmark %1 is empty</English>
+			<French>Le signet %1 est vide</French>
+			<Spanish>El marcador %1 está vacío</Spanish>
+			<German>Lesezeichen %1 ist leer</German>
+			<Italian>Il segnalibro %1 è vuoto</Italian>
+			<Polish>Zakładka %1 jest pusta</Polish>
+			<Russian>Закладка %1 пуста</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_p_bm_save">
+			<English>SAVE BOOKMARK:</English>
+			<French>SAUVER SIGNET :</French>
+			<Spanish>GUARDAR MARCADOR:</Spanish>
+			<German>LESEZEICHEN SPEICHERN:</German>
+			<Italian>SALVA SEGNALIBRO:</Italian>
+			<Polish>ZAPISZ ZAKŁADKĘ:</Polish>
+			<Russian>СОХР. ЗАКЛАДКУ:</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_p_bm_load">
+			<English>LOAD BOOKMARK:</English>
+			<French>CHARGER SIGNET :</French>
+			<Spanish>CARGAR MARCADOR:</Spanish>
+			<German>LESEZEICHEN LADEN:</German>
+			<Italian>CARICA SEGNALIBRO:</Italian>
+			<Polish>WCZYTAJ ZAKŁADKĘ:</Polish>
+			<Russian>ЗАГР. ЗАКЛАДКУ:</Russian>
+		</Key>
 		<Key ID="STR_Bro_SCam_s_ts_lbl_fmt">
 			<English>Numpad %1 Timescale</English>
 			<French>Pavé num. %1 - Timescale</French>

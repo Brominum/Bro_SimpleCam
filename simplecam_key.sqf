@@ -34,7 +34,10 @@ Bro_SCam_SetTimescale = {
 		["s_hd", "HUDDefault", "CHECKBOX", true],
 		["s_sp", "SavePos", "CHECKBOX", true],
 		["s_ai", "HideAI", "CHECKBOX", false],
-		["s_as", "AudioSpectator", "CHECKBOX", true]
+		["s_as", "AudioSpectator", "CHECKBOX", true],
+		["s_dof", "DOF", "CHECKBOX", false],
+		["s_bmm", "BookmarkMode", "LIST", [[0, 1], [localize "STR_Bro_SCam_s_bmm_inst", localize "STR_Bro_SCam_s_bmm_ease"], 1]],
+		["s_bmt", "BookmarkTime", "SLIDER", [0.1, 300, 3, 1]]
 	]],
 	["sec_view", [
 		["s_ms", "Sens", "SLIDER", [1, 100, 15, 0]],
@@ -105,6 +108,11 @@ if (!hasInterface) exitWith {};
 	["List_Down", "Jump List Down", DIK_DOWN],
 	["Select", "Select Target", DIK_RETURN]
 ];
+// Bookmarks 1-9: Ctrl + number saves, number loads (DIK_1 to DIK_9 are in sequence)
+for "_i" from 1 to 9 do {
+	[_modName, format ["Bro_SCam_Bm_Save_%1", _i], format ["Save Bookmark %1", _i], {}, {}, [DIK_1 + _i - 1, [false, true, false]]] call CBA_fnc_addKeybind;
+	[_modName, format ["Bro_SCam_Bm_Load_%1", _i], format ["Load Bookmark %1", _i], {}, {}, [DIK_1 + _i - 1, [false, false, false]]] call CBA_fnc_addKeybind;
+};
 // Timescale hotkeys work anywhere (SP only); Numpad 2-9 read their slider
 private _numpad = [DIK_NUMPAD0, DIK_NUMPAD1, DIK_NUMPAD2, DIK_NUMPAD3, DIK_NUMPAD4, DIK_NUMPAD5, DIK_NUMPAD6, DIK_NUMPAD7, DIK_NUMPAD8, DIK_NUMPAD9];
 {

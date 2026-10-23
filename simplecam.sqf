@@ -61,6 +61,7 @@ if (!isNull findDisplay 312) exitWith { systemChat localize "STR_Bro_SCam_n_zeus
 private _d = createHashMap;
 uiNamespace setVariable ["Bro_SCam_Data", _d];
 private _tapActs = ["Exit", "HUD", "Vision", "Time_Inc", "Time_Dec", "Lock_Alt", "Look_At", "Lock_Ori", "Reset", "Follow", "List_Up", "List_Down", "Jump_Prev", "Jump_Next", "Select", "Names", "Reset_Full"];
+for "_i" from 1 to 9 do { _tapActs append [format ["Bm_Save_%1", _i], format ["Bm_Load_%1", _i]] };
 private _binds = createHashMap;
 {
 	private _bind = [MOD_NAME, "Bro_SCam_" + _x] call CBA_fnc_getKeybind;
@@ -76,6 +77,7 @@ private _initState = if (missionNamespace getVariable ["Bro_SCam_HUDDefault", tr
 		[DIK_XBOX_DPAD_UP, "List_Up"], [DIK_XBOX_DPAD_DOWN, "List_Down"], [DIK_XBOX_START, "Reset"], [DIK_XBOX_BACK, "Lock_Alt"]
 	]],
 	["Keys", []],
+	["Ease", []],
 	["MouseD", [0, 0]],
 	["Pos", [0, 0, 0]],
 	["PosDes", [0, 0, 0]],
@@ -119,13 +121,18 @@ _d set ["fnc_Msg", {
 	_ctrl ctrlShow true;
 	_d set ["NotifyEnd", diag_tickTime + NOTIFY_DURATION];
 }];
-// Sets the pose from a position and dir/up vectors in whatever space they were given
-_d set ["fnc_SetPose", {
-	params ["_d", "_pos", "_dir", "_up"];
+// Gets [yaw, pitch, roll] from dir/up vectors
+_d set ["fnc_DirUpToAng", {
+	params ["_d", "_dir", "_up"];
 	private _yaw = (_dir select 0) atan2 (_dir select 1);
 	private _pit = asin (_dir select 2) max -89 min 89;
 	private _rightH = [cos _yaw, -(sin _yaw), 0];
-	private _roll = (_up vectorDotProduct _rightH) atan2 (_up vectorDotProduct (_rightH vectorCrossProduct _dir));
+	[_yaw, _pit, (_up vectorDotProduct _rightH) atan2 (_up vectorDotProduct (_rightH vectorCrossProduct _dir))]
+}];
+// Sets the pose from a position and dir/up vectors in whatever space they were given
+_d set ["fnc_SetPose", {
+	params ["_d", "_pos", "_dir", "_up"];
+	([_d, _dir, _up] call (_d get "fnc_DirUpToAng")) params ["_yaw", "_pit", "_roll"];
 	_d set ["Pos", _pos];
 	_d set ["PosDes", +_pos];
 	_d set ["Ang", [_yaw, _pit]];
@@ -149,6 +156,73 @@ _d set ["fnc_Orient", {
 	private _t = _d get "Target";
 	if ((_d get "Follow") && {!isNull _t && {alive _t}}) then { _p = _p vectorDiff (getPosASLVisual _t) };
 	[_d, _p, _wDir, _wUp] call (_d get "fnc_SetPose");
+}];
+// Stops Follow and keeps the camera at its last world position
+_d set ["fnc_FollowOff", {
+	params ["_d"];
+	if !(_d get "Follow") exitWith {};
+	private _shift = ((_d get "LastCam") select 0) vectorDiff (_d get "Pos");
+	{ _d set [_x, (_d get _x) vectorAdd _shift] } forEach ["Pos", "PosDes"];
+	_d set ["Follow", false];
+}];
+// 0 = normal, 1 = NVG, 2 = white hot, 3 = black hot
+_d set ["fnc_SetVision", {
+	params ["_d", "_mode"];
+	_d set ["VisionMode", _mode];
+	camUseNVG (_mode == 1);
+	(_mode >= 2) setCamUseTi ((_mode - 2) max 0);
+}];
+// Bookmarks stay in uiNamespace until the game closes; each one is for one world only
+_d set ["fnc_BmSave", {
+	params ["_d", "_slot"];
+	(_d get "LastCam") params ["_pos", "_dir", "_up"];
+	private _bms = uiNamespace getVariable ["Bro_SCam_Bookmarks", createHashMap];
+	uiNamespace setVariable ["Bro_SCam_Bookmarks", _bms];
+	_bms set [_slot, createHashMapFromArray [
+		["World", worldName], ["Pos", +_pos], ["Dir", +_dir], ["Up", +_up], ["Fov", _d get "Fov"],
+		["Vision", _d get "VisionMode"], ["Speed", _d get "SpeedMult"], ["Target", _d get "Target"],
+		["Follow", _d get "Follow"], ["AltLock", _d get "AltLock"], ["OrientLock", _d get "OrientLock"], ["LookAtLock", _d get "LookAtLock"]
+	]];
+}];
+// Returns false if the slot is empty. The camera moves in world space; the saved modes come back at the end.
+_d set ["fnc_BmLoad", {
+	params ["_d", "_slot"];
+	private _bm = (uiNamespace getVariable ["Bro_SCam_Bookmarks", createHashMap]) getOrDefault [_slot, createHashMap];
+	if ((_bm getOrDefault ["World", ""]) != worldName) exitWith { false };
+	[_d, false] call (_d get "fnc_Orient");
+	[_d] call (_d get "fnc_FollowOff");
+	_d set ["LookAtLock", false];
+	[_d, _bm get "Vision"] call (_d get "fnc_SetVision");
+	{ _d set [_x, _bm get "Speed"] } forEach ["SpeedMult", "SpeedMultDes"];
+	if ((missionNamespace getVariable ["Bro_SCam_BookmarkMode", 1]) == 1) then {
+		private _from = [+(_d get "Pos")] + (_d get "Ang") + [_d get "Roll", _d get "Fov"];
+		private _to = [_d, _bm get "Dir", _bm get "Up"] call (_d get "fnc_DirUpToAng");
+		_d set ["Ease", [diag_tickTime, (missionNamespace getVariable ["Bro_SCam_BookmarkTime", 3]) max 0.1, _from, _bm, _to]];
+	} else {
+		[_d, _bm] call (_d get "fnc_BmArrive");
+	};
+	true
+}];
+// Sets the final bookmark pose, then turns the saved modes back on if the saved target is alive
+_d set ["fnc_BmArrive", {
+	params ["_d", "_bm"];
+	_d set ["Ease", []];
+	[_d, _bm get "Pos", _bm get "Dir", _bm get "Up"] call (_d get "fnc_SetPose");
+	{ _d set [_x, _bm get "Fov"] } forEach ["Fov", "FovDes"];
+	// fnc_Orient reads LastCam, so it must have the bookmark pose before the next frame
+	_d set ["LastCam", [_bm get "Pos", _bm get "Dir", _bm get "Up"]];
+	_d set ["AltLock", _bm get "AltLock"];
+	private _t = _bm get "Target";
+	if (isNull _t || {!alive _t}) exitWith {};
+	_d set ["Target", _t];
+	_d set ["ListTarget", _t];
+	if (_bm get "Follow") then {
+		private _tPos = getPosASLVisual _t;
+		{ _d set [_x, (_d get _x) vectorDiff _tPos] } forEach ["Pos", "PosDes"];
+		_d set ["Follow", true];
+	};
+	if ((_bm get "OrientLock") && {alive (vehicle _t)}) then { [_d, true] call (_d get "fnc_Orient") };
+	_d set ["LookAtLock", _bm get "LookAtLock"];
 }];
 _d set ["fnc_SetAudioSpectator", {
 	params ["_state"];
@@ -293,6 +367,8 @@ _d set ["fnc_Exit", {
 // Every camera action, whether triggered by keyboard or controller
 _d set ["fnc_Act", {
 	params ["_d", "_act"];
+	// Camera actions stop a bookmark movement; HUD, list and timescale actions do not
+	if !(_act in ["HUD", "Names", "Vision", "Time_Inc", "Time_Dec", "List_Up", "List_Down", "Jump_Prev", "Jump_Next"] || {_act select [0, 7] == "Bm_Save"}) then { _d set ["Ease", []] };
 	private _tgt = _d get "Target";
 	private _valid = !isNull _tgt && {alive _tgt};
 	private _msgKey = "";
@@ -315,9 +391,7 @@ _d set ["fnc_Act", {
 		};
 		case "Vision": {
 			private _mode = ((_d get "VisionMode") + 1) mod 4;
-			_d set ["VisionMode", _mode];
-			camUseNVG (_mode == 1);
-			(_mode >= 2) setCamUseTi ((_mode - 2) max 0);
+			[_d, _mode] call (_d get "fnc_SetVision");
 			_msgKey = ["n_vis_norm", "n_vis_nvg", "n_vis_whot", "n_vis_bhot"] select _mode;
 		};
 		case "Time_Inc";
@@ -364,9 +438,7 @@ _d set ["fnc_Act", {
 			_d set ["Follow", false];
 			_d set ["Target", player];
 			[_d, player, true] call (_d get "fnc_Focus");
-			_d set ["VisionMode", 0];
-			camUseNVG false;
-			false setCamUseTi 0;
+			[_d, 0] call (_d get "fnc_SetVision");
 			[_d] call (_d get "fnc_UpdateListUI");
 			_msgKey = "n_cam_reset_full";
 		};
@@ -437,6 +509,19 @@ _d set ["fnc_Act", {
 			private _step = (missionNamespace getVariable ["Bro_SCam_RollSpeed", 10]) / 2;
 			_d set ["RollDes", (_d get "RollDes") + ([-_step, _step] select (_act == "RollR"))];
 		};
+		// Bookmarks: "Bm_Save_N" and "Bm_Load_N"
+		default {
+			if (_act select [0, 3] != "Bm_") exitWith {};
+			private _slot = parseNumber (_act select [8]);
+			_args = [_slot];
+			if (_act select [3, 4] == "Save") exitWith {
+				[_d, _slot] call (_d get "fnc_BmSave");
+				_msgKey = "n_bm_save_fmt";
+			};
+			if !([_d, _slot] call (_d get "fnc_BmLoad")) exitWith { _msgKey = "n_bm_empty_fmt" };
+			// Show the "going to bookmark" message only with the full HUD, so it does not show in a recording
+			if ((_d get "HUD_State") == 0) then { _msgKey = "n_bm_load_fmt" };
+		};
 	};
 	if (_msgKey != "") then { [_d, format ([localize ("STR_Bro_SCam_" + _msgKey)] + _args)] call (_d get "fnc_Msg") };
 }];
@@ -482,7 +567,7 @@ private _mk = {
 _d set ["HUD_Top", [[safeZoneX, safeZoneY, safeZoneW, 0.045], _showBars, 0.25] call _mk];
 _d set ["HUD_Bot", [[safeZoneX, safeZoneY + safeZoneH - 0.06, safeZoneW, 0.06], _showBars, 0.25] call _mk];
 _d set ["HUD_List", [[safeZoneX + 0.01, safeZoneY + (safeZoneH * 0.3), 0.45, 0.4], _showWidgets, 0] call _mk];
-_d set ["HUD_Keys", [[safeZoneX + safeZoneW - 0.32, safeZoneY + safeZoneH - 0.65, 0.32, 0.55], _showWidgets, 0] call _mk];
+_d set ["HUD_Keys", [[safeZoneX + safeZoneW - 0.32, safeZoneY + safeZoneH - 0.71, 0.32, 0.61], _showWidgets, 0] call _mk];
 _d set ["Notify", [[safeZoneX, safeZoneY + safeZoneH - 0.12, safeZoneW, 0.05], false, 0] call _mk];
 
 // Keyboard hint panel, with the player's current bindings
@@ -507,6 +592,8 @@ private _rows = [
 	["p_lockalt", "Lock_Alt" call _single],
 	["p_vision", "Vision" call _single],
 	["p_names", "Names" call _single],
+	["p_bm_save", format ["%1 - %2", "Bm_Save_1" call _single, "Bm_Save_9" call _single]],
+	["p_bm_load", format ["%1 - %2", "Bm_Load_1" call _single, "Bm_Load_9" call _single]],
 	["p_reset", "Reset" call _single],
 	["p_resetfull", "Reset_Full" call _single],
 	["p_togglehud", "HUD" call _single]
@@ -582,7 +669,8 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 		};
 	};
 	if (_act != "") then { [_d, _act] call (_d get "fnc_Act") };
-	_act == "Exit"
+	// Block bookmark keys, so the number keys do not also open game menus
+	_act == "Exit" || {_act select [0, 3] == "Bm_"}
 }]);
 _ehIds pushBack (_display displayAddEventHandler ["KeyUp", {
 	params ["", "_key"];
@@ -611,6 +699,27 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	if !(_d getOrDefault ["Active", false]) exitWith { removeMissionEventHandler ["EachFrame", _thisEventHandler] };
 	// Failsafe: leave the camera when the player dies or the HUD display is gone
 	if (!alive player || {isNull (_d get "HUD_Top")}) exitWith { [_d] call (_d get "fnc_Exit") };
+	// Bookmark ease: move the pose from the start to the bookmark. Camera input has no effect until the end.
+	private _easing = (_d get "Ease") isNotEqualTo [];
+	if (_easing) then {
+		(_d get "Ease") params ["_t0", "_dur", "_from", "_bm", "_to"];
+		private _t = ((diag_tickTime - _t0) / _dur) min 1;
+		if (_t >= 1) exitWith {
+			[_d, _bm] call (_d get "fnc_BmArrive");
+			_easing = false;
+		};
+		// Smoothstep: slow at the start and at the end
+		private _s = _t * _t * (3 - 2 * _t);
+		_from params ["_p0", "_y0", "_pit0", "_r0", "_f0"];
+		_to params ["_y1", "_pit1", "_r1"];
+		// Shortest turn, so the camera does not spin the long way
+		private _wrap = { _this - (360 * floor ((_this + 180) / 360)) };
+		private _p = _p0 vectorAdd (((_bm get "Pos") vectorDiff _p0) vectorMultiply _s);
+		private _a = [_y0 + (((_y1 - _y0) call _wrap) * _s), _pit0 + ((_pit1 - _pit0) * _s)];
+		private _r = _r0 + (((_r1 - _r0) call _wrap) * _s);
+		private _f = _f0 + (((_bm get "Fov") - _f0) * _s);
+		{ _d set _x } forEach [["Pos", _p], ["PosDes", +_p], ["Ang", _a], ["AngDes", +_a], ["Roll", _r], ["RollDes", _r], ["Fov", _f], ["FovDes", _f]];
+	};
 	private _usePad = missionNamespace getVariable ["Bro_SCam_Controller", false];
 	private _padDz = missionNamespace getVariable ["Bro_SCam_PadDeadzone", 0.15];
 	private _cfgSens = (missionNamespace getVariable ["Bro_SCam_Sens", 15]) / 100;
@@ -674,15 +783,18 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	if (_orient && {_ref != (_d get "OrientRef")}) then { [_d, _ref] call (_d get "fnc_Glue") };
 	// Follow needs a live target. Keep the camera at its world position and stop Follow.
 	if (_follow && {!_hasTarget}) then {
-		private _shift = ((_d get "LastCam") select 0) vectorDiff (_d get "Pos");
-		{ _d set [_x, (_d get _x) vectorAdd _shift] } forEach ["Pos", "PosDes"];
-		_d set ["Follow", false];
+		[_d] call (_d get "fnc_FollowOff");
 		_follow = false;
 		[_d, localize "STR_Bro_SCam_n_fol_off"] call (_d get "fnc_Msg");
 	};
 
 	private _rollDelta = ([0, _cfgRoll] select ("Roll_Right" call _held)) - ([0, _cfgRoll] select ("Roll_Left" call _held));
 	private _rollReset = "Roll_Reset" call _held;
+	if (_easing) then {
+		_mouse = [0, 0];
+		_rollDelta = 0;
+		_rollReset = false;
+	};
 	private _mx = (_mouse select 0) * _sens;
 	private _my = (_mouse select 1) * _sens;
 	private _angDes = _d get "AngDes";
@@ -747,6 +859,7 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 		if (DIK_XBOX_RT in _keys) then { _move = _move vectorAdd [0, 0, 1] };
 		if (DIK_XBOX_LT in _keys) then { _move = _move vectorAdd [0, 0, -1] };
 	};
+	if (_easing) then { _move = [0, 0, 0] };
 	// Clamp to 1 so diagonals aren't faster, but keep analog magnitudes below 1
 	if (vectorMagnitude _move > 1) then { _move = vectorNormalized _move };
 
@@ -772,6 +885,8 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	_d set ["Fov", _fovNew];
 	private _cam = _d get "Cam";
 	_cam camSetFov _fovNew;
+	// Depth of field: focus on the target; [-1, -1] turns the effect off
+	_cam camSetFocus (if ((missionNamespace getVariable ["Bro_SCam_DOF", false]) && {_hasTarget}) then { [_camPos vectorDistance (aimPos _target), 1] } else { [-1, -1] });
 
 	if (diag_tickTime > (_d get "LastListUpdate") + LIST_UPDATE_INTERVAL) then {
 		_d set ["LastListUpdate", diag_tickTime];
@@ -807,11 +922,14 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 			private _fn = DIK_XBOX_A in _keys;
 			_padTag = format ["   <t color='%1'>PAD%2</t>", [C_ACCENT, C_WARN] select _fn, ["", "/FN"] select _fn];
 		};
+		// Horizontal FOV and the focal length for a 36 mm wide (full-frame) sensor. fovLeft is the profile tan of the half angle at FOV 1.
+		private _tanH = _fovNew * ((getResolution) select 7);
+		private _fovTxt = format ["%1° %2mm", (2 * atan _tanH) toFixed 1, round (18 / _tanH)];
 		private _bot = format [
 			"<t valign='middle' size='1.1' shadow='2'><t align='left' font='RobotoCondensedBold'> SPD <t color='%1'>%2</t>  FOV <t color='%1'>%3</t>  ROLL <t color='%1'>%4</t></t><t align='center' font='RobotoCondensedBold'><t color='%5'>ALT</t>  <t color='%6'>ORI</t>  <t color='%7'>LAT</t>  <t color='%8'>FOL</t>   VIS:<t color='%9'>%10</t>%11</t></t>",
 			C_ACCENT,
 			_newSpd toFixed 2,
-			_fovNew toFixed 2,
+			_fovTxt,
 			_rollNew toFixed 1,
 			[C_OFF, C_GOOD] select (_d get "AltLock"),
 			[C_OFF, C_GOOD] select _orient,

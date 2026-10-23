@@ -1,5 +1,4 @@
 #include "\a3\ui_f\hpp\defineDIKCodes.inc"
-if (!hasInterface) exitWith {};
 private _modName = "[Bro] Simple Cinematic Camera";
 
 Bro_SCam_SetTimescale = {
@@ -17,44 +16,60 @@ Bro_SCam_SetTimescale = {
 };
 
 // Setting labels follow the game language: CBA reads them only at this point
+// CBA shows subcategories and settings in the order of registration
 {
-	_x params ["_id", "_name", "_type", "_value", ["_global", false]];
-	[
-		"Bro_SCam_" + _name, _type,
-		[localize ("STR_Bro_SCam_" + _id + "_lbl"), localize ("STR_Bro_SCam_" + _id + "_tip")],
-		_modName, _value, _global
-	] call CBA_Settings_fnc_init;
+	_x params ["_sec", "_list"];
+	private _cat = [_modName, localize ("STR_Bro_SCam_" + _sec)];
+	{
+		_x params ["_id", "_name", "_type", "_value", ["_global", false]];
+		[
+			"Bro_SCam_" + _name, _type,
+			[localize ("STR_Bro_SCam_" + _id + "_lbl"), localize ("STR_Bro_SCam_" + _id + "_tip")],
+			_cat, _value, _global
+		] call CBA_Settings_fnc_init;
+	} forEach _list;
 } forEach [
-	["s_wl", "Whitelist", "EDITBOX", "", true],
-	["s_sp", "SavePos", "CHECKBOX", true],
-	["s_hd", "HUDDefault", "CHECKBOX", true],
-	["s_ai", "HideAI", "CHECKBOX", false],
-	["s_as", "AudioSpectator", "CHECKBOX", true],
-	["s_ms", "Sens", "SLIDER", [1, 100, 15, 0]],
-	["s_bs", "Speed", "SLIDER", [1, 30, 7, 0]],
-	["s_pr", "SmoothPos", "SLIDER", [0.1, 10, 1, 1]],
-	["s_rr", "SmoothRot", "SLIDER", [0.1, 10, 1, 1]],
-	["s_or", "SmoothBrg", "SLIDER", [0.1, 10, 5, 1]],
-	["s_zr", "SmoothFOV", "SLIDER", [0.1, 10, 1, 1]],
-	["s_sr", "SmoothSpd", "SLIDER", [0.1, 10, 5, 1]],
-	["s_rs", "RollSpeed", "SLIDER", [1, 50, 10, 0]],
-	["s_pad", "Controller", "CHECKBOX", false],
-	["s_pdz", "PadDeadzone", "SLIDER", [0, 0.4, 0.15, 2]],
-	["s_pls", "PadLookSens", "SLIDER", [10, 400, 120, 0]],
-	["s_piy", "PadInvertY", "CHECKBOX", false],
-	["s_pvs", "PadVertSens", "SLIDER", [0.5, 50, 25, 1]],
-	["s_strtp", "StartPaused", "CHECKBOX", false]
+	["sec_gen", [
+		["s_wl", "Whitelist", "EDITBOX", "", true],
+		["s_hd", "HUDDefault", "CHECKBOX", true],
+		["s_sp", "SavePos", "CHECKBOX", true],
+		["s_ai", "HideAI", "CHECKBOX", false],
+		["s_as", "AudioSpectator", "CHECKBOX", true]
+	]],
+	["sec_mov", [
+		["s_bs", "Speed", "SLIDER", [1, 30, 7, 0]],
+		["s_sr", "SmoothSpd", "SLIDER", [0.1, 10, 5, 1]],
+		["s_pr", "SmoothPos", "SLIDER", [0.1, 10, 1, 1]]
+	]],
+	["sec_view", [
+		["s_ms", "Sens", "SLIDER", [1, 100, 15, 0]],
+		["s_rr", "SmoothRot", "SLIDER", [0.1, 10, 1, 1]],
+		["s_or", "SmoothBrg", "SLIDER", [0.1, 10, 5, 1]],
+		["s_rs", "RollSpeed", "SLIDER", [1, 50, 10, 0]],
+		["s_zr", "SmoothFOV", "SLIDER", [0.1, 10, 1, 1]]
+	]],
+	["sec_pad", [
+		["s_pad", "Controller", "CHECKBOX", false],
+		["s_pdz", "PadDeadzone", "SLIDER", [0, 0.4, 0.15, 2]],
+		["s_pls", "PadLookSens", "SLIDER", [10, 400, 120, 0]],
+		["s_pvs", "PadVertSens", "SLIDER", [0.5, 50, 25, 1]],
+		["s_piy", "PadInvertY", "CHECKBOX", false]
+	]],
+	["sec_ts", [
+		["s_strtp", "StartPaused", "CHECKBOX", false]
+	]]
 ];
-
 // Numpad 2-9 timescale presets (Numpad 0 / 1 are fixed at pause / normal)
 private _tsPresets = [0.1, 0.25, 0.5, 0.75, 1.5, 2, 3, 4];
 {
 	[
 		format ["Bro_SCam_TS_Num%1", 2 + _forEachIndex], "SLIDER",
 		[format [localize "STR_Bro_SCam_s_ts_lbl_fmt", 2 + _forEachIndex], localize "STR_Bro_SCam_s_ts_tip"],
-		_modName, [0.05, 4, _x, 2]
+		[_modName, localize "STR_Bro_SCam_sec_ts"], [0.05, 4, _x, 2]
 	] call CBA_Settings_fnc_init;
 } forEach _tsPresets;
+// Settings must also exist on a dedicated server, else the server rejects all changes. Keybinds are only for clients.
+if (!hasInterface) exitWith {};
 [_modName, "Bro_SCam_Open", "Open Camera", { [] execVM "bro_simplecam\simplecam.sqf"; }, {}, [DIK_B, [true, true, false]]] call CBA_fnc_addKeybind;
 // Camera keys are read by simplecam.sqf, so these have no handlers; [shift, ctrl, alt]
 {

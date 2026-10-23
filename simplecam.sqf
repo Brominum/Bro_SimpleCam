@@ -261,7 +261,7 @@ _d set ["fnc_Exit", {
 	[_d, false] call (_d get "fnc_Orient");
 	_d set ["Active", false];
 	private _tgt = _d get "Target";
-	if (missionNamespace getVariable ["Bro_SCam_SavePos", false]) then {
+	if (missionNamespace getVariable ["Bro_SCam_SavePos", true]) then {
 		private _pos = _d get "Pos";
 		if ((_d get "Follow") && {!isNull _tgt && {alive _tgt}}) then { _pos = (getPosASLVisual _tgt) vectorAdd _pos };
 		uiNamespace setVariable ["Bro_SCam_LastState", [worldName, _pos, _d get "Ang", _d get "Roll", _d get "Fov", _tgt]];
@@ -443,7 +443,7 @@ _d set ["fnc_Act", {
 
 // --- CAMERA ---
 private _saved = uiNamespace getVariable ["Bro_SCam_LastState", []];
-if ((missionNamespace getVariable ["Bro_SCam_SavePos", false]) && {count _saved > 0 && {(_saved select 0) == worldName}}) then {
+if ((missionNamespace getVariable ["Bro_SCam_SavePos", true]) && {count _saved > 0 && {(_saved select 0) == worldName}}) then {
 	_saved params ["", "_pos", "_ang", "_roll", "_fov", "_tgt"];
 	_d set ["Pos", _pos];
 	_d set ["PosDes", +_pos];
@@ -549,7 +549,7 @@ private _ehIds = [];
 _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 	params ["", "_key", "_shift", "_ctrl", "_alt"];
 	private _d = uiNamespace getVariable ["Bro_SCam_Data", createHashMap];
-	if !(_d getOrDefault ["Active", false]) exitWith { true };
+	if !(_d getOrDefault ["Active", false]) exitWith { false };
 	private _keys = _d get "Keys";
 	_keys pushBackUnique _key;
 	private _binds = _d get "Binds";
@@ -587,7 +587,7 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyDown", {
 _ehIds pushBack (_display displayAddEventHandler ["KeyUp", {
 	params ["", "_key"];
 	private _d = uiNamespace getVariable ["Bro_SCam_Data", createHashMap];
-	if !(_d getOrDefault ["Active", false]) exitWith { true };
+	if !(_d getOrDefault ["Active", false]) exitWith { false };
 	_d set ["Keys", (_d get "Keys") - [_key]];
 	if (_key == DIK_XBOX_A) then { _d set ["Pad_A_Down", false] };
 	false
@@ -595,14 +595,14 @@ _ehIds pushBack (_display displayAddEventHandler ["KeyUp", {
 _ehIds pushBack (_display displayAddEventHandler ["MouseMoving", {
 	params ["", "_dx", "_dy"];
 	private _d = uiNamespace getVariable ["Bro_SCam_Data", createHashMap];
-	if !(_d getOrDefault ["Active", false]) exitWith { true };
+	if !(_d getOrDefault ["Active", false]) exitWith { false };
 	_d set ["MouseD", [_dx, _dy]];
 	false
 }]);
 _ehIds pushBack (_display displayAddEventHandler ["MouseZChanged", {
 	params ["", "_z"];
 	private _d = uiNamespace getVariable ["Bro_SCam_Data", createHashMap];
-	if !(_d getOrDefault ["Active", false]) exitWith { true };
+	if !(_d getOrDefault ["Active", false]) exitWith { false };
 	_d set ["FovDes", ((_d get "FovDes") - (_z * 0.05)) max 0.01 min 2];
 	false
 }]);
@@ -672,6 +672,14 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 		[_d, localize ("STR_Bro_SCam_" + _lostKey)] call (_d get "fnc_Msg");
 	};
 	if (_orient && {_ref != (_d get "OrientRef")}) then { [_d, _ref] call (_d get "fnc_Glue") };
+	// Follow needs a live target. Keep the camera at its world position and stop Follow.
+	if (_follow && {!_hasTarget}) then {
+		private _shift = ((_d get "LastCam") select 0) vectorDiff (_d get "Pos");
+		{ _d set [_x, (_d get _x) vectorAdd _shift] } forEach ["Pos", "PosDes"];
+		_d set ["Follow", false];
+		_follow = false;
+		[_d, localize "STR_Bro_SCam_n_fol_off"] call (_d get "fnc_Msg");
+	};
 
 	private _rollDelta = ([0, _cfgRoll] select ("Roll_Right" call _held)) - ([0, _cfgRoll] select ("Roll_Left" call _held));
 	private _rollReset = "Roll_Reset" call _held;

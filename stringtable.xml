@@ -1,6 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project name="Bro_SimpleCam">
 	<Package name="Main">
+		<Key ID="STR_Bro_SCam_sec_gen">
+			<English>General</English>
+			<French>Général</French>
+			<Spanish>General</Spanish>
+			<German>Allgemein</German>
+			<Italian>Generale</Italian>
+			<Polish>Ogólne</Polish>
+			<Russian>Общие</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_sec_mov">
+			<English>Movement</English>
+			<French>Déplacement</French>
+			<Spanish>Movimiento</Spanish>
+			<German>Bewegung</German>
+			<Italian>Movimento</Italian>
+			<Polish>Ruch</Polish>
+			<Russian>Движение</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_sec_view">
+			<English>View</English>
+			<French>Vue</French>
+			<Spanish>Vista</Spanish>
+			<German>Ansicht</German>
+			<Italian>Visuale</Italian>
+			<Polish>Widok</Polish>
+			<Russian>Обзор</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_sec_pad">
+			<English>Controller</English>
+			<French>Manette</French>
+			<Spanish>Mando</Spanish>
+			<German>Controller</German>
+			<Italian>Controller</Italian>
+			<Polish>Kontroler</Polish>
+			<Russian>Геймпад</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_sec_ts">
+			<English>Timescale</English>
+			<French>Échelle de temps</French>
+			<Spanish>Escala de tiempo</Spanish>
+			<German>Zeitskala</German>
+			<Italian>Scala temporale</Italian>
+			<Polish>Skala czasu</Polish>
+			<Russian>Шкала времени</Russian>
+		</Key>
 		<Key ID="STR_Bro_SCam_s_wl_lbl">
 			<English>Allowed Users (Whitelist)</English>
 			<French>Utilisateurs autorisés (Whitelist)</French>
@@ -164,22 +209,22 @@
 			<Russian>1 = тяжело/плавно, 10 = мгновенно.</Russian>
 		</Key>
 		<Key ID="STR_Bro_SCam_s_or_lbl">
-			<English>Orientation Lock Responsiveness</English>
-			<French>Réactivité du verrouillage d'orientation</French>
-			<Spanish>Respuesta del bloqueo de orientación</Spanish>
-			<German>Reaktion der Orientierungsfixierung</German>
-			<Italian>Reattività blocco orientamento</Italian>
-			<Polish>Reaktywność blokady orientacji</Polish>
-			<Russian>Отзывчивость блокировки ориентации</Russian>
+			<English>Look At Responsiveness</English>
+			<French>Réactivité du mode Regarder la cible</French>
+			<Spanish>Respuesta del modo Mirar al objetivo</Spanish>
+			<German>Reaktion des Ziel-Blickmodus</German>
+			<Italian>Reattività modalità Guarda il bersaglio</Italian>
+			<Polish>Reaktywność trybu Patrz na cel</Polish>
+			<Russian>Отзывчивость режима взгляда на цель</Russian>
 		</Key>
 		<Key ID="STR_Bro_SCam_s_or_tip">
-			<English>How fast it tracks the target's angles.</English>
-			<French>Vitesse de suivi des angles de la cible.</French>
-			<Spanish>Velocidad de seguimiento de los ángulos del objetivo.</Spanish>
-			<German>Wie schnell die Zielwinkel verfolgt werden.</German>
-			<Italian>Velocità di tracciamento degli angoli del bersaglio.</Italian>
-			<Polish>Szybkość śledzenia kątów celu.</Polish>
-			<Russian>Скорость отслеживания углов цели.</Russian>
+			<English>How fast the camera turns to keep the target in view. 1 = Heavy/Smooth, 10 = Instant.</English>
+			<French>Vitesse à laquelle la caméra tourne pour garder la cible en vue. 1 = Lent/Fluide, 10 = Instantané.</French>
+			<Spanish>Velocidad con la que la cámara gira para mantener el objetivo a la vista. 1 = Lento/Suave, 10 = Instantáneo.</Spanish>
+			<German>Wie schnell sich die Kamera dreht, um das Ziel im Blick zu halten. 1 = Träge/Weich, 10 = Sofort.</German>
+			<Italian>Velocità con cui la camera ruota per tenere il bersaglio in vista. 1 = Lento/Fluido, 10 = Istantaneo.</Italian>
+			<Polish>Szybkość obrotu kamery, aby utrzymać cel w kadrze. 1 = Ciężko/Płynnie, 10 = Natychmiast.</Polish>
+			<Russian>Скорость поворота камеры, чтобы держать цель в кадре. 1 = Тяжело/Плавно, 10 = Мгновенно.</Russian>
 		</Key>
 		<Key ID="STR_Bro_SCam_s_zr_lbl">
 			<English>Zoom Responsiveness</English>

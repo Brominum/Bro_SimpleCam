@@ -36,17 +36,17 @@ Bro_SCam_SetTimescale = {
 		["s_ai", "HideAI", "CHECKBOX", false],
 		["s_as", "AudioSpectator", "CHECKBOX", true]
 	]],
-	["sec_mov", [
-		["s_bs", "Speed", "SLIDER", [1, 30, 7, 0]],
-		["s_sr", "SmoothSpd", "SLIDER", [0.1, 10, 5, 1]],
-		["s_pr", "SmoothPos", "SLIDER", [0.1, 10, 1, 1]]
-	]],
 	["sec_view", [
 		["s_ms", "Sens", "SLIDER", [1, 100, 15, 0]],
 		["s_rr", "SmoothRot", "SLIDER", [0.1, 10, 1, 1]],
 		["s_or", "SmoothBrg", "SLIDER", [0.1, 10, 5, 1]],
 		["s_rs", "RollSpeed", "SLIDER", [1, 50, 10, 0]],
 		["s_zr", "SmoothFOV", "SLIDER", [0.1, 10, 1, 1]]
+	]],
+	["sec_mov", [
+		["s_bs", "Speed", "SLIDER", [1, 30, 7, 0]],
+		["s_sr", "SmoothSpd", "SLIDER", [0.1, 10, 5, 1]],
+		["s_pr", "SmoothPos", "SLIDER", [0.1, 10, 1, 1]]
 	]],
 	["sec_pad", [
 		["s_pad", "Controller", "CHECKBOX", false],

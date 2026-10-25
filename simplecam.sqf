@@ -78,6 +78,8 @@ private _initState = if (missionNamespace getVariable ["Bro_SCam_HUDDefault", tr
 	]],
 	["Keys", []],
 	["Ease", []],
+	["Overlay", []],
+	["OverlayMode", 0],
 	["MouseD", [0, 0]],
 	["Pos", [0, 0, 0]],
 	["PosDes", [0, 0, 0]],
@@ -224,6 +226,53 @@ _d set ["fnc_BmArrive", {
 	if ((_bm get "OrientLock") && {alive (vehicle _t)}) then { [_d, true] call (_d get "fnc_Orient") };
 	_d set ["LookAtLock", _bm get "LookAtLock"];
 }];
+// Composition overlay: 0 none, 1 rule of thirds, 4 golden triangle (values stay stable for saved settings)
+_d set ["fnc_Overlay", {
+	params ["_d", "_mode"];
+	{ ctrlDelete _x } forEach (_d get "Overlay");
+	_d set ["OverlayMode", _mode];
+	private _display = findDisplay 46;
+	// One screen pixel in UI units
+	private _pxX = safeZoneW / ((getResolution) select 0);
+	private _pxY = safeZoneH / ((getResolution) select 1);
+	private _ctrls = [];
+	switch (_mode) do {
+		case 1: {
+			// Solid 3 pixel bars on whole pixels; a 1 pixel line between two pixels shows grey
+			{
+				_x params ["_vert", "_f"];
+				private _c = _display ctrlCreate ["RscText", -1];
+				_c ctrlSetPosition (if (_vert) then {
+					[safeZoneX + ((round (_f * safeZoneW / _pxX) - 1) * _pxX), safeZoneY, 3 * _pxX, safeZoneH]
+				} else {
+					[safeZoneX, safeZoneY + ((round (_f * safeZoneH / _pxY) - 1) * _pxY), safeZoneW, 3 * _pxY]
+				});
+				_c ctrlSetBackgroundColor [1, 1, 1, 1];
+				_c ctrlCommit 0;
+				_ctrls pushBack _c;
+			} forEach [[true, 1 / 3], [true, 2 / 3], [false, 1 / 3], [false, 2 / 3]];
+		};
+		case 4: {
+			// The perpendiculars from the other two corners meet the diagonal at these fractions (aspect corrected)
+			private _a2 = ((getResolution) select 4) ^ 2;
+			private _t1 = _a2 / (_a2 + 1);
+			private _t2 = 1 / (_a2 + 1);
+			// RscLine draws from the top-left corner to the bottom-right corner; a negative width or height reverses the direction
+			// RscLine is 1 pixel wide, so each line is drawn 3 times with a 1 pixel offset
+			{
+				_x params ["_x1", "_y1", "_x2", "_y2"];
+				{
+					private _c = _display ctrlCreate ["RscLine", -1];
+					_c ctrlSetPosition [safeZoneX + (_x1 * safeZoneW) + (_x * _pxX), safeZoneY + (_y1 * safeZoneH), (_x2 - _x1) * safeZoneW, (_y2 - _y1) * safeZoneH];
+					_c ctrlSetTextColor [1, 1, 1, 1];
+					_c ctrlCommit 0;
+					_ctrls pushBack _c;
+				} forEach [-1, 0, 1];
+			} forEach [[0, 0, 1, 1], [1, 0, _t1, _t1], [0, 1, _t2, _t2]];
+		};
+	};
+	_d set ["Overlay", _ctrls];
+}];
 _d set ["fnc_SetAudioSpectator", {
 	params ["_state"];
 	if (_state && {!(missionNamespace getVariable ["Bro_SCam_AudioSpectator", true])}) exitWith {};
@@ -358,6 +407,7 @@ _d set ["fnc_Exit", {
 	_cam cameraEffect ["Terminate", "Back"];
 	camDestroy _cam;
 	{ ctrlDelete (_d get _x) } forEach ["HUD_Top", "HUD_Bot", "HUD_List", "HUD_Keys", "Notify"];
+	{ ctrlDelete _x } forEach (_d get "Overlay");
 	camUseNVG false;
 	false setCamUseTi 0;
 	[false] call (_d get "fnc_SetAudioSpectator");
@@ -895,6 +945,9 @@ _ehIds pushBack (addMissionEventHandler ["EachFrame", {
 	};
 
 	private _hudState = _d get "HUD_State";
+	// Composition overlay: only with the full HUD
+	private _ovMode = [0, missionNamespace getVariable ["Bro_SCam_Overlay", 1]] select (_hudState == 0);
+	if (_ovMode != (_d get "OverlayMode")) then { [_d, _ovMode] call (_d get "fnc_Overlay") };
 	if (_hudState != 2 && {diag_tickTime > (_d get "LastHUDUpdate") + (1 / HUD_UPDATE_FPS)}) then {
 		_d set ["LastHUDUpdate", diag_tickTime];
 		if (_hudState == 0 && {!(_usePad isEqualTo (_d get "PadMode"))}) then {

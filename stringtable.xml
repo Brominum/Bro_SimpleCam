@@ -505,6 +505,51 @@
 			<Polish>WCZYTAJ ZAKŁADKĘ:</Polish>
 			<Russian>ЗАГР. ЗАКЛАДКУ:</Russian>
 		</Key>
+		<Key ID="STR_Bro_SCam_s_ovl_lbl">
+			<English>Composition Overlay</English>
+			<French>Grille de composition</French>
+			<Spanish>Guía de composición</Spanish>
+			<German>Kompositionsraster</German>
+			<Italian>Griglia di composizione</Italian>
+			<Polish>Siatka kompozycji</Polish>
+			<Russian>Сетка композиции</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_ovl_tip">
+			<English>Composition guide on the screen. It shows only when the HUD is full.</English>
+			<French>Guide de composition à l'écran. Il s'affiche seulement quand le HUD est complet.</French>
+			<Spanish>Guía de composición en pantalla. Solo se muestra con el HUD completo.</Spanish>
+			<German>Kompositionshilfe auf dem Bildschirm. Nur sichtbar, wenn das HUD vollständig ist.</German>
+			<Italian>Guida di composizione sullo schermo. Visibile solo con l'HUD completo.</Italian>
+			<Polish>Siatka kompozycji na ekranie. Widoczna tylko przy pełnym HUD.</Polish>
+			<Russian>Сетка композиции на экране. Показывается только при полном HUD.</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_ovl_0">
+			<English>None</English>
+			<French>Aucune</French>
+			<Spanish>Ninguna</Spanish>
+			<German>Keine</German>
+			<Italian>Nessuna</Italian>
+			<Polish>Brak</Polish>
+			<Russian>Нет</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_ovl_1">
+			<English>Rule of Thirds</English>
+			<French>Règle des tiers</French>
+			<Spanish>Regla de los tercios</Spanish>
+			<German>Drittel-Regel</German>
+			<Italian>Regola dei terzi</Italian>
+			<Polish>Zasada trójpodziału</Polish>
+			<Russian>Правило третей</Russian>
+		</Key>
+		<Key ID="STR_Bro_SCam_s_ovl_4">
+			<English>Golden Triangle</English>
+			<French>Triangle d'or</French>
+			<Spanish>Triángulo áureo</Spanish>
+			<German>Goldenes Dreieck</German>
+			<Italian>Triangolo aureo</Italian>
+			<Polish>Złoty trójkąt</Polish>
+			<Russian>Золотой треугольник</Russian>
+		</Key>
 		<Key ID="STR_Bro_SCam_s_ts_lbl_fmt">
 			<English>Numpad %1 Timescale</English>
 			<French>Pavé num. %1 - Timescale</French>

@@ -32,6 +32,7 @@ Bro_SCam_SetTimescale = {
 	["sec_gen", [
 		["s_wl", "Whitelist", "EDITBOX", "", true],
 		["s_hd", "HUDDefault", "CHECKBOX", true],
+		["s_ovl", "Overlay", "LIST", [[0, 1, 4], [0, 1, 4] apply { localize format ["STR_Bro_SCam_s_ovl_%1", _x] }, 1]],
 		["s_sp", "SavePos", "CHECKBOX", true],
 		["s_ai", "HideAI", "CHECKBOX", false],
 		["s_as", "AudioSpectator", "CHECKBOX", true],

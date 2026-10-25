@@ -14,6 +14,7 @@ A modern cinematic camera system for Arma 3, built as a spiritual successor to G
 - State saving that remembers your exact position, roll, and FOV when reopening the camera
 - 9 camera bookmarks (Ctrl+1-9 to save, 1-9 to load) that store position, angle, roll, FOV, vision mode, speed, target and lock modes, with an instant jump or a smooth ease in/out of 0.1 seconds to 5 minutes
 - Optional depth of field that focuses on the current target
+- Composition overlays with the full HUD: Rule of Thirds, Golden Triangle
 - FOV shown in degrees and as a full-frame focal length in mm
 - Instant timescale hotkeys for single-player slow motion without navigating menus
 
